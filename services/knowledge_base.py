@@ -1,64 +1,55 @@
+import sqlite3
+import os
+
+
 class TheoremService:
     """
     Сервіс бази знань (Data Access Object).
-    Поточна реалізація: Mock (заглушка) в пам'яті.
-    Пізніше тут буде підключення до SQLite (database/theorems.db).
+    Працює зі справжньою БД SQLite.
     """
 
     def __init__(self):
-        # Тимчасова "база даних" для тестування ядра програми
-        self._mock_db = {
-            # Трикутники
-            "Теорема косинусів": {
-                "formula": "c² = a² + b² - 2ab * cos(γ)",
-                "description": "Квадрат сторони трикутника дорівнює сумі квадратів двох інших сторін мінус подвоєний добуток цих сторін на косинус кута між ними."
-            },
-            "Формула Герона": {
-                "formula": "S = √(p * (p-a) * (p-b) * (p-c))",
-                "description": "Площа трикутника обчислюється через його півпериметр (p) та довжини трьох сторін."
-            },
-            "Радіус вписаного кола (трикутник)": {
-                "formula": "r = S / p",
-                "description": "Радіус вписаного кола дорівнює відношенню площі трикутника до його півпериметра."
-            },
+        # 1. Визначаємо правильний абсолютний шлях до файлу БД.
+        # __file__ вказує на поточний файл (services/knowledge_base.py)
+        # os.path.dirname піднімає нас на рівень вище, у корінь проєкту
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        self.db_path = os.path.join(base_dir, 'database', 'theorems.db')
 
-            # Чотирикутники
-            "Площа прямокутника": {
-                "formula": "S = a * b",
-                "description": "Площа прямокутника дорівнює добутку його довжини на ширину."
-            },
-            "Площа трапеції": {
-                "formula": "S = ((a + b) / 2) * h",
-                "description": "Площа трапеції дорівнює добутку півсуми її основ на висоту."
-            },
+    def _get_connection(self):
+        """Допоміжний приватний метод для створення підключення до БД."""
+        if not os.path.exists(self.db_path):
+            raise FileNotFoundError(f"Базу даних не знайдено за шляхом: {self.db_path}. Запустіть database/init_db.py")
 
-            # Кола
-            "Довжина кола": {
-                "formula": "C = 2 * π * r",
-                "description": "Довжина кола дорівнює подвоєному добутку числа пі на радіус."
-            },
-            "Площа круга": {
-                "formula": "S = π * r²",
-                "description": "Площа круга дорівнює добутку числа пі на квадрат радіуса."
-            }
-        }
+        # Підключаємося до файлу SQLite
+        return sqlite3.connect(self.db_path)
 
     def get_theorem(self, name: str) -> dict:
         """
-        Повертає формулу та опис теореми за її назвою.
-        Універсальний метод, який будуть викликати математичні класи.
+        Шукає теорему в базі даних SQLite за її назвою.
+        Повертає словник, який чекають класи розрахунків.
         """
-        if name in self._mock_db:
-            data = self._mock_db[name]
+        # Створюємо підключення та курсор
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        # Виконуємо SQL-запит (використовуємо '?' для захисту від SQL-ін'єкцій)
+        cursor.execute("SELECT formula, description FROM theorems WHERE name = ?", (name,))
+        row = cursor.fetchone()  # Дістаємо один запис
+
+        # Обов'язково закриваємо підключення, щоб не блокувати файл
+        conn.close()
+
+        # Якщо теорему знайдено в БД
+        if row:
             return {
                 "name": name,
-                "formula": data["formula"],
-                "description": data["description"]
+                "formula": row[0],  # Перша колонка з SELECT (formula)
+                "description": row[1]  # Друга колонка з SELECT (description)
             }
 
-        # Фоллбек (якщо правило ще не додали)
+        # Якщо в БД ще немає такого правила (Фоллбек)
         return {
             "name": name,
-            "formula": "Формулу ще не додано",
-            "description": "Опис відсутній у базі знань."
+            "formula": "Формулу не знайдено в БД",
+            "description": "Опис відсутній у базі знань. Додайте його через init_db.py."
         }
