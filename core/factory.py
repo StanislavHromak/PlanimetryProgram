@@ -1,4 +1,4 @@
-from core.polygons.triangle import TriangleSSSSolver
+from core.polygons.triangle import TriangleSSSSolver, TriangleSASSolver, TriangleASASolver
 from core.curves.circle import CircleSolver
 
 
@@ -16,7 +16,14 @@ class GeometryFactory:
                     c=params.get('c'),
                     target=target
                 )
-            # Тут пізніше додамо SAS, ASA тощо...
+            elif task_type == "SAS":
+                return TriangleSASSolver(
+                    a=params.get('a'), b=params.get('b'), angle_c=params.get('angle_c'), target=target
+                )
+            elif task_type == "ASA":
+                return TriangleASASolver(
+                    a=params.get('a'), angle_b=params.get('angle_b'), angle_c=params.get('angle_c'), target=target
+                )
 
         elif figure == "circle":
             if task_type == "RADIUS":

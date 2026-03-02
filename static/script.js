@@ -10,8 +10,23 @@ const uiConfig = {
                     { id: "b", label: "Сторона b" },
                     { id: "c", label: "Сторона c" }
                 ]
+            },
+            "SAS": {
+                name: "Дві сторони і кут (SAS)",
+                inputs: [
+                    { id: "a", label: "Сторона a" },
+                    { id: "b", label: "Сторона b" },
+                    { id: "angle_c", label: "Кут між ними γ (°)" }
+                ]
+            },
+            "ASA": {
+                name: "Сторона і два кути (ASA)",
+                inputs: [
+                    { id: "a", label: "Сторона a" },
+                    { id: "angle_b", label: "Прилеглий кут β (°)" },
+                    { id: "angle_c", label: "Прилеглий кут γ (°)" }
+                ]
             }
-            // Тут потім додамо SAS, ASA...
         }
     },
     circle: {
@@ -66,9 +81,9 @@ function updateInputs() {
     `).join('');
 }
 
-// 4. Головна функція відправки даних на сервер
+// 4. Головна функція вирушення даних на сервер
 async function solve() {
-    // Очищуємо старі помилки і ховаємо результати
+    // Очищуємо старі помилки та ховаємо результати
     document.getElementById('error-msg').innerText = '';
     document.getElementById('results').style.display = 'none';
 
