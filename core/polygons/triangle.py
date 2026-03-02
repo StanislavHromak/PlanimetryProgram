@@ -1,12 +1,13 @@
 import math
 from core.base import GeometricSolver
+from core.plotter import GeometryPlotter
 
 
 class TriangleSSSSolver(GeometricSolver):
     """Розв'язувач трикутника за трьома сторонами (SSS)."""
 
-    def __init__(self, a: float, b: float, c: float, target: str = "all"):
-        super().__init__(target)
+    def __init__(self, a: float, b: float, c: float, targets: list = None):
+        super().__init__(targets)
         self.a = float(a)
         self.b = float(b)
         self.c = float(c)
@@ -25,50 +26,88 @@ class TriangleSSSSolver(GeometricSolver):
             return {"success": False, "error": self._steps[-1]}
 
         self._steps.append(f"Дано трикутник: a={self.a}, b={self.b}, c={self.c}")
+        result_data = {}
 
-        # 1. Площа (Формула Герона)
-        thm_heron = self.db.get_theorem("Формула Герона")
+        # --- БАЗОВА МАТЕМАТИКА ---
         p = (self.a + self.b + self.c) / 2
-        s = math.sqrt(p * (p - self.a) * (p - self.b) * (p - self.c))
+        area = math.sqrt(p * (p - self.a) * (p - self.b) * (p - self.c))
+        r_in = area / p
+        r_out = (self.a * self.b * self.c) / (4 * area)
 
-        self._steps.append(f"➤ Площа:")
-        self._steps.append(f"{thm_heron['description']} ({thm_heron['formula']})")
-        self._steps.append(f"Півпериметр p = {p}. Площа S ≈ {s:.2f}")
+        # Знаходимо кути в радіанах, а потім переводимо в градуси
+        cos_alpha = (self.b ** 2 + self.c ** 2 - self.a ** 2) / (2 * self.b * self.c)
+        cos_beta = (self.a ** 2 + self.c ** 2 - self.b ** 2) / (2 * self.a * self.c)
 
-        # 2. Радіус вписаного кола (r)
-        thm_in = self.db.get_theorem("Радіус вписаного кола (трикутник)")
-        r_in = s / p
-        self._steps.append(f"➤ Вписане коло:")
-        self._steps.append(f"{thm_in['description']} ({thm_in['formula']})")
-        self._steps.append(f"r = {s:.2f} / {p} ≈ {r_in:.2f}")
+        # Захист від похибок (щоб косинус не виліз за межі [-1, 1])
+        cos_alpha = max(-1.0, min(1.0, cos_alpha))
+        cos_beta = max(-1.0, min(1.0, cos_beta))
 
-        # 3. Радіус описаного кола (R)
-        thm_out = self.db.get_theorem("Радіус описаного кола (трикутник)")
-        r_out = (self.a * self.b * self.c) / (4 * s)
-        self._steps.append(f"➤ Описане коло:")
-        self._steps.append(f"{thm_out['description']} ({thm_out['formula']})")
-        self._steps.append(f"R = ({self.a}*{self.b}*{self.c}) / (4*{s:.2f}) ≈ {r_out:.2f}")
+        angle_a = math.degrees(math.acos(cos_alpha))
+        angle_b = math.degrees(math.acos(cos_beta))
+        angle_c = 180.0 - angle_a - angle_b
+
+        # --- ФОРМУВАННЯ ЗВІТУ ЗА ЗАПИТОМ ---
+        if "side" in self.targets:
+            thm = self.db.get_theorem("Теорема косинусів")
+            self._steps.append(f"➤ Знаходимо невідомі кути:")
+            self._steps.append(f"Правило: {thm['description']}")
+            self._steps.append(
+                f"cos(α) = (b² + c² - a²) / 2bc = ({self.b}² + {self.c}² - {self.a}²) / (2*{self.b}*{self.c})")
+            self._steps.append(f"α ≈ {angle_a:.2f}°")
+            self._steps.append(
+                f"cos(β) = (a² + c² - b²) / 2ac = ({self.a}² + {self.c}² - {self.b}²) / (2*{self.a}*{self.c})")
+            self._steps.append(f"β ≈ {angle_b:.2f}°")
+            self._steps.append(f"γ = 180° - α - β ≈ {angle_c:.2f}°")
+
+            result_data["angle_a"] = round(angle_a, 2)
+            result_data["angle_b"] = round(angle_b, 2)
+            result_data["angle_c"] = round(angle_c, 2)
+
+        if "perimeter" in self.targets:
+            self._steps.append(f"➤ Периметр:")
+            self._steps.append(f"P = a + b + c = {self.a} + {self.b} + {self.c} = {p * 2}")
+            result_data["perimeter"] = round(p * 2, 2)
+
+        if "area" in self.targets:
+            thm = self.db.get_theorem("Формула Герона")
+            self._steps.append(f"➤ Площа:")
+            self._steps.append(f"{thm['description']} ({thm['formula']})")
+            self._steps.append(f"S ≈ {area:.2f}")
+            result_data["area"] = round(area, 2)
+
+        if "incircle" in self.targets:
+            thm = self.db.get_theorem("Радіус вписаного кола (трикутник)")
+            self._steps.append(f"➤ Вписане коло:")
+            self._steps.append(f"{thm['description']} ({thm['formula']})")
+            self._steps.append(f"r = S / p ≈ {area:.2f} / {p:.2f} ≈ {r_in:.2f}")
+            result_data["r_inscribed"] = round(r_in, 2)
+
+        if "circumcircle" in self.targets:
+            thm = self.db.get_theorem("Радіус описаного кола (трикутник)")
+            self._steps.append(f"➤ Описане коло:")
+            self._steps.append(f"{thm['description']} ({thm['formula']})")
+            self._steps.append(f"R = ({self.a}*{self.b}*{self.c}) / (4*{area:.2f}) ≈ {r_out:.2f}")
+            result_data["r_circumscribed"] = round(r_out, 2)
+
+        # Малюємо креслення
+        image_base64 = GeometryPlotter.plot_triangle(self.a, self.b, self.c)
 
         return {
             "success": True,
-            "data": {
-                "perimeter": round(p * 2, 2),
-                "area": round(s, 2),
-                "r_inscribed": round(r_in, 2),
-                "r_circumscribed": round(r_out, 2)
-            },
-            "steps": self._steps
+            "data": result_data,
+            "steps": self._steps,
+            "image": image_base64
         }
 
 
 class TriangleSASSolver(GeometricSolver):
-    """Розв'язувач трикутника за двома сторонами та кутом між ними (SAS)."""
+    """Розв'язувач трикутника за двома сторонами і кутом між ними (SAS)."""
 
-    def __init__(self, a: float, b: float, angle_c: float, target: str = "all"):
-        super().__init__(target)
+    def __init__(self, a: float, b: float, angle_c: float, targets: list = None):
+        super().__init__(targets)
         self.a = float(a)
         self.b = float(b)
-        self.angle_c = float(angle_c)  # Кут в градусах
+        self.angle_c = float(angle_c)
 
     def validate(self) -> bool:
         if self.a <= 0 or self.b <= 0:
@@ -84,41 +123,65 @@ class TriangleSASSolver(GeometricSolver):
             return {"success": False, "error": self._steps[-1]}
 
         self._steps.append(f"Дано: a={self.a}, b={self.b}, Кут γ={self.angle_c}°")
+        result_data = {}
 
-        # 1. Шукаємо третю сторону за теоремою косинусів
-        thm_cos = self.db.get_theorem("Теорема косинусів")
-        angle_c_rad = math.radians(self.angle_c)
+        # --- БАЗОВА МАТЕМАТИКА (Рахуємо все тихо) ---
+        rad_c = math.radians(self.angle_c)
+        c = math.sqrt(self.a ** 2 + self.b ** 2 - 2 * self.a * self.b * math.cos(rad_c))
 
-        c_sq = self.a ** 2 + self.b ** 2 - 2 * self.a * self.b * math.cos(angle_c_rad)
-        c = math.sqrt(c_sq)
+        perim = self.a + self.b + c
+        p = perim / 2
+        area = 0.5 * self.a * self.b * math.sin(rad_c)
 
-        self._steps.append(f"➤ Знаходимо невідому сторону c:")
-        self._steps.append(f"Правило: {thm_cos['description']}")
-        self._steps.append(
-            f"Підстановка: c = √({self.a}² + {self.b}² - 2*{self.a}*{self.b}*cos({self.angle_c}°)) ≈ {c:.2f}")
+        r_in = area / p
+        r_out = c / (2 * math.sin(rad_c))  # Оптимізація через наслідок теореми синусів
 
-        # 2. Шукаємо площу (через синус)
-        area = 0.5 * self.a * self.b * math.sin(angle_c_rad)
-        self._steps.append(f"➤ Знаходимо площу:")
-        self._steps.append(f"Формула: S = 1/2 * a * b * sin(γ)")
-        self._steps.append(f"Обчислення: S = 0.5 * {self.a} * {self.b} * sin({self.angle_c}°) ≈ {area:.2f}")
+        # --- ФОРМУВАННЯ ЗВІТУ ЗА ЗАПИТОМ ---
+        if "side" in self.targets:
+            thm = self.db.get_theorem("Теорема косинусів")
+            self._steps.append(f"➤ Знаходимо невідому сторону c:")
+            self._steps.append(f"Правило: {thm['description']}")
+            self._steps.append(f"c ≈ {c:.2f}")
+            result_data["side_c"] = round(c, 2)
+        else:
+            self._steps.append(f"ℹ️ Для подальших розрахунків визначаємо сторону c ≈ {c:.2f}")
+
+        if "perimeter" in self.targets:
+            self._steps.append(f"➤ Периметр: P ≈ {perim:.2f}")
+            result_data["perimeter"] = round(perim, 2)
+
+        if "area" in self.targets:
+            self._steps.append(f"➤ Знаходимо площу:")
+            self._steps.append(f"S = 1/2 * a * b * sin(γ) ≈ {area:.2f}")
+            result_data["area"] = round(area, 2)
+
+        if "incircle" in self.targets:
+            thm = self.db.get_theorem("Радіус вписаного кола (трикутник)")
+            self._steps.append(f"➤ Вписане коло:")
+            self._steps.append(f"{thm['description']} ({thm['formula']})")
+            self._steps.append(f"r = S / p ≈ {area:.2f} / {p:.2f} ≈ {r_in:.2f}")
+            result_data["r_inscribed"] = round(r_in, 2)
+
+        if "circumcircle" in self.targets:
+            self._steps.append(f"➤ Описане коло (наслідок теореми синусів):")
+            self._steps.append(f"R = c / (2 * sin(γ)) ≈ {c:.2f} / (2 * {math.sin(rad_c):.2f}) ≈ {r_out:.2f}")
+            result_data["r_circumscribed"] = round(r_out, 2)
+
+        image_base64 = GeometryPlotter.plot_triangle(self.a, self.b, c)
 
         return {
             "success": True,
-            "data": {
-                "side_c": round(c, 2),
-                "area": round(area, 2),
-                "perimeter": round(self.a + self.b + c, 2)
-            },
-            "steps": self._steps
+            "data": result_data,
+            "steps": self._steps,
+            "image": image_base64
         }
 
 
 class TriangleASASolver(GeometricSolver):
     """Розв'язувач трикутника за стороною та двома прилеглими кутами (ASA)."""
 
-    def __init__(self, a: float, angle_b: float, angle_c: float, target: str = "all"):
-        super().__init__(target)
+    def __init__(self, a: float, angle_b: float, angle_c: float, targets: list = None):
+        super().__init__(targets)
         self.a = float(a)
         self.angle_b = float(angle_b)
         self.angle_c = float(angle_c)
@@ -140,15 +203,10 @@ class TriangleASASolver(GeometricSolver):
             return {"success": False, "error": self._steps[-1]}
 
         self._steps.append(f"Дано: сторона a={self.a}, прилеглі кути β={self.angle_b}°, γ={self.angle_c}°")
+        result_data = {}
 
-        # 1. Знаходимо третій кут
+        # --- БАЗОВА МАТЕМАТИКА (Рахуємо все тихо) ---
         angle_a = 180 - self.angle_b - self.angle_c
-        self._steps.append(f"➤ Знаходимо третій кут (α):")
-        self._steps.append(f"Сума кутів трикутника дорівнює 180°.")
-        self._steps.append(f"α = 180° - {self.angle_b}° - {self.angle_c}° = {angle_a}°")
-
-        # 2. Знаходимо інші сторони за теоремою синусів
-        thm_sin = self.db.get_theorem("Теорема синусів")
         rad_a = math.radians(angle_a)
         rad_b = math.radians(self.angle_b)
         rad_c = math.radians(self.angle_c)
@@ -156,22 +214,54 @@ class TriangleASASolver(GeometricSolver):
         b = (self.a * math.sin(rad_b)) / math.sin(rad_a)
         c = (self.a * math.sin(rad_c)) / math.sin(rad_a)
 
-        self._steps.append(f"➤ Знаходимо сторони b та c:")
-        self._steps.append(f"Правило: {thm_sin['description']}")
-        self._steps.append(f"b = ({self.a} * sin({self.angle_b}°)) / sin({angle_a}°) ≈ {b:.2f}")
-        self._steps.append(f"c = ({self.a} * sin({self.angle_c}°)) / sin({angle_a}°) ≈ {c:.2f}")
-
-        # 3. Площа
+        perim = self.a + b + c
+        p = perim / 2
         area = 0.5 * b * c * math.sin(rad_a)
+
+        r_in = area / p
+        r_out = self.a / (2 * math.sin(rad_a))
+
+        # --- ФОРМУВАННЯ ЗВІТУ ЗА ЗАПИТОМ ---
+        if "side" in self.targets:
+            thm_sin = self.db.get_theorem("Теорема синусів")
+            self._steps.append(f"➤ Знаходимо третій кут та невідомі сторони:")
+            self._steps.append(f"α = 180° - {self.angle_b}° - {self.angle_c}° = {angle_a}°")
+            self._steps.append(f"Правило: {thm_sin['description']}")
+            self._steps.append(f"b = ({self.a} * sin({self.angle_b}°)) / sin({angle_a}°) ≈ {b:.2f}")
+            self._steps.append(f"c = ({self.a} * sin({self.angle_c}°)) / sin({angle_a}°) ≈ {c:.2f}")
+
+            result_data["angle_a"] = round(angle_a, 2)
+            result_data["side_b"] = round(b, 2)
+            result_data["side_c"] = round(c, 2)
+        else:
+            self._steps.append(f"ℹ️ Для подальших розрахунків визначаємо: α={angle_a}°, b≈{b:.2f}, c≈{c:.2f}")
+
+        if "perimeter" in self.targets:
+            self._steps.append(f"➤ Периметр: P = a + b + c ≈ {perim:.2f}")
+            result_data["perimeter"] = round(perim, 2)
+
+        if "area" in self.targets:
+            self._steps.append(f"➤ Площа:")
+            self._steps.append(f"S = 1/2 * b * c * sin(α) ≈ {area:.2f}")
+            result_data["area"] = round(area, 2)
+
+        if "incircle" in self.targets:
+            thm_in = self.db.get_theorem("Радіус вписаного кола (трикутник)")
+            self._steps.append(f"➤ Вписане коло:")
+            self._steps.append(f"{thm_in['description']} ({thm_in['formula']})")
+            self._steps.append(f"r = S / p ≈ {area:.2f} / {p:.2f} ≈ {r_in:.2f}")
+            result_data["r_inscribed"] = round(r_in, 2)
+
+        if "circumcircle" in self.targets:
+            self._steps.append(f"➤ Описане коло (за наслідком теореми синусів):")
+            self._steps.append(f"R = a / (2 * sin(α)) ≈ {self.a} / (2 * {math.sin(rad_a):.2f}) ≈ {r_out:.2f}")
+            result_data["r_circumscribed"] = round(r_out, 2)
+
+        image_base64 = GeometryPlotter.plot_triangle(self.a, b, c)
 
         return {
             "success": True,
-            "data": {
-                "angle_a": round(angle_a, 2),
-                "side_b": round(b, 2),
-                "side_c": round(c, 2),
-                "area": round(area, 2),
-                "perimeter": round(self.a + b + c, 2)
-            },
-            "steps": self._steps
+            "data": result_data,
+            "steps": self._steps,
+            "image": image_base64
         }

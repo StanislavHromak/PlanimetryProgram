@@ -6,30 +6,20 @@ class GeometryFactory:
     """Паттерн Factory Method для створення правильного об'єкта-розв'язувача."""
 
     @staticmethod
-    def create_solver(figure: str, task_type: str, params: dict, target: str = "all"):
+    def create_solver(figure: str, task_type: str, params: dict, targets: list):
 
         if figure == "triangle":
             if task_type == "SSS":
                 return TriangleSSSSolver(
-                    a=params.get('a'),
-                    b=params.get('b'),
-                    c=params.get('c'),
-                    target=target
+                    a=params.get('a'), b=params.get('b'), c=params.get('c'), targets=targets
                 )
             elif task_type == "SAS":
                 return TriangleSASSolver(
-                    a=params.get('a'), b=params.get('b'), angle_c=params.get('angle_c'), target=target
+                    a=params.get('a'), b=params.get('b'), angle_c=params.get('angle_c'), targets=targets
                 )
             elif task_type == "ASA":
                 return TriangleASASolver(
-                    a=params.get('a'), angle_b=params.get('angle_b'), angle_c=params.get('angle_c'), target=target
-                )
-
-        elif figure == "circle":
-            if task_type == "RADIUS":
-                return CircleSolver(
-                    radius=params.get('radius'),
-                    target=target
+                    a=params.get('a'), angle_b=params.get('angle_b'), angle_c=params.get('angle_c'), targets=targets
                 )
 
         # Фоллбек для помилок

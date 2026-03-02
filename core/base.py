@@ -6,10 +6,9 @@ from services.knowledge_base import TheoremService
 class GeometricSolver(ABC):
     """Абстрактний базовий клас для всіх геометричних фігур."""
 
-    def __init__(self, target: str = "all"):
-        self.target = target
+    def __init__(self, targets: list = None):
+        self.targets = targets if targets else []
         self._steps = []
-        # Підключаємо базу знань! Тепер кожна фігура знає аксіоми.
         self.db = TheoremService()
 
     @abstractmethod

@@ -20,6 +20,17 @@
                 <label for="task-select">Що відомо?</label>
                 <select id="task-select" onchange="updateInputs()"></select>
             </div>
+
+            <div class="setting-group">
+                <label>Що знайти?</label>
+                <div id="target-checkboxes" class="checkbox-group">
+                    <label><input type="checkbox" value="area" checked> Площу (S)</label>
+                    <label><input type="checkbox" value="perimeter"> Периметр (P)</label>
+                    <label><input type="checkbox" value="incircle"> Вписане коло (r)</label>
+                    <label><input type="checkbox" value="circumcircle"> Описане коло (R)</label>
+                    <label><input type="checkbox" value="side" checked> Невідомі сторони/кути</label>
+                </div>
+            </div>
         </div>
 
         <div id="dynamic-inputs" class="input-section"></div>

@@ -27,7 +27,7 @@ async def solve_geometry(request: GeometryRequest):
             figure=request.figure,
             task_type=request.task_type,
             params=request.params,
-            target=request.target
+            targets=request.targets
         )
 
         # 2. Об'єкт сам себе валідує, рахує і дістає правила з БД

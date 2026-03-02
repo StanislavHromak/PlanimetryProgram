@@ -106,11 +106,21 @@ async function solve() {
         return;
     }
 
+    // Збираємо всі відмічені чекбокси у масив
+    const targetCheckboxes = document.querySelectorAll('#target-checkboxes input[type="checkbox"]:checked');
+    const targets = Array.from(targetCheckboxes).map(cb => cb.value);
+
+    // Захист: якщо користувач зняв усі галочки
+    if (targets.length === 0) {
+        document.getElementById('error-msg').innerText = 'Оберіть хоча б один параметр для пошуку!';
+        return;
+    }
+
     // Формуємо універсальний DTO для нашого API
     const requestData = {
         figure: figure,
         task_type: task,
-        target: "all",
+        targets: targets,
         params: params
     };
 
