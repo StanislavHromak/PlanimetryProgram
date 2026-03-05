@@ -134,3 +134,37 @@ class GeometryPlotter:
 
         # Викликаємо нашу нову функцію
         return GeometryPlotter._get_base64_image()
+
+    @staticmethod
+    def plot_circle_sector(r: float, angle_deg: float) -> str:
+        """Малює коло з виділеним сектором та хордою."""
+        import matplotlib.patches as patches
+        plt.figure(figsize=(4, 4))
+
+        # 1. Основне коло (бліде, для фону)
+        circle = plt.Circle((0, 0), r, color='lightgray', alpha=0.2, ec='black', lw=1, linestyle=':')
+        plt.gca().add_patch(circle)
+
+        # 2. Сектор (зафарбований)
+        sector = patches.Wedge((0, 0), r, 0, angle_deg, color='skyblue', alpha=0.5)
+        plt.gca().add_patch(sector)
+
+        # 3. Радіуси та Хорда
+        angle_rad = math.radians(angle_deg)
+        x_end = r * math.cos(angle_rad)
+        y_end = r * math.sin(angle_rad)
+
+        plt.plot([0, r], [0, 0], 'k-', lw=2)  # Нижній радіус
+        plt.plot([0, x_end], [0, y_end], 'k-', lw=2)  # Верхній радіус
+
+        # Хорда (червоний пунктир)
+        plt.plot([r, x_end], [0, y_end], 'r--', lw=2)
+
+        plt.plot(0, 0, 'ko')  # Центр
+        plt.text(r / 2, 0, f' r={r}', va='bottom')
+        plt.text(r / 4, r / 8, f'{angle_deg}°', color='blue', fontweight='bold')
+
+        plt.axis('equal')
+        plt.axis('off')
+
+        return GeometryPlotter._get_base64_image()

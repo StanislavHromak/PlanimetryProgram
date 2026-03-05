@@ -78,3 +78,73 @@ class CircleSolver(GeometricSolver):
             "steps": self._steps,
             "image": image_base64
         }
+
+
+class CircleSectorSolver(GeometricSolver):
+    """Розв'язувач задач для кругового сектора та хорди."""
+
+    def __init__(self, radius: float, angle: float, targets: list = None):
+        super().__init__(targets)
+        self.r = float(radius)
+        self.angle = float(angle)
+
+    def validate(self) -> bool:
+        if self.r <= 0:
+            self._steps.append("Помилка: Радіус має бути додатним.")
+            return False
+        if self.angle <= 0 or self.angle >= 360:
+            self._steps.append("Помилка: Центральний кут має бути в межах від 0 до 360 градусів.")
+            return False
+        return True
+
+    def calculate(self):
+        if not self.validate():
+            return {"success": False, "error": self._steps[-1]}
+
+        self._steps.append(f"Дано: Радіус r = {self.r}, Центральний кут α = {self.angle}°")
+        result_data = {}
+
+        # --- БАЗОВА МАТЕМАТИКА ---
+        rad_angle = math.radians(self.angle)
+
+        arc_length = (math.pi * self.r * self.angle) / 180
+        sector_area = (math.pi * (self.r ** 2) * self.angle) / 360
+        chord_length = 2 * self.r * math.sin(rad_angle / 2)
+
+        # --- ФОРМУВАННЯ ЗВІТУ ЗА ШАБЛОНОМ ---
+        if "arc" in self.targets:
+            thm = self.db.get_theorem("Довжина дуги кола")
+            self._steps.append(f"➤ Знаходимо довжину дуги:")
+            self._steps.append(f"Правило: {thm['description']}")
+            self._steps.append(f"Формула: L = (π * r * α) / 180°")
+            self._steps.append(
+                f"Розв'язок: L = (π * {self.r} * {self.angle}°) / 180° = <span style='color: red; font-weight: bold;'>{arc_length:.2f}</span>")
+            result_data["arc_length"] = round(arc_length, 2)
+
+        if "sector_area" in self.targets:
+            thm = self.db.get_theorem("Площа кругового сектора")
+            self._steps.append(f"➤ Знаходимо площу сектора:")
+            self._steps.append(f"Правило: {thm['description']}")
+            self._steps.append(f"Формула: S = (π * r² * α) / 360°")
+            self._steps.append(
+                f"Розв'язок: S = (π * {self.r}² * {self.angle}°) / 360° = <span style='color: red; font-weight: bold;'>{sector_area:.2f}</span>")
+            result_data["sector_area"] = round(sector_area, 2)
+
+        if "chord" in self.targets:
+            thm = self.db.get_theorem("Довжина хорди")
+            self._steps.append(f"➤ Знаходимо довжину хорди:")
+            self._steps.append(f"Правило: {thm['description']}")
+            self._steps.append(f"Формула: c = 2 * r * sin(α / 2)")
+            self._steps.append(
+                f"Розв'язок: c = 2 * {self.r} * sin({self.angle}° / 2) = <span style='color: red; font-weight: bold;'>{chord_length:.2f}</span>")
+            result_data["chord_length"] = round(chord_length, 2)
+
+        # Малюємо креслення
+        image_base64 = GeometryPlotter.plot_circle_sector(self.r, self.angle)
+
+        return {
+            "success": True,
+            "data": result_data,
+            "steps": self._steps,
+            "image": image_base64
+        }

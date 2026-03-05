@@ -19,13 +19,17 @@ const uiConfig = {
         name: "Коло та Круг",
         targets: [
             { id: "area", label: "Площу круга (S)", checked: true },
-            { id: "perimeter", label: "Довжину кола (C)", checked: true }
+            { id: "perimeter", label: "Довжину кола (C)", checked: true },
+            { id: "arc", label: "Довжину дуги (L)", checked: false },         // <--- НОВЕ
+            { id: "sector_area", label: "Площу сектора", checked: false },    // <--- НОВЕ
+            { id: "chord", label: "Довжину хорди (c)", checked: false }       // <--- НОВЕ
         ],
         tasks: {
             "RADIUS": { name: "Відомий радіус (r)", inputs: [ { id: "radius", label: "Радіус r" } ] },
             "DIAMETER": { name: "Відомий діаметр (d)", inputs: [ { id: "diameter", label: "Діаметр d" } ] },
             "CIRCUMFERENCE": { name: "Відома довжина кола (C)", inputs: [ { id: "circumference", label: "Довжина C" } ] },
-            "AREA": { name: "Відома площа (S)", inputs: [ { id: "area", label: "Площа S" } ] }
+            "AREA": { name: "Відома площа (S)", inputs: [ { id: "area", label: "Площа S" } ] },
+            "SECTOR_ANGLE": { name: "Сектор: Радіус і Кут", inputs: [ { id: "radius", label: "Радіус r" }, { id: "angle", label: "Кут α (°)" } ] } // <--- НОВЕ
         }
     }
 };

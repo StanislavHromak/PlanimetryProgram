@@ -1,5 +1,5 @@
 from core.polygons.triangle import TriangleSSSSolver, TriangleSASSolver, TriangleASASolver
-from core.curves.circle import CircleSolver
+from core.curves.circle import CircleSolver, CircleSectorSolver
 
 
 class GeometryFactory:
@@ -23,8 +23,13 @@ class GeometryFactory:
                 )
 
         elif figure == "circle":
-            # Передаємо у CircleSolver тип відомого параметра і його значення
-            if task_type == "RADIUS":
+            if task_type == "SECTOR_ANGLE":
+                return CircleSectorSolver(
+                    radius=params.get('radius'),
+                    angle=params.get('angle'),
+                    targets=targets
+                )
+            elif task_type == "RADIUS":
                 return CircleSolver("RADIUS", params.get('radius'), targets)
             elif task_type == "DIAMETER":
                 return CircleSolver("DIAMETER", params.get('diameter'), targets)
