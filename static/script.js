@@ -1,43 +1,31 @@
-// Конфігурація: які фігури є, які в них задачі, і які поля треба малювати
+// Конфігурація фігур, їхніх задач та можливих результатів
 const uiConfig = {
     triangle: {
         name: "Трикутник",
+        targets: [
+            { id: "area", label: "Площу (S)", checked: true },
+            { id: "perimeter", label: "Периметр (P)", checked: false },
+            { id: "incircle", label: "Вписане коло (r)", checked: false },
+            { id: "circumcircle", label: "Описане коло (R)", checked: false },
+            { id: "side", label: "Невідомі сторони/кути", checked: true }
+        ],
         tasks: {
-            "SSS": {
-                name: "За трьома сторонами (SSS)",
-                inputs: [
-                    { id: "a", label: "Сторона a" },
-                    { id: "b", label: "Сторона b" },
-                    { id: "c", label: "Сторона c" }
-                ]
-            },
-            "SAS": {
-                name: "Дві сторони і кут (SAS)",
-                inputs: [
-                    { id: "a", label: "Сторона a" },
-                    { id: "b", label: "Сторона b" },
-                    { id: "angle_c", label: "Кут між ними γ (°)" }
-                ]
-            },
-            "ASA": {
-                name: "Сторона і два кути (ASA)",
-                inputs: [
-                    { id: "a", label: "Сторона a" },
-                    { id: "angle_b", label: "Прилеглий кут β (°)" },
-                    { id: "angle_c", label: "Прилеглий кут γ (°)" }
-                ]
-            }
+            "SSS": { name: "Три сторони (SSS)", inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ] },
+            "SAS": { name: "Дві сторони і кут (SAS)", inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "angle_c", label: "Кут між ними γ (°)" } ] },
+            "ASA": { name: "Сторона і два кути (ASA)", inputs: [ { id: "a", label: "Сторона a" }, { id: "angle_b", label: "Прилеглий кут β (°)" }, { id: "angle_c", label: "Прилеглий кут γ (°)" } ] }
         }
     },
     circle: {
         name: "Коло та Круг",
+        targets: [
+            { id: "area", label: "Площу круга (S)", checked: true },
+            { id: "perimeter", label: "Довжину кола (C)", checked: true }
+        ],
         tasks: {
-            "RADIUS": {
-                name: "Відомий радіус (r)",
-                inputs: [
-                    { id: "radius", label: "Радіус r" }
-                ]
-            }
+            "RADIUS": { name: "Відомий радіус (r)", inputs: [ { id: "radius", label: "Радіус r" } ] },
+            "DIAMETER": { name: "Відомий діаметр (d)", inputs: [ { id: "diameter", label: "Діаметр d" } ] },
+            "CIRCUMFERENCE": { name: "Відома довжина кола (C)", inputs: [ { id: "circumference", label: "Довжина C" } ] },
+            "AREA": { name: "Відома площа (S)", inputs: [ { id: "area", label: "Площа S" } ] }
         }
     }
 };
@@ -57,10 +45,18 @@ function updateUI() {
     const figure = document.getElementById('figure-select').value;
     const taskSelect = document.getElementById('task-select');
 
+    // Оновлюємо список "Що відомо"
     const tasks = uiConfig[figure].tasks;
     taskSelect.innerHTML = Object.keys(tasks).map(taskKey =>
         `<option value="${taskKey}">${tasks[taskKey].name}</option>`
     ).join('');
+
+    // Оновлюємо чекбокси "Що знайти"
+    const targetsDiv = document.getElementById('target-checkboxes');
+    const targets = uiConfig[figure].targets;
+    targetsDiv.innerHTML = targets.map(t => `
+        <label><input type="checkbox" value="${t.id}" ${t.checked ? 'checked' : ''}> ${t.label}</label>
+    `).join('');
 
     updateInputs();
 }
@@ -81,16 +77,14 @@ function updateInputs() {
     `).join('');
 }
 
-// 4. Головна функція вирушення даних на сервер
+// 4. Головна функція відправки даних на сервер
 async function solve() {
-    // Очищуємо старі помилки та ховаємо результати
     document.getElementById('error-msg').innerText = '';
     document.getElementById('results').style.display = 'none';
 
     const figure = document.getElementById('figure-select').value;
     const task = document.getElementById('task-select').value;
 
-    // Збираємо числа з динамічних полів у словник params
     let params = {};
     let hasEmptyFields = false;
 
@@ -110,13 +104,11 @@ async function solve() {
     const targetCheckboxes = document.querySelectorAll('#target-checkboxes input[type="checkbox"]:checked');
     const targets = Array.from(targetCheckboxes).map(cb => cb.value);
 
-    // Захист: якщо користувач зняв усі галочки
     if (targets.length === 0) {
         document.getElementById('error-msg').innerText = 'Оберіть хоча б один параметр для пошуку!';
         return;
     }
 
-    // Формуємо універсальний DTO для нашого API
     const requestData = {
         figure: figure,
         task_type: task,
@@ -131,31 +123,25 @@ async function solve() {
             body: JSON.stringify(requestData)
         });
 
-        /** * JSDoc: Підказуємо редактору структуру об'єкта, який повертає наш Python API.
-         * Це виправляє помилку "Unresolved variable".
-         * @type {{success: boolean, error?: string, data?: Object, steps?: string[], image?: string}}
+        /** * @type {{success: boolean, error?: string, data?: Object, steps?: string[], image?: string}}
          */
         const result = await response.json();
 
         if (!result.success) {
             document.getElementById('error-msg').innerText = result.error;
         } else {
-            // Успіх! Показуємо блок результатів
             document.getElementById('results').style.display = 'block';
 
-            // Виправлення 1: Пряме присвоєння без зайвої змінної (і захист через || {})
             document.getElementById('params-list').innerHTML = Object.entries(result.data || {}).map(([key, val]) =>
                 `<li><b>${key}</b>: <span style="color:#007bff; font-weight:bold;">${val}</span></li>`
             ).join('');
 
-            // Виправлення 2: Пряме присвоєння без зайвої змінної (і захист через || [])
             document.getElementById('steps-list').innerHTML = (result.steps || []).map(s => {
                 if (s.startsWith("➤")) return `<div class="step-header">${s}</div>`;
                 if (s.startsWith("Правило:")) return `<div class="step-rule">${s}</div>`;
                 return `<div class="step-text">${s}</div>`;
             }).join('');
 
-            // Відображення картинки (перевірка result.image більше не підсвічується як помилка)
             const plotSection = document.getElementById('plot-section');
             if (result.image) {
                 document.getElementById('plot-container').innerHTML = `<img src="data:image/png;base64,${result.image}" alt="Креслення" />`;
