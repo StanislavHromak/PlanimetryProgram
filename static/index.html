@@ -3,54 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Універсальний Планіметричний Рушій</title>
+    <title>Планіметрія: Експертна Система</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1>📐 PlanimetrySolver</h1>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>📐 Планіметрія <span class="badge">Експертна Система</span></h1>
+            <p>Швидке розв'язання геометричних задач з детальним поясненням</p>
+        </header>
 
-        <div class="settings-panel">
-            <div class="setting-group">
-                <label for="figure-select">Оберіть фігуру:</label>
-                <select id="figure-select" onchange="updateUI()"></select>
-            </div>
+        <main class="main-content">
+            <section class="card config-card">
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label for="figure-select">Оберіть фігуру</label>
+                        <select id="figure-select" class="modern-select" onchange="updateUI()"></select>
+                    </div>
 
-            <div class="setting-group">
-                <label for="task-select">Що відомо?</label>
-                <select id="task-select" onchange="updateInputs()"></select>
-            </div>
+                    <div class="setting-group">
+                        <label for="task-select">Що відомо?</label>
+                        <select id="task-select" class="modern-select" onchange="updateInputs()"></select>
+                    </div>
 
-            <div class="setting-group">
-                <label>Що знайти?</label>
-                <div id="target-checkboxes" class="checkbox-group"></div>
-            </div>
-        </div>
+                    <div class="setting-group targets-group">
+                        <label>Що знайти?</label>
+                        <div id="target-checkboxes" class="chips-group">
+                            </div>
+                    </div>
+                </div>
+            </section>
 
-        <div id="dynamic-inputs" class="input-section"></div>
+            <section class="card input-card">
+                <h2>Введіть дані</h2>
+                <div id="dynamic-inputs" class="input-grid"></div>
+                <button class="btn-primary" onclick="solve()">
+                    <span class="btn-icon">⚡</span> Розрахувати
+                </button>
+                <div id="error-msg" class="error-msg"></div>
+            </section>
 
-        <button onclick="solve()">Розрахувати задачу</button>
-        <div id="error-msg" class="error"></div>
+            <section id="results" class="card results-card" style="display: none;">
+                <div class="results-layout">
+                    <div class="data-section">
+                        <h2>✅ Результати</h2>
+                        <ul id="params-list" class="modern-list"></ul>
+                    </div>
 
-        <div id="results" class="results" style="display: none;">
-            <div class="flex-res">
-                <div class="data-res">
-                    <h3>✅ Знайдені параметри:</h3>
-                    <ul id="params-list"></ul>
+                    <div class="plot-section" id="plot-section" style="display: none;">
+                        <h2>🎨 Креслення</h2>
+                        <div id="plot-container" class="image-wrapper"></div>
+                    </div>
                 </div>
 
-                <div class="img-res" id="plot-section" style="display: none;">
-                    <h3>🎨 Креслення:</h3>
-                    <div id="plot-container"></div>
+                <div class="steps-section">
+                    <h2>🧠 Хід розв'язання</h2>
+                    <div id="steps-list" class="steps-container"></div>
                 </div>
-            </div>
-
-            <div class="steps-res">
-                <h3>🧠 Хід розв'язання (База знань):</h3>
-                <div id="steps-list"></div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="/static/script.js"></script>
 </body>
 </html>

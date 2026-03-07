@@ -59,7 +59,10 @@ function updateUI() {
     const targetsDiv = document.getElementById('target-checkboxes');
     const targets = uiConfig[figure].targets;
     targetsDiv.innerHTML = targets.map(t => `
-        <label><input type="checkbox" value="${t.id}" ${t.checked ? 'checked' : ''}> ${t.label}</label>
+        <label class="chip-checkbox">
+            <input type="checkbox" value="${t.id}" ${t.checked ? 'checked' : ''}>
+            <span class="chip-label">${t.label}</span>
+        </label>
     `).join('');
 
     updateInputs();
@@ -141,14 +144,34 @@ async function solve() {
             ).join('');
 
             document.getElementById('steps-list').innerHTML = (result.steps || []).map(s => {
-                if (s.startsWith("➤")) return `<div class="step-header">${s}</div>`;
-                if (s.startsWith("Правило:")) return `<div class="step-rule">${s}</div>`;
-                return `<div class="step-text">${s}</div>`;
+
+                if (s.startsWith("➤")) {
+                    return `
+                    <div class="step-card">
+                        <div class="step-title">${s}</div>
+                    </div>`;
+                }
+
+                if (s.startsWith("Формула:")) {
+                    const formula = s.replace("Формула:", "").trim();
+                    return `<div class="formula-box">${formula}</div>`;
+                }
+
+                if (s.startsWith("Правило:")) {
+                    return `<div class="rule-box">${s}</div>`;
+                }
+
+                return `<div class="step-description">${s}</div>`;
+
             }).join('');
 
             const plotSection = document.getElementById('plot-section');
             if (result.image) {
-                document.getElementById('plot-container').innerHTML = `<img src="data:image/png;base64,${result.image}" alt="Креслення" />`;
+                document.getElementById('plot-container').innerHTML =
+                    `<img class="geometry-plot"
+                    src="data:image/png;base64,${result.image}"
+                    alt="Креслення"
+                    onclick="openImage(this.src)" />`;
                 plotSection.style.display = 'block';
             } else {
                 plotSection.style.display = 'none';
