@@ -20,9 +20,9 @@ const uiConfig = {
         targets: [
             { id: "area", label: "Площу круга (S)", checked: true },
             { id: "perimeter", label: "Довжину кола (C)", checked: true },
-            { id: "arc", label: "Довжину дуги (L)", checked: false },         // <--- НОВЕ
-            { id: "sector_area", label: "Площу сектора", checked: false },    // <--- НОВЕ
-            { id: "chord", label: "Довжину хорди (c)", checked: false }       // <--- НОВЕ
+            { id: "arc", label: "Довжину дуги (L)", checked: false },
+            { id: "sector_area", label: "Площу сектора", checked: false },
+            { id: "chord", label: "Довжину хорди (c)", checked: false }
         ],
         tasks: {
             "RADIUS": { name: "Відомий радіус (r)", inputs: [ { id: "radius", label: "Радіус r" } ] },
@@ -41,7 +41,7 @@ window.onload = function() {
         `<option value="${key}">${uiConfig[key].name}</option>`
     ).join('');
 
-    updateUI(); // Запускаємо оновлення інтерфейсу
+    updateUI();
 };
 
 // 2. Оновлення списку задач при зміні фігури
@@ -169,9 +169,10 @@ async function solve() {
             if (result.image) {
                 document.getElementById('plot-container').innerHTML =
                     `<img class="geometry-plot"
-                    src="data:image/png;base64,${result.image}"
+                    src="data:image/svg+xml;base64,${result.image}"
                     alt="Креслення"
-                    onclick="openImage(this.src)" />`;
+                    style="cursor: zoom-in;"
+                    onclick="openImageModal(this.src)" />`;
                 plotSection.style.display = 'block';
             } else {
                 plotSection.style.display = 'none';
@@ -182,3 +183,59 @@ async function solve() {
         document.getElementById('error-msg').innerText = 'Внутрішня помилка з\'єднання з сервером.';
     }
 }
+
+// --- Логіка масштабування креслення ---
+let scale = 1;
+let isDragging = false;
+let startX, startY, translateX = 0, translateY = 0;
+
+function openImageModal(src) {
+    const modal = document.getElementById('image-modal');
+    const img = document.getElementById('modal-image');
+    img.src = src;
+    modal.style.display = 'flex';
+
+    // Скидаємо масштаб
+    scale = 1; translateX = 0; translateY = 0;
+    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}
+
+// Закриття по кліку на темний фон
+document.getElementById('image-modal').addEventListener('click', function(e) {
+    if (e.target.id === 'image-modal') {
+        this.style.display = 'none';
+    }
+});
+
+// Закриття по кліку на хрестик
+document.getElementById('close-modal-btn').addEventListener('click', function() {
+    document.getElementById('image-modal').style.display = 'none';
+});
+
+// Зум коліщатком
+document.getElementById('zoom-container').addEventListener('wheel', (e) => {
+    e.preventDefault();
+    scale += e.deltaY * -0.002;
+    scale = Math.min(Math.max(0.5, scale), 10); // Обмеження: від 0.5x до 10x
+    document.getElementById('modal-image').style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+});
+
+// Перетягування мишею
+const zoomContainer = document.getElementById('zoom-container');
+zoomContainer.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    zoomContainer.style.cursor = 'grabbing';
+});
+window.addEventListener('mouseup', () => {
+    isDragging = false;
+    zoomContainer.style.cursor = 'grab';
+});
+window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    document.getElementById('modal-image').style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+});
