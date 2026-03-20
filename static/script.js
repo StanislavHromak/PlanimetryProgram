@@ -1,4 +1,3 @@
-// Конфігурація фігур, їхніх задач та можливих результатів
 const uiConfig = {
     triangle: {
         name: "Трикутник",
@@ -10,65 +9,98 @@ const uiConfig = {
             { id: "side", label: "Невідомі сторони/кути", checked: true }
         ],
         tasks: {
-            "SSS": {
-                name: "Три сторони (SSS)",
-                inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ],
-                validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"]
-            },
-            "SAS": {
-                name: "Дві сторони і кут (SAS)",
-                inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "angle_c", label: "Кут між ними γ (°)" } ],
-                validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"]
-            },
-            "ASA": {
-                name: "Сторона і два кути (ASA)",
-                inputs: [ { id: "a", label: "Сторона a" }, { id: "angle_b", label: "Прилеглий кут β (°)" }, { id: "angle_c", label: "Прилеглий кут γ (°)" } ],
-                validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"]
-            }
+            "SSS": { name: "Три сторони (SSS)", inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ], validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"] },
+            "SAS": { name: "Дві сторони і кут (SAS)", inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "angle_c", label: "Кут γ (°)" } ], validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"] },
+            "ASA": { name: "Сторона і два кути (ASA)", inputs: [ { id: "a", label: "Сторона a" }, { id: "angle_b", label: "Кут β (°)" }, { id: "angle_c", label: "Кут γ (°)" } ], validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"] }
         }
     },
     circle: {
-    name: "Коло та Круг",
-    targets: [
-        { id: "radius", label: "Радіус (r)", checked: false },
-        { id: "diameter", label: "Діаметр (d)", checked: false },
-        { id: "area", label: "Площу круга (S)", checked: true },
-        { id: "perimeter", label: "Довжину кола (C)", checked: true },
-        { id: "arc", label: "Довжину дуги (L)", checked: false },
-        { id: "sector_area", label: "Площу сектора", checked: false },
-        { id: "chord", label: "Довжину хорди (c)", checked: false }
-    ],
-    tasks: {
-        "RADIUS": {
-            name: "Відомий радіус (r)",
-            inputs: [ { id: "radius", label: "Радіус r" } ],
-            validTargets: ["diameter", "area", "perimeter"]
-        },
-        "DIAMETER": {
-            name: "Відомий діаметр (d)",
-            inputs: [ { id: "diameter", label: "Діаметр d" } ],
-            validTargets: ["radius", "area", "perimeter"]
-        },
-        "CIRCUMFERENCE": {
-            name: "Відома довжина кола (C)",
-            inputs: [ { id: "circumference", label: "Довжина C" } ],
-            validTargets: ["radius", "diameter", "area"]
-        },
-        "AREA": {
-            name: "Відома площа (S)",
-            inputs: [ { id: "area", label: "Площа S" } ],
-            validTargets: ["radius", "diameter", "perimeter"]
-        },
-        "SECTOR_AND_ARC": {
-            name: "Відомі радіус (r) і кут (α)",
-            inputs: [
-                { id: "radius", label: "Радіус r" },
-                { id: "angle", label: "Центральний кут α (°)" }
-            ],
-            validTargets: ["diameter", "area", "perimeter", "arc", "sector_area", "chord"]
+        name: "Коло та Круг",
+        targets: [
+            { id: "radius", label: "Радіус (r)", checked: false },
+            { id: "diameter", label: "Діаметр (d)", checked: false },
+            { id: "area", label: "Площу круга (S)", checked: true },
+            { id: "perimeter", label: "Довжину кола (C)", checked: true },
+            { id: "arc", label: "Довжину дуги (L)", checked: false },
+            { id: "sector_area", label: "Площу сектора", checked: false },
+            { id: "chord", label: "Довжину хорди (c)", checked: false }
+        ],
+        tasks: {
+            "RADIUS": { name: "Радіус (r)", inputs: [ { id: "radius", label: "Радіус r" } ], validTargets: ["diameter", "area", "perimeter"] },
+            "DIAMETER": { name: "Діаметр (d)", inputs: [ { id: "diameter", label: "Діаметр d" } ], validTargets: ["radius", "area", "perimeter"] },
+            "CIRCUMFERENCE": { name: "Довжина кола (C)", inputs: [ { id: "circumference", label: "Довжина C" } ], validTargets: ["radius", "diameter", "area"] },
+            "AREA": { name: "Площа (S)", inputs: [ { id: "area", label: "Площа S" } ], validTargets: ["radius", "diameter", "perimeter"] },
+            "SECTOR_AND_ARC": { name: "Радіус і центральний кут", inputs: [ { id: "radius", label: "Радіус r" }, { id: "angle", label: "Кут α (°)" } ], validTargets: ["diameter", "area", "perimeter", "arc", "sector_area", "chord"] }
+        }
+    },
+    quadrangle: {
+        name: "Чотирикутник",
+        hasSubFigures: true,
+        subFigures: {
+            rectangle: {
+                name: "Прямокутник",
+                targets: [
+                    { id: "area", label: "Площу (S)", checked: true },
+                    { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "diagonal", label: "Діагональ (d)", checked: false }
+                ],
+                tasks: {
+                    "RECTANGLE_SIDES": {
+                        name: "Сторони",
+                        inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" } ],
+                        validTargets: ["area", "perimeter", "diagonal"]
+                    }
+                }
+            },
+            square: {
+                name: "Квадрат",
+                targets: [
+                    { id: "area", label: "Площу (S)", checked: true },
+                    { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "diagonal", label: "Діагональ (d)", checked: false }
+                ],
+                tasks: {
+                    "SQUARE_SIDE": {
+                        name: "Сторона",
+                        inputs: [ { id: "a", label: "Сторона a" } ],
+                        validTargets: ["area", "perimeter", "diagonal"]
+                    }
+                }
+            },
+            rhombus: {
+                name: "Ромб",
+                targets: [
+                    { id: "area", label: "Площу (S)", checked: true },
+                    { id: "perimeter", label: "Периметр (P)", checked: false }
+                ],
+                tasks: {
+                    "RHOMBUS_DIAGONALS": {
+                        name: "Діагоналі",
+                        inputs: [ { id: "d1", label: "Діагональ d1" }, { id: "d2", label: "Діагональ d2" } ],
+                        validTargets: ["area", "perimeter"]
+                    },
+                    "RHOMBUS_SIDE_ANGLE": {
+                        name: "Сторона і кут",
+                        inputs: [ { id: "a", label: "Сторона a" }, { id: "angle", label: "Кут α (°)" } ],
+                        validTargets: ["area", "perimeter"]
+                    }
+                }
+            },
+            trapezoid: {
+                name: "Трапеція",
+                targets: [
+                    { id: "area", label: "Площу (S)", checked: true }
+                ],
+                tasks: {
+                    "TRAPEZOID_ABH": {
+                        name: "Основи і висота",
+                        inputs: [ { id: "a", label: "Основа a" }, { id: "b", label: "Основа b" }, { id: "h", label: "Висота h" } ],
+                        validTargets: ["area"]
+                    }
+                }
+            }
         }
     }
-}
 };
 
 // 1. Ініціалізація сторінки
@@ -81,31 +113,61 @@ window.onload = function() {
     updateUI();
 };
 
+// Допоміжна функція для отримання поточного активного вузла конфігурації
+function getActiveConfigNode() {
+    const figure = document.getElementById('figure-select').value;
+    if (uiConfig[figure].hasSubFigures) {
+        const subFigure = document.getElementById('sub-figure-select').value;
+        return uiConfig[figure].subFigures[subFigure];
+    }
+    return uiConfig[figure];
+}
+
 // 2. Оновлення списку задач при зміні фігури
 function updateUI() {
     const figure = document.getElementById('figure-select').value;
-    const taskSelect = document.getElementById('task-select');
+    const subFigureGroup = document.getElementById('sub-figure-group');
+    const subFigureSelect = document.getElementById('sub-figure-select');
 
-    // Оновлюємо список "Що відомо"
-    const tasks = uiConfig[figure].tasks;
-    taskSelect.innerHTML = Object.keys(tasks).map(taskKey =>
-        `<option value="${taskKey}">${tasks[taskKey].name}</option>`
-    ).join('');
+    if (uiConfig[figure].hasSubFigures) {
+        // Показуємо вибір виду і заповнюємо його
+        subFigureGroup.style.display = 'flex';
+        const subFigures = uiConfig[figure].subFigures;
+        subFigureSelect.innerHTML = Object.keys(subFigures).map(subKey =>
+            `<option value="${subKey}">${subFigures[subKey].name}</option>`
+        ).join('');
+    } else {
+        // Ховаємо вибір виду для простих фігур (коло, трикутник)
+        subFigureGroup.style.display = 'none';
+    }
 
-    // Викликаємо оновлення інпутів ТА чекбоксів
-    updateInputs();
+    updateTasks(); // Одразу оновлюємо задачі
 }
 
-// 3. Оновлення полів вводу та чекбоксів при зміні задачі
+// 3. Оновлення списку задач (Що відомо?)
+function updateTasks() {
+    const configNode = getActiveConfigNode();
+    const taskSelect = document.getElementById('task-select');
+
+    taskSelect.innerHTML = Object.keys(configNode.tasks).map(taskKey =>
+        `<option value="${taskKey}">${configNode.tasks[taskKey].name}</option>`
+    ).join('');
+
+    updateInputs(); // Одразу оновлюємо інпути та чекбокси
+}
+
+// 4. Оновлення полів вводу та чекбоксів при зміні задачі
 function updateInputs() {
-    const figure = document.getElementById('figure-select').value;
+    const configNode = getActiveConfigNode();
     const task = document.getElementById('task-select').value;
+
+    if (!configNode.tasks[task]) return;
 
     const inputsDiv = document.getElementById('dynamic-inputs');
     const targetsDiv = document.getElementById('target-checkboxes');
 
-    // Оновлюємо поля вводу (Що відомо)
-    const requiredInputs = uiConfig[figure].tasks[task].inputs;
+    // Оновлюємо інпути
+    const requiredInputs = configNode.tasks[task].inputs;
     inputsDiv.innerHTML = requiredInputs.map(inp => `
         <div class="input-group">
             <label for="${inp.id}">${inp.label}</label>
@@ -113,11 +175,9 @@ function updateInputs() {
         </div>
     `).join('');
 
-    // Оновлюємо чекбокси (Що знайти) залежно від дозволених для цієї задачі
-    const allTargets = uiConfig[figure].targets;
-    const validTargetIds = uiConfig[figure].tasks[task].validTargets;
-
-    // Фільтруємо масив цілей: залишаємо тільки ті, чий ID є у validTargets
+    // Оновлюємо чекбокси з фільтрацією
+    const allTargets = configNode.targets;
+    const validTargetIds = configNode.tasks[task].validTargets;
     const filteredTargets = allTargets.filter(t => validTargetIds.includes(t.id));
 
     targetsDiv.innerHTML = filteredTargets.map(t => `
@@ -128,7 +188,7 @@ function updateInputs() {
     `).join('');
 }
 
-// 4. Головна функція відправки даних на сервер
+// 5. Головна функція відправки даних на сервер
 async function solve() {
     document.getElementById('error-msg').innerText = '';
     document.getElementById('results').style.display = 'none';
@@ -139,7 +199,12 @@ async function solve() {
     let params = {};
     let hasEmptyFields = false;
 
-    const requiredInputs = uiConfig[figure].tasks[task].inputs;
+    // Отримуємо правильний конфіг
+    const configNode = getActiveConfigNode();
+
+    // Використовуємо configNode замість жорсткого uiConfig[figure]
+    const requiredInputs = configNode.tasks[task].inputs;
+
     requiredInputs.forEach(inp => {
         const val = document.getElementById(inp.id).value;
         if (val === '') hasEmptyFields = true;
@@ -218,7 +283,7 @@ async function solve() {
     }
 }
 
-// --- Логіка масштабування креслення ---
+// 6. Логіка масштабування креслення ---
 let scale = 1;
 let isDragging = false;
 let startX, startY, translateX = 0, translateY = 0;

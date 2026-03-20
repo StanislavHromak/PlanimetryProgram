@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Планіметрія: Експертна Система</title>
+    <title>PlanimetrySolver: Розв'язувач задач з планіметрії</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,8 +13,8 @@
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>📐 Планіметрія <span class="badge">Експертна Система</span></h1>
-            <p>Швидке розв'язання геометричних задач з детальним поясненням</p>
+            <h1>📐 PlanimetrySolver <span class="badge">Розв'язувач задач з планіметрії</span></h1>
+            <p>Швидке розв'язання задач з детальним поясненням</p>
         </header>
 
         <main class="main-content">
@@ -25,6 +25,11 @@
                         <select id="figure-select" class="modern-select" onchange="updateUI()"></select>
                     </div>
 
+                    <div id="sub-figure-group" class="setting-group" style="display: none;">
+                        <label for="sub-figure-select">Оберіть вид</label>
+                        <select id="sub-figure-select" class="modern-select" onchange="updateTasks()"></select>
+                    </div>
+
                     <div class="setting-group">
                         <label for="task-select">Що відомо?</label>
                         <select id="task-select" class="modern-select" onchange="updateInputs()"></select>
@@ -33,7 +38,7 @@
                     <div class="setting-group targets-group">
                         <label>Що знайти?</label>
                         <div id="target-checkboxes" class="chips-group">
-                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

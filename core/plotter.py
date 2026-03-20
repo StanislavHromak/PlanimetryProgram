@@ -84,6 +84,118 @@ class GeometryPlotter:
         return GeometryPlotter._get_base64_image()
 
     @staticmethod
+    def plot_rectangle(a: float, b: float) -> str:
+        """Малює прямокутник (або квадрат, якщо a == b)."""
+        plt.figure(figsize=(6, 6))
+        ax = plt.gca()
+
+        # Вершини
+        x = [0, a, a, 0, 0]
+        y = [0, 0, b, b, 0]
+
+        ax.plot(x, y, 'k-', lw=2)
+
+        # Заливка: якщо квадрат - один колір, якщо прямокутник - інший
+        color = 'khaki' if a == b else 'lightblue'
+        ax.fill(x, y, color, alpha=0.4)
+
+        # Підписи сторін
+        offset = max(a, b) * 0.05
+        ax.text(a / 2, -offset, f'a = {a}', ha='center', va='top', fontweight='bold')
+        ax.text(-offset, b / 2, f'b = {b}', ha='right', va='center', fontweight='bold')
+
+        # Діагональ для краси
+        ax.plot([0, a], [0, b], 'r--', lw=1.5, alpha=0.6)
+
+        ax.axis('equal')
+        ax.axis('off')
+        plt.tight_layout()
+        return GeometryPlotter._get_base64_image()
+
+    @staticmethod
+    def plot_parallelogram(a: float, b: float, angle_deg: float) -> str:
+        """Малює паралелограм за двома сторонами та кутом між ними."""
+        plt.figure(figsize=(6, 6))
+        ax = plt.gca()
+
+        rad = math.radians(angle_deg)
+        x_offset = b * math.cos(rad)
+        y_offset = b * math.sin(rad)
+
+        # Вершини
+        x = [0, a, a + x_offset, x_offset, 0]
+        y = [0, 0, y_offset, y_offset, 0]
+
+        ax.plot(x, y, 'k-', lw=2)
+        ax.fill(x, y, 'lightgreen', alpha=0.4)
+
+        # Підписи
+        offset = max(a, b) * 0.05
+        ax.text(a / 2, -offset, f'a = {a}', ha='center', va='top', fontweight='bold')
+        ax.text(x_offset / 2 - offset, y_offset / 2, f'b = {b}', ha='right', va='center', fontweight='bold')
+
+        # Підпис кута
+        ax.text(offset, offset, f'{angle_deg}°', color='red', fontweight='bold')
+
+        ax.axis('equal')
+        ax.axis('off')
+        plt.tight_layout()
+        return GeometryPlotter._get_base64_image()
+
+    @staticmethod
+    def plot_rhombus_diagonals(d1: float, d2: float) -> str:
+        """Малює ромб через його діагоналі."""
+        plt.figure(figsize=(6, 6))
+        ax = plt.gca()
+
+        # Вершини (центруємо ромб у точці 0,0)
+        x = [d1 / 2, 0, -d1 / 2, 0, d1 / 2]
+        y = [0, d2 / 2, 0, -d2 / 2, 0]
+
+        ax.plot(x, y, 'k-', lw=2)
+        ax.fill(x, y, 'plum', alpha=0.4)
+
+        # Діагоналі
+        ax.plot([-d1 / 2, d1 / 2], [0, 0], 'r--', lw=1.5)
+        ax.plot([0, 0], [-d2 / 2, d2 / 2], 'b--', lw=1.5)
+
+        # Підписи діагоналей
+        ax.text(d1 / 4, -max(d1, d2) * 0.05, f'd1 = {d1}', color='red', ha='center', va='top', fontweight='bold')
+        ax.text(-max(d1, d2) * 0.05, d2 / 4, f'd2 = {d2}', color='blue', ha='right', va='center', fontweight='bold')
+
+        ax.axis('equal')
+        ax.axis('off')
+        plt.tight_layout()
+        return GeometryPlotter._get_base64_image()
+
+    @staticmethod
+    def plot_trapezoid(a: float, b: float, h: float) -> str:
+        """Малює трапецію (візуально як рівнобічну, для краси креслення)."""
+        plt.figure(figsize=(6, 6))
+        ax = plt.gca()
+
+        # Розміщуємо нижню основу (a) по центру, верхню (b) теж по центру на висоті h
+        x = [-a / 2, a / 2, b / 2, -b / 2, -a / 2]
+        y = [0, 0, h, h, 0]
+
+        ax.plot(x, y, 'k-', lw=2)
+        ax.fill(x, y, 'wheat', alpha=0.5)
+
+        # Малюємо пунктирну висоту
+        ax.plot([b / 2, b / 2], [0, h], 'r--', lw=1.5)
+
+        # Підписи
+        offset = max(a, b, h) * 0.05
+        ax.text(0, -offset, f'a = {a}', ha='center', va='top', fontweight='bold')
+        ax.text(0, h + offset, f'b = {b}', ha='center', va='bottom', fontweight='bold')
+        ax.text(b / 2 + offset, h / 2, f'h = {h}', color='red', va='center', fontweight='bold')
+
+        ax.axis('equal')
+        ax.axis('off')
+        plt.tight_layout()
+        return GeometryPlotter._get_base64_image()
+
+    @staticmethod
     def plot_circle(r: float) -> str:
         plt.figure(figsize=(4, 4))
         circle = plt.Circle((0, 0), r, color='lightgreen', alpha=0.3, ec='black', lw=2)
