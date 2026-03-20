@@ -10,7 +10,7 @@ class CircleSolver(GeometricSolver):
         super().__init__(targets)
         self.known_type = known_type
         self.val = float(val)
-        self.r = 0.0  # Радіус знайдемо пізніше
+        self.r = 0.0
 
     def validate(self) -> bool:
         if self.val <= 0:
@@ -32,7 +32,8 @@ class CircleSolver(GeometricSolver):
         elif self.known_type == "DIAMETER":
             self.r = self.val / 2
             self._steps.append(f"Дано: Коло з діаметром d = {self.val}")
-            self._steps.append(f"ℹ️ Проміжний крок: Знаходимо радіус r = d / 2 = {self.val} / 2 = {self.r:.2f}")
+            self._steps.append(
+                f"ℹ️ Проміжний крок: Радіус — це половина діаметра: r = d / 2 = {self.val} / 2 = {self.r:.2f}")
 
         elif self.known_type == "CIRCUMFERENCE":
             self.r = self.val / (2 * math.pi)
@@ -46,30 +47,47 @@ class CircleSolver(GeometricSolver):
             self._steps.append(
                 f"ℹ️ Проміжний крок: Знаходимо радіус r = √(S / π) = √({self.val} / {math.pi:.4f}) ≈ {self.r:.2f}")
 
-        # --- 2. БАЗОВА МАТЕМАТИКА ---
-        circumference = 2 * math.pi * self.r
-        area = math.pi * (self.r ** 2)
+        # --- 2. ОБЧИСЛЕННЯ ЗАПИТАНИХ ПАРАМЕТРІВ ЗА ШАБЛОНОМ ---
 
-        # --- 3. ФОРМУВАННЯ ЗВІТУ ЗА ШАБЛОНОМ ---
+        # Радіус (якщо його запитали окремо і він не був даний)
+        if "radius" in self.targets and self.known_type != "RADIUS":
+            self._steps.append("➤ Знаходимо радіус кола:")
+            self._steps.append("Правило: Радіус можна знайти через зворотні формули основних параметрів кола.")
+            self._steps.append(f"Розв'язок: r = <span style='color: red; font-weight: bold;'>{self.r:.2f}</span>")
+            result_data["radius"] = round(self.r, 2)
+
+        # Діаметр
+        if "diameter" in self.targets and self.known_type != "DIAMETER":
+            diameter = self.r * 2
+            self._steps.append("➤ Знаходимо діаметр кола:")
+            self._steps.append("Правило: Діаметр кола вдвічі більший за його радіус.")
+            self._steps.append("Формула: d = 2 * r")
+            self._steps.append(
+                f"Розв'язок: d = 2 * {self.r:.2f} = <span style='color: red; font-weight: bold;'>{diameter:.2f}</span>")
+            result_data["diameter"] = round(diameter, 2)
+
+        # Довжина кола
         if "perimeter" in self.targets or "circumference" in self.targets:
+            circumference = 2 * math.pi * self.r
             thm_c = self.db.get_theorem("Довжина кола")
-            self._steps.append(f"➤ Знаходимо довжину кола:")
+            self._steps.append("➤ Знаходимо довжину кола:")
             self._steps.append(f"Правило: {thm_c['description']}")
-            self._steps.append(f"Формула: C = 2 * π * r")
+            self._steps.append("Формула: C = 2 * π * r")
             self._steps.append(
                 f"Розв'язок: C = 2 * π * {self.r:.2f} = <span style='color: red; font-weight: bold;'>{circumference:.2f}</span>")
             result_data["circumference"] = round(circumference, 2)
 
+        # Площа круга
         if "area" in self.targets:
+            area = math.pi * (self.r ** 2)
             thm_s = self.db.get_theorem("Площа круга")
-            self._steps.append(f"➤ Знаходимо площу круга:")
+            self._steps.append("➤ Знаходимо площу круга:")
             self._steps.append(f"Правило: {thm_s['description']}")
-            self._steps.append(f"Формула: S = π * r²")
+            self._steps.append("Формула: S = π * r²")
             self._steps.append(
                 f"Розв'язок: S = π * ({self.r:.2f})² = <span style='color: red; font-weight: bold;'>{area:.2f}</span>")
             result_data["area"] = round(area, 2)
 
-        # Малюємо креслення
         image_base64 = GeometryPlotter.plot_circle(self.r)
 
         return {
@@ -104,42 +122,65 @@ class CircleSectorSolver(GeometricSolver):
         self._steps.append(f"Дано: Радіус r = {self.r}, Центральний кут α = {self.angle}°")
         result_data = {}
 
-        # --- БАЗОВА МАТЕМАТИКА ---
+        # Базові параметри для сектора (аналогічно CircleSolver)
+        if "diameter" in self.targets:
+            diameter = self.r * 2
+            self._steps.append("➤ Знаходимо діаметр кола:")
+            self._steps.append("Правило: Діаметр кола вдвічі більший за його радіус.")
+            self._steps.append("Формула: d = 2 * r")
+            self._steps.append(
+                f"Розв'язок: d = 2 * {self.r} = <span style='color: red; font-weight: bold;'>{diameter:.2f}</span>")
+            result_data["diameter"] = round(diameter, 2)
+
+        if "perimeter" in self.targets:
+            circumference = 2 * math.pi * self.r
+            self._steps.append("➤ Знаходимо повну довжину кола:")
+            self._steps.append("Формула: C = 2 * π * r")
+            self._steps.append(
+                f"Розв'язок: C = 2 * π * {self.r} = <span style='color: red; font-weight: bold;'>{circumference:.2f}</span>")
+            result_data["circumference"] = round(circumference, 2)
+
+        if "area" in self.targets:
+            area = math.pi * (self.r ** 2)
+            self._steps.append("➤ Знаходимо повну площу круга:")
+            self._steps.append("Формула: S = π * r²")
+            self._steps.append(
+                f"Розв'язок: S = π * {self.r}² = <span style='color: red; font-weight: bold;'>{area:.2f}</span>")
+            result_data["area"] = round(area, 2)
+
+        # Параметри сектора
         rad_angle = math.radians(self.angle)
 
-        arc_length = (math.pi * self.r * self.angle) / 180
-        sector_area = (math.pi * (self.r ** 2) * self.angle) / 360
-        chord_length = 2 * self.r * math.sin(rad_angle / 2)
-
-        # --- ФОРМУВАННЯ ЗВІТУ ЗА ШАБЛОНОМ ---
         if "arc" in self.targets:
+            arc_length = (math.pi * self.r * self.angle) / 180
             thm = self.db.get_theorem("Довжина дуги кола")
-            self._steps.append(f"➤ Знаходимо довжину дуги:")
+            self._steps.append("➤ Знаходимо довжину дуги:")
             self._steps.append(f"Правило: {thm['description']}")
-            self._steps.append(f"Формула: L = (π * r * α) / 180°")
+            self._steps.append("Формула: L = (π * r * α) / 180°")
             self._steps.append(
                 f"Розв'язок: L = (π * {self.r} * {self.angle}°) / 180° = <span style='color: red; font-weight: bold;'>{arc_length:.2f}</span>")
             result_data["arc_length"] = round(arc_length, 2)
 
         if "sector_area" in self.targets:
+            sector_area = (math.pi * (self.r ** 2) * self.angle) / 360
             thm = self.db.get_theorem("Площа кругового сектора")
-            self._steps.append(f"➤ Знаходимо площу сектора:")
+            self._steps.append("➤ Знаходимо площу сектора:")
             self._steps.append(f"Правило: {thm['description']}")
-            self._steps.append(f"Формула: S = (π * r² * α) / 360°")
+            self._steps.append("Формула: S = (π * r² * α) / 360°")
             self._steps.append(
                 f"Розв'язок: S = (π * {self.r}² * {self.angle}°) / 360° = <span style='color: red; font-weight: bold;'>{sector_area:.2f}</span>")
             result_data["sector_area"] = round(sector_area, 2)
 
         if "chord" in self.targets:
+            chord_length = 2 * self.r * math.sin(rad_angle / 2)
             thm = self.db.get_theorem("Довжина хорди")
-            self._steps.append(f"➤ Знаходимо довжину хорди:")
+            self._steps.append("➤ Знаходимо довжину хорди:")
             self._steps.append(f"Правило: {thm['description']}")
-            self._steps.append(f"Формула: c = 2 * r * sin(α / 2)")
+            self._steps.append("Формула: c = 2 * r * sin(α / 2)")
             self._steps.append(
                 f"Розв'язок: c = 2 * {self.r} * sin({self.angle}° / 2) = <span style='color: red; font-weight: bold;'>{chord_length:.2f}</span>")
             result_data["chord_length"] = round(chord_length, 2)
 
-        # Малюємо креслення
         image_base64 = GeometryPlotter.plot_circle_sector(self.r, self.angle)
 
         return {
