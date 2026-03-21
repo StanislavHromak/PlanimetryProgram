@@ -1,6 +1,6 @@
 import math
 from core.base import GeometricSolver
-from core.plotter import GeometryPlotter
+from core.plotter import TrianglePlotter
 
 
 class ArbitraryTriangleSolver(GeometricSolver):
@@ -95,7 +95,7 @@ class ArbitraryTriangleSolver(GeometricSolver):
                                                        f"R = ({self.a:.2f}*{self.b:.2f}*{self.c:.2f}) / 4*{area:.2f}",
                                                        r_out)
 
-        image_base64 = GeometryPlotter.plot_triangle(self.a, self.b, self.c)
+        image_base64 = TrianglePlotter(self.a, self.b, self.c).plot()
         return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
 
 
@@ -164,7 +164,7 @@ class RightTriangleSolver(GeometricSolver):
             result["r_circumscribed"] = self._add_step("Знаходимо радіус описаного кола", "R = c / 2",
                                                        f"R = {self.c:.2f} / 2", self.c / 2)
 
-        image_base64 = GeometryPlotter.plot_triangle(self.a, self.b, self.c)
+        image_base64 = TrianglePlotter(self.a, self.b, self.c).plot()
         return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
 
 
@@ -209,8 +209,7 @@ class IsoscelesTriangleSolver(GeometricSolver):
             result["perimeter"] = self._add_step("Знаходимо периметр", "P = a + 2b", f"P = {self.base} + 2*{self.side}",
                                                  self.base + 2 * self.side)
 
-        # Використовуємо універсальний плоттер (a, b, c) -> (base, side, side)
-        image_base64 = GeometryPlotter.plot_triangle(self.base, self.side, self.side)
+        image_base64 = TrianglePlotter(self.base, self.side, self.side).plot()
         return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
 
 
@@ -255,5 +254,5 @@ class EquilateralTriangleSolver(GeometricSolver):
             result["r_circumscribed"] = self._add_step("Знаходимо радіус описаного кола", "R = a√3 / 3",
                                                        f"R = {self.a}√3 / 3", r_out)
 
-        image_base64 = GeometryPlotter.plot_triangle(self.a, self.a, self.a)
+        image_base64 = TrianglePlotter(self.a, self.a, self.a).plot()
         return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
