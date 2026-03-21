@@ -84,6 +84,48 @@ class GeometryPlotter:
         return GeometryPlotter._get_base64_image()
 
     @staticmethod
+    def plot_arbitrary_quadrangle(vertices: list, a: float, b: float, c: float, d: float, angle_deg: float) -> str:
+        """Малює довільний чотирикутник за координатами вершин."""
+        plt.figure(figsize=(6, 6))
+        ax = plt.gca()
+
+        # Розділяємо координати для побудови ліній
+        x = [v[0] for v in vertices] + [vertices[0][0]]
+        y = [v[1] for v in vertices] + [vertices[0][1]]
+
+        # Малюємо контур та заливку
+        ax.plot(x, y, 'k-', lw=2)
+        ax.fill(x, y, 'lightcoral', alpha=0.3)
+
+        # Малюємо пунктирну діагональ (між вершиною 1 і 3, або 2 і 4 - у нашому алгоритмі це v2 і v4)
+        ax.plot([vertices[1][0], vertices[3][0]], [vertices[1][1], vertices[3][1]], 'b--', lw=1.5, alpha=0.6)
+
+        # Хелпер для знаходження середини відрізка (щоб підписати сторони)
+        def mid(p1, p2):
+            return (p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2
+
+        m1 = mid(vertices[0], vertices[1])
+        m2 = mid(vertices[1], vertices[2])
+        m3 = mid(vertices[2], vertices[3])
+        m4 = mid(vertices[3], vertices[0])
+
+        offset = max(a, b, c, d) * 0.05
+
+        # Підписи сторін
+        ax.text(m1[0], m1[1] - offset, f'a={a}', ha='center', va='top', fontweight='bold')
+        ax.text(m2[0] + offset, m2[1], f'b={b}', ha='left', va='center', fontweight='bold')
+        ax.text(m3[0], m3[1] + offset, f'c={c}', ha='center', va='bottom', fontweight='bold')
+        ax.text(m4[0] - offset, m4[1], f'd={d}', ha='right', va='center', fontweight='bold')
+
+        # Підпис відомого кута біля першої вершини
+        ax.text(vertices[0][0] + offset, vertices[0][1] + offset / 2, f'α={angle_deg}°', color='red', fontweight='bold')
+
+        ax.axis('equal')
+        ax.axis('off')
+        plt.tight_layout()
+        return GeometryPlotter._get_base64_image()
+
+    @staticmethod
     def plot_rectangle(a: float, b: float) -> str:
         """Малює прямокутник (або квадрат, якщо a == b)."""
         plt.figure(figsize=(6, 6))
