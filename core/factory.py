@@ -1,59 +1,79 @@
-from core.polygons.triangle import TriangleSSSSolver, TriangleSASSolver, TriangleASASolver
-from core.curves.circle import CircleSolver, CircleSectorSolver
-from core.polygons.quadrangle import (
-    SquareSolver,
-    RectangleSolver,
-    RhombusSolver,
-    ParallelogramSolver,
-    TrapezoidSolver
-)
+from core.curves.circle import CircleSolver
+from core.curves.sector import SectorSolver
+from core.curves.ellipse import EllipseSolver
+
+from core.polygons.regular.regular import RegularPolygonSolver
+
+from core.polygons.triangles.arbitrary_triangle import ArbitraryTriangleSolver
+from core.polygons.triangles.right_triangle import RightTriangleSolver
+from core.polygons.triangles.isosceles_triangle import IsoscelesTriangleSolver
+from core.polygons.triangles.equilateral_triangle import EquilateralTriangleSolver
+
+from core.polygons.quadrangles.arbitrary_quadrangle import ArbitraryQuadrangleSolver
+from core.polygons.quadrangles.parallelogram import ParallelogramSolver
+from core.polygons.quadrangles.rectangle import RectangleSolver
+from core.polygons.quadrangles.rhombus import RhombusSolver
+from core.polygons.quadrangles.square import SquareSolver
+from core.polygons.quadrangles.trapezoid import TrapezoidSolver
 
 class GeometryFactory:
-    """Паттерн Factory Method для створення правильного об'єкта-розв'язувача."""
+    """Патерн Factory Method для створення правильного об'єкта-розв'язувача."""
 
     @staticmethod
     def create_solver(figure: str, task_type: str, params: dict, targets: list):
 
-        if figure == "triangle":
-            if task_type == "SSS":
-                return TriangleSSSSolver(
-                    a=params.get('a'), b=params.get('b'), c=params.get('c'), targets=targets
-                )
-            elif task_type == "SAS":
-                return TriangleSASSolver(
-                    a=params.get('a'), b=params.get('b'), angle_c=params.get('angle_c'), targets=targets
-                )
-            elif task_type == "ASA":
-                return TriangleASASolver(
-                    a=params.get('a'), angle_b=params.get('angle_b'), angle_c=params.get('angle_c'), targets=targets
-                )
+        # --- БЛОК БАГАТОКУТНИКІВ ---
+        if figure == "regular_polygon":
+            n = params.get('n', 3)
+            return RegularPolygonSolver(n, task_type, params, targets)
 
+        # --- БЛОК ТРИКУТНИКІВ ---
+        elif figure == "triangle":
+            if task_type in ["SSS", "SAS", "ASA"]:
+                return ArbitraryTriangleSolver(task_type, params, targets)
+
+            elif task_type in ["RIGHT_LEGS", "RIGHT_LEG_HYPOTENUSE"]:
+                return RightTriangleSolver(task_type, params, targets)
+
+            elif task_type == "ISOSCELES_BASE_SIDE":
+                return IsoscelesTriangleSolver(task_type, params, targets)
+
+            elif task_type == "EQUILATERAL_SIDE":
+                return EquilateralTriangleSolver(task_type, params, targets)
+
+        # --- БЛОК ЧОТИРИКУТНИКІВ ---
         elif figure == "quadrangle":
-            if task_type == "SQUARE_SIDE":
+            if task_type == "ARB_SIDES_ANGLES":
+                return ArbitraryQuadrangleSolver(task_type, params, targets)
+            elif task_type == "SQUARE_SIDE":
                 return SquareSolver(task_type, params, targets)
-
             elif task_type == "RECTANGLE_SIDES":
                 return RectangleSolver(task_type, params, targets)
-
             elif task_type in ["RHOMBUS_DIAGONALS", "RHOMBUS_SIDE_ANGLE"]:
                 return RhombusSolver(task_type, params, targets)
-
-            elif task_type == "PARALLELOGRAM_S_A":
+            elif task_type in ["PARALLELOGRAM_S_A", "PARALLELOGRAM_D_A"]:
                 return ParallelogramSolver(task_type, params, targets)
-
             elif task_type == "TRAPEZOID_ABH":
                 return TrapezoidSolver(task_type, params, targets)
 
+        # --- БЛОК КІЛ ---
         elif figure == "circle":
+            val = params.get(task_type.lower())
+            return CircleSolver(task_type, val, targets)
+
+        # --- БЛОК СЕКТОРІВ ТА СЕГМЕНТІВ ---
+        elif figure == "sector":
             if task_type == "SECTOR_AND_ARC":
-                return CircleSectorSolver(
+                return SectorSolver(
                     radius=params.get('radius'),
                     angle=params.get('angle'),
                     targets=targets
                 )
-            # Всі інші типи (RADIUS, DIAMETER, AREA, CIRCUMFERENCE) використовують CircleSolver
-            elif task_type in ["RADIUS", "DIAMETER", "CIRCUMFERENCE", "AREA"]:
-                return CircleSolver(task_type, params.get(task_type.lower()), targets)
 
-        # Фоллбек для помилок
+        # --- БЛОК ЕЛІПСІВ ---
+        elif figure == "ellipse":
+            if task_type == "ELLIPSE_AXES":
+                return EllipseSolver(task_type, params, targets)
+
+        # Якщо нічого не підійшло
         raise ValueError(f"Фабрика не знає як створити: фігура '{figure}', тип задачі '{task_type}'")

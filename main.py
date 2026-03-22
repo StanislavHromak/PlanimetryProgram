@@ -35,10 +35,8 @@ async def solve_geometry(request: GeometryRequest):
         return result
 
     except ValueError as ve:
-        # Спрацює, якщо Фабрика не знає такої фігури
         return {"success": False, "error": str(ve)}
     except Exception as e:
-        # Для відлову непередбачуваних помилок (наприклад, ділення на 0)
         return {"success": False, "error": f"Внутрішня помилка сервера: {str(e)}"}
 
 

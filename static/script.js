@@ -1,119 +1,28 @@
-const uiConfig = {
-    triangle: {
-        name: "Трикутник",
-        targets: [
-            { id: "area", label: "Площу (S)", checked: true },
-            { id: "perimeter", label: "Периметр (P)", checked: false },
-            { id: "incircle", label: "Вписане коло (r)", checked: false },
-            { id: "circumcircle", label: "Описане коло (R)", checked: false },
-            { id: "side", label: "Невідомі сторони/кути", checked: true }
-        ],
-        tasks: {
-            "SSS": { name: "Три сторони (SSS)", inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ], validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"] },
-            "SAS": { name: "Дві сторони і кут (SAS)", inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "angle_c", label: "Кут γ (°)" } ], validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"] },
-            "ASA": { name: "Сторона і два кути (ASA)", inputs: [ { id: "a", label: "Сторона a" }, { id: "angle_b", label: "Кут β (°)" }, { id: "angle_c", label: "Кут γ (°)" } ], validTargets: ["area", "perimeter", "incircle", "circumcircle", "side"] }
-        }
-    },
-    circle: {
-        name: "Коло та Круг",
-        targets: [
-            { id: "radius", label: "Радіус (r)", checked: false },
-            { id: "diameter", label: "Діаметр (d)", checked: false },
-            { id: "area", label: "Площу круга (S)", checked: true },
-            { id: "perimeter", label: "Довжину кола (C)", checked: true },
-            { id: "arc", label: "Довжину дуги (L)", checked: false },
-            { id: "sector_area", label: "Площу сектора", checked: false },
-            { id: "chord", label: "Довжину хорди (c)", checked: false }
-        ],
-        tasks: {
-            "RADIUS": { name: "Радіус (r)", inputs: [ { id: "radius", label: "Радіус r" } ], validTargets: ["diameter", "area", "perimeter"] },
-            "DIAMETER": { name: "Діаметр (d)", inputs: [ { id: "diameter", label: "Діаметр d" } ], validTargets: ["radius", "area", "perimeter"] },
-            "CIRCUMFERENCE": { name: "Довжина кола (C)", inputs: [ { id: "circumference", label: "Довжина C" } ], validTargets: ["radius", "diameter", "area"] },
-            "AREA": { name: "Площа (S)", inputs: [ { id: "area", label: "Площа S" } ], validTargets: ["radius", "diameter", "perimeter"] },
-            "SECTOR_AND_ARC": { name: "Радіус і центральний кут", inputs: [ { id: "radius", label: "Радіус r" }, { id: "angle", label: "Кут α (°)" } ], validTargets: ["diameter", "area", "perimeter", "arc", "sector_area", "chord"] }
-        }
-    },
-    quadrangle: {
-        name: "Чотирикутник",
-        hasSubFigures: true,
-        subFigures: {
-            rectangle: {
-                name: "Прямокутник",
-                targets: [
-                    { id: "area", label: "Площу (S)", checked: true },
-                    { id: "perimeter", label: "Периметр (P)", checked: false },
-                    { id: "diagonal", label: "Діагональ (d)", checked: false }
-                ],
-                tasks: {
-                    "RECTANGLE_SIDES": {
-                        name: "Сторони",
-                        inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" } ],
-                        validTargets: ["area", "perimeter", "diagonal"]
-                    }
-                }
-            },
-            square: {
-                name: "Квадрат",
-                targets: [
-                    { id: "area", label: "Площу (S)", checked: true },
-                    { id: "perimeter", label: "Периметр (P)", checked: false },
-                    { id: "diagonal", label: "Діагональ (d)", checked: false }
-                ],
-                tasks: {
-                    "SQUARE_SIDE": {
-                        name: "Сторона",
-                        inputs: [ { id: "a", label: "Сторона a" } ],
-                        validTargets: ["area", "perimeter", "diagonal"]
-                    }
-                }
-            },
-            rhombus: {
-                name: "Ромб",
-                targets: [
-                    { id: "area", label: "Площу (S)", checked: true },
-                    { id: "perimeter", label: "Периметр (P)", checked: false }
-                ],
-                tasks: {
-                    "RHOMBUS_DIAGONALS": {
-                        name: "Діагоналі",
-                        inputs: [ { id: "d1", label: "Діагональ d1" }, { id: "d2", label: "Діагональ d2" } ],
-                        validTargets: ["area", "perimeter"]
-                    },
-                    "RHOMBUS_SIDE_ANGLE": {
-                        name: "Сторона і кут",
-                        inputs: [ { id: "a", label: "Сторона a" }, { id: "angle", label: "Кут α (°)" } ],
-                        validTargets: ["area", "perimeter"]
-                    }
-                }
-            },
-            trapezoid: {
-                name: "Трапеція",
-                targets: [
-                    { id: "area", label: "Площу (S)", checked: true }
-                ],
-                tasks: {
-                    "TRAPEZOID_ABH": {
-                        name: "Основи і висота",
-                        inputs: [ { id: "a", label: "Основа a" }, { id: "b", label: "Основа b" }, { id: "h", label: "Висота h" } ],
-                        validTargets: ["area"]
-                    }
-                }
-            }
-        }
-    }
-};
-
 // 1. Ініціалізація сторінки
+import { uiConfig } from './config.js';
+import { openImageModal, initModalListeners } from './modal.js';
+
+// Робимо функції доступними глобально для inline-обробників у HTML
+window.solve = solve;
+window.openImageModal = openImageModal;
+
 window.onload = function() {
+    // Ініціалізуємо слухачі для модального вікна
+    initModalListeners();
+
     const figureSelect = document.getElementById('figure-select');
     figureSelect.innerHTML = Object.keys(uiConfig).map(key =>
         `<option value="${key}">${uiConfig[key].name}</option>`
     ).join('');
 
+    // Прив'язуємо події до селектів напряму з JS (краща практика, ніж onclick в HTML)
+    figureSelect.addEventListener('change', updateUI);
+    document.getElementById('sub-figure-select').addEventListener('change', updateTasks);
+    document.getElementById('task-select').addEventListener('change', updateInputs);
+
     updateUI();
 };
 
-// Допоміжна функція для отримання поточного активного вузла конфігурації
 function getActiveConfigNode() {
     const figure = document.getElementById('figure-select').value;
     if (uiConfig[figure].hasSubFigures) {
@@ -188,6 +97,15 @@ function updateInputs() {
     `).join('');
 }
 
+/**
+ * @typedef {Object} SolveResponse
+ * @property {boolean} success
+ * @property {string} [error]
+ * @property {Object} [data]
+ * @property {string[]} [steps]
+ * @property {string} [image]
+ */
+
 // 5. Головна функція відправки даних на сервер
 async function solve() {
     document.getElementById('error-msg').innerText = '';
@@ -239,6 +157,7 @@ async function solve() {
             body: JSON.stringify(requestData)
         });
 
+        /** @type {SolveResponse} */
         const result = await response.json();
 
         if (!result.success) {
@@ -282,54 +201,3 @@ async function solve() {
         document.getElementById('error-msg').innerText = 'Внутрішня помилка з\'єднання з сервером.';
     }
 }
-
-// 6. Логіка масштабування креслення ---
-let scale = 1;
-let isDragging = false;
-let startX, startY, translateX = 0, translateY = 0;
-
-function openImageModal(src) {
-    const modal = document.getElementById('image-modal');
-    const img = document.getElementById('modal-image');
-    img.src = src;
-    modal.style.display = 'flex';
-
-    scale = 1; translateX = 0; translateY = 0;
-    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-}
-
-document.getElementById('image-modal').addEventListener('click', function(e) {
-    if (e.target.id === 'image-modal') {
-        this.style.display = 'none';
-    }
-});
-
-document.getElementById('close-modal-btn').addEventListener('click', function() {
-    document.getElementById('image-modal').style.display = 'none';
-});
-
-document.getElementById('zoom-container').addEventListener('wheel', (e) => {
-    e.preventDefault();
-    scale += e.deltaY * -0.002;
-    scale = Math.min(Math.max(0.5, scale), 10);
-    document.getElementById('modal-image').style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-});
-
-const zoomContainer = document.getElementById('zoom-container');
-zoomContainer.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startX = e.clientX - translateX;
-    startY = e.clientY - translateY;
-    zoomContainer.style.cursor = 'grabbing';
-});
-window.addEventListener('mouseup', () => {
-    isDragging = false;
-    zoomContainer.style.cursor = 'grab';
-});
-window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    translateX = e.clientX - startX;
-    translateY = e.clientY - startY;
-    document.getElementById('modal-image').style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-});
