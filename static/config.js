@@ -1,4 +1,32 @@
 export const uiConfig = {
+    // Додай у uiConfig
+    regular_polygon: {
+        name: "Правильний багатокутник",
+        targets: [
+            { id: "area", label: "Площу (S)", checked: true },
+            { id: "perimeter", label: "Периметр (P)", checked: true },
+            { id: "angles", label: "Кути", checked: false },
+            { id: "radii", label: "Радіуси (R, r)", checked: false }
+        ],
+        tasks: {
+            "REGULAR_SIDE": {
+                name: "За стороною",
+                inputs: [
+                    { id: "n", label: "Кількість сторін n" },
+                    { id: "side", label: "Довжина сторони a" }
+                ],
+                validTargets: ["area", "perimeter", "angles", "radii"]
+            },
+            "REGULAR_R_CIRCUM": {
+                name: "За радіусом описаного кола (R)",
+                inputs: [
+                    { id: "n", label: "Кількість сторін n" },
+                    { id: "R", label: "Радіус R" }
+                ],
+                validTargets: ["area", "perimeter", "angles", "radii"]
+            }
+        }
+    },
     triangle: {
         name: "Трикутник",
         hasSubFigures: true,
