@@ -1,6 +1,6 @@
 import math
 from core.base import GeometricSolver
-from plotters.triangle_plotter import TrianglePlotter
+from core.polygons.triangles.plotters.triangle_plotter import TrianglePlotter
 
 
 class RightTriangleSolver(GeometricSolver):

@@ -1,5 +1,5 @@
 from core.base import GeometricSolver
-from plotters.trapezoid_plotter import TrapezoidPlotter
+from core.polygons.quadrangles.plotters.trapezoid_plotter import TrapezoidPlotter
 
 
 class TrapezoidSolver(GeometricSolver):

@@ -1,6 +1,6 @@
 import math
 from core.base import GeometricSolver
-from plotters.arbitary_quadrangle_plotter import ArbitraryQuadranglePlotter
+from core.polygons.quadrangles.plotters.arbitary_quadrangle_plotter import ArbitraryQuadranglePlotter
 
 
 class ArbitraryQuadrangleSolver(GeometricSolver):

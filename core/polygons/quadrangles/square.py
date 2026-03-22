@@ -1,6 +1,6 @@
 import math
 from core.base import GeometricSolver
-from plotters.rectangle_plotter import RectanglePlotter
+from core.polygons.quadrangles.plotters.rectangle_plotter import RectanglePlotter
 
 
 class SquareSolver(GeometricSolver):

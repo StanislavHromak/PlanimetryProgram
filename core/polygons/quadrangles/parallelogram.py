@@ -1,6 +1,6 @@
 import math
 from core.base import GeometricSolver
-from plotters.parallelogram_plotter import ParallelogramPlotter
+from core.polygons.quadrangles.plotters.parallelogram_plotter import ParallelogramPlotter
 
 
 class ParallelogramSolver(GeometricSolver):

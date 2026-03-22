@@ -1,7 +1,7 @@
 import math
 from core.base import GeometricSolver
-from plotters.rhombus_diagonals_plotter import RhombusDiagonalsPlotter
-from plotters.parallelogram_plotter import ParallelogramPlotter
+from core.polygons.quadrangles.plotters.rhombus_diagonals_plotter import RhombusDiagonalsPlotter
+from core.polygons.quadrangles.plotters.parallelogram_plotter import ParallelogramPlotter
 
 
 class RhombusSolver(GeometricSolver):
