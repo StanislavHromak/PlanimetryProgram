@@ -1,12 +1,11 @@
 import math
 from core.base import GeometricSolver
-from core.plotter import TrianglePlotter
+from plotters.triangle_plotter import TrianglePlotter
 
 
 class ArbitraryTriangleSolver(GeometricSolver):
     """
-    Довільний трикутник.
-    Єдина відповідальність: розв'язати трикутник за класичними ознаками (SSS, SAS, ASA).
+    Розв'язувач задач для довільного трикутника за класичними ознаками (SSS, SAS, ASA).
     """
 
     def __init__(self, task_type: str, params: dict, targets: list = None):

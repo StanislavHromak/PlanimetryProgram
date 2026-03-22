@@ -1,12 +1,11 @@
 import math
 from core.base import GeometricSolver
-from core.plotter import TrianglePlotter
+from plotters.triangle_plotter import TrianglePlotter
 
 
 class RightTriangleSolver(GeometricSolver):
     """
-    Прямокутний трикутник.
-    Має власні, спрощені формули.
+    Розвязувач задач для прямокутного трикутника.
     """
 
     def __init__(self, task_type: str, params: dict, targets: list = None):

@@ -1,12 +1,11 @@
 import math
 from core.base import GeometricSolver
-from core.plotter import TrianglePlotter
+from plotters.triangle_plotter import TrianglePlotter
 
 
 class EquilateralTriangleSolver(GeometricSolver):
     """
-    Рівносторонній трикутник (правильний).
-    Найпростіші формули.
+    Розв'язувач задач для рівностороннього трикутника (правильного).
     """
 
     def __init__(self, task_type: str, params: dict, targets: list = None):

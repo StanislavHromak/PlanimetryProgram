@@ -1,21 +1,17 @@
+from core.polygons.regular.regular import RegularPolygonSolver
 from core.curves.circle import CircleSolver, CircleSectorSolver
 
-from core.polygons.triangle import (
-    ArbitraryTriangleSolver,
-    RightTriangleSolver,
-    IsoscelesTriangleSolver,
-    EquilateralTriangleSolver
-)
+from core.polygons.triangles.arbitrary_triangle import ArbitraryTriangleSolver
+from core.polygons.triangles.right_triangle import RightTriangleSolver
+from core.polygons.triangles.isosceles_triangle import IsoscelesTriangleSolver
+from core.polygons.triangles.equilateral_triangle import EquilateralTriangleSolver
 
-from core.polygons.quadrangle import (
-    SquareSolver,
-    RectangleSolver,
-    RhombusSolver,
-    ParallelogramSolver,
-    TrapezoidSolver,
-    ArbitraryQuadrangleSolver
-)
-
+from core.polygons.quadrangles.arbitrary_quadrangle import ArbitraryQuadrangleSolver
+from core.polygons.quadrangles.parallelogram import ParallelogramSolver
+from core.polygons.quadrangles.rectangle import RectangleSolver
+from core.polygons.quadrangles.rhombus import RhombusSolver
+from core.polygons.quadrangles.square import SquareSolver
+from core.polygons.quadrangles.trapezoid import TrapezoidSolver
 
 class GeometryFactory:
     """Патерн Factory Method для створення правильного об'єкта-розв'язувача."""
@@ -23,8 +19,13 @@ class GeometryFactory:
     @staticmethod
     def create_solver(figure: str, task_type: str, params: dict, targets: list):
 
+        # --- БЛОК БАГАТОКУТНИКІВ ---
+        if figure == "regular_polygon":
+            n = params.get('n', 3)
+            return RegularPolygonSolver(n, task_type, params, targets)
+
         # --- БЛОК ТРИКУТНИКІВ ---
-        if figure == "triangle":
+        elif figure == "triangle":
             if task_type in ["SSS", "SAS", "ASA"]:
                 return ArbitraryTriangleSolver(task_type, params, targets)
 
