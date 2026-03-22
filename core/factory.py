@@ -1,5 +1,8 @@
+from core.curves.circle import CircleSolver
+from core.curves.sector import SectorSolver
+from core.curves.ellipse import EllipseSolver
+
 from core.polygons.regular.regular import RegularPolygonSolver
-from core.curves.circle import CircleSolver, CircleSectorSolver
 
 from core.polygons.triangles.arbitrary_triangle import ArbitraryTriangleSolver
 from core.polygons.triangles.right_triangle import RightTriangleSolver
@@ -53,11 +56,24 @@ class GeometryFactory:
             elif task_type == "TRAPEZOID_ABH":
                 return TrapezoidSolver(task_type, params, targets)
 
-        # --- БЛОК КІЛ ТА КРУГІВ ---
+        # --- БЛОК КІЛ ---
         elif figure == "circle":
-            if task_type == "SECTOR_AND_ARC":
-                return CircleSectorSolver(radius=params.get('radius'), angle=params.get('angle'), targets=targets)
-            elif task_type in ["RADIUS", "DIAMETER", "CIRCUMFERENCE", "AREA"]:
-                return CircleSolver(task_type, params.get(task_type.lower()), targets)
+            val = params.get(task_type.lower())
+            return CircleSolver(task_type, val, targets)
 
+        # --- БЛОК СЕКТОРІВ ТА СЕГМЕНТІВ ---
+        elif figure == "sector":
+            if task_type == "SECTOR_AND_ARC":
+                return SectorSolver(
+                    radius=params.get('radius'),
+                    angle=params.get('angle'),
+                    targets=targets
+                )
+
+        # --- БЛОК ЕЛІПСІВ ---
+        elif figure == "ellipse":
+            if task_type == "ELLIPSE_AXES":
+                return EllipseSolver(task_type, params, targets)
+
+        # Якщо нічого не підійшло
         raise ValueError(f"Фабрика не знає як створити: фігура '{figure}', тип задачі '{task_type}'")
