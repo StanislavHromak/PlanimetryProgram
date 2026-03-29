@@ -45,7 +45,7 @@ class ParallelogramSolver(GeometricSolver):
             if "perimeter" in self.targets:
                 result["perimeter"] = self._add_step("Знаходимо периметр", "P = 2 * (a + b)",
                                                      f"P = 2 * ({self.a} + {self.b})", 2 * (self.a + self.b))
-            image_base64 = ParallelogramPlotter(self.a, self.a, self.angle).plot()
+            image_base64 = ParallelogramPlotter(self.a, self.b, self.angle).plot()
 
         elif self.task_type == "PARALLELOGRAM_D_A":
             self._steps.append(
