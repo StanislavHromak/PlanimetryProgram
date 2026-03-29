@@ -34,6 +34,7 @@ export const uiConfig = {
             arbitrary: {
                 name: "Довільний трикутник",
                 targets: [
+                    { id: "angles", label: "Кути (α, β, γ)", checked: false },
                     { id: "side", label: "Знайти невідомі сторони/кути", checked: true },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
@@ -44,7 +45,7 @@ export const uiConfig = {
                     "SSS": {
                         name: "За трьома сторонами (SSS)",
                         inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ],
-                        validTargets: ["side", "area", "perimeter", "incircle", "circumcircle"]
+                        validTargets: ["angles", "area", "perimeter", "incircle", "circumcircle"]
                     },
                     "SAS": {
                         name: "Дві сторони і кут між ними (SAS)",

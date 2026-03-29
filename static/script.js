@@ -1,6 +1,7 @@
 // 1. Ініціалізація сторінки
 import { uiConfig } from './config.js';
 import { openImageModal, initModalListeners } from './modal.js';
+import { renderStep } from './renderer.js';
 
 // Робимо функції доступними глобально для inline-обробників у HTML
 window.solve = solve;
@@ -169,19 +170,9 @@ async function solve() {
                 `<li><b>${key}</b>: <span style="color:#007bff; font-weight:bold;">${val}</span></li>`
             ).join('');
 
-            document.getElementById('steps-list').innerHTML = (result.steps || []).map(s => {
-                if (s.startsWith("➤")) {
-                    return `<div class="step-card"><div class="step-title">${s}</div></div>`;
-                }
-                if (s.startsWith("Формула:")) {
-                    const formula = s.replace("Формула:", "").trim();
-                    return `<div class="formula-box">${formula}</div>`;
-                }
-                if (s.startsWith("Правило:")) {
-                    return `<div class="rule-box">${s}</div>`;
-                }
-                return `<div class="step-description">${s}</div>`;
-            }).join('');
+            document.getElementById('steps-list').innerHTML = (result.steps || [])
+                .map(renderStep)
+                .join('');
 
             const plotSection = document.getElementById('plot-section');
             if (result.image) {

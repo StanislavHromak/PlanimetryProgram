@@ -18,16 +18,16 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
 
     def validate(self) -> bool:
         if any(v <= 0 for v in [self.a, self.b, self.c, self.d]):
-            self._steps.append("Помилка: Всі сторони мають бути додатними.")
+            self._add_error("Помилка: Всі сторони мають бути додатними.")
             return False
         if self.angle <= 0 or self.angle >= 180:
-            self._steps.append("Помилка: Кут має бути в межах від 0° до 180°.")
+            self._add_error("Помилка: Кут має бути в межах від 0° до 180°.")
             return False
 
         rad = math.radians(self.angle)
         self.D = math.sqrt(self.a ** 2 + self.d ** 2 - 2 * self.a * self.d * math.cos(rad))
         if (self.b + self.c <= self.D) or (self.b + self.D <= self.c) or (self.c + self.D <= self.b):
-            self._steps.append(
+            self._add_error(
                 "Помилка: Такий чотирикутник не існує. Сторони не зійдуться (порушена нерівність трикутника).")
             return False
         return True
@@ -37,7 +37,7 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
             return {"success": False, "error": self._steps[-1]}
 
         result = {}
-        self._steps.append(
+        self._add_info(
             f"Фігура: Довільний чотирикутник (a={self.a}, b={self.b}, c={self.c}, d={self.d}, α={self.angle}°)")
 
         if "perimeter" in self.targets:
@@ -51,28 +51,27 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
             p2 = (self.b + self.c + self.D) / 2
             s2 = math.sqrt(p2 * (p2 - self.b) * (p2 - self.c) * (p2 - self.D))
 
-            self._steps.append("➤ Знаходимо площу:")
-            self._steps.append("Правило: Площа дорівнює сумі площ двох трикутників, на які фігуру розбиває діагональ.")
-            self._steps.append(f"Проміжний крок: Діагональ D ≈ {self.D:.2f}, S1 ≈ {s1:.2f}, S2 ≈ {s2:.2f}")
-            # Використовуємо порожній рядок "" замість None
+            self._add_header("Знаходимо площу:")
+            self._add_rule("Правило: Площа дорівнює сумі площ двох трикутників, на які фігуру розбиває діагональ.")
+            self._add_info(f"Проміжний крок: Діагональ D ≈ {self.D:.2f}, S1 ≈ {s1:.2f}, S2 ≈ {s2:.2f}")
             result["area"] = self._add_step("", "S = S1 + S2", f"S = {s1:.2f} + {s2:.2f}", s1 + s2)
 
         if "circles_check" in self.targets:
-            self._steps.append("➤ Перевірка на можливість вписати/описати коло:")
+            self._add_header("Перевірка на можливість вписати/описати коло:")
             if math.isclose(self.a + self.c, self.b + self.d, rel_tol=1e-3):
-                self._steps.append("✅ <b>Вписане коло:</b> ІСНУЄ (сума a+c дорівнює b+d).")
+                self._add_info("✅ <b>Вписане коло:</b> ІСНУЄ (сума a+c дорівнює b+d).")
                 result["can_inscribe"] = "Так"
             else:
-                self._steps.append("❌ <b>Вписане коло:</b> НЕ ІСНУЄ (a+c ≠ b+d).")
+                self._add_info("❌ <b>Вписане коло:</b> НЕ ІСНУЄ (a+c ≠ b+d).")
                 result["can_inscribe"] = "Ні"
 
             cos_opp = (self.b ** 2 + self.c ** 2 - self.D ** 2) / (2 * self.b * self.c)
             opp_angle = math.degrees(math.acos(max(-1.0, min(1.0, cos_opp))))
             if math.isclose(self.angle + opp_angle, 180.0, rel_tol=1e-3):
-                self._steps.append("✅ <b>Описане коло:</b> ІСНУЄ (сума протилежних кутів дорівнює 180°).")
+                self._add_info("✅ <b>Описане коло:</b> ІСНУЄ (сума протилежних кутів дорівнює 180°).")
                 result["can_circumscribe"] = "Так"
             else:
-                self._steps.append("❌ <b>Описане коло:</b> НЕ ІСНУЄ (сума протилежних кутів ≠ 180°).")
+                self._add_info("❌ <b>Описане коло:</b> НЕ ІСНУЄ (сума протилежних кутів ≠ 180°).")
                 result["can_circumscribe"] = "Ні"
 
         # Координати для плоттера
