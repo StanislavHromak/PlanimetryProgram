@@ -9,9 +9,9 @@ class RightTriangleSolver(GeometricSolver):
     def __init__(self, task_type: str, params: dict, targets: list = None):
         super().__init__(targets)
         self.task_type = task_type
-        self.a = float(params.get('a', 0))  # катет 1
-        self.b = float(params.get('b', 0))  # катет 2
-        self.c = float(params.get('c', 0))  # гіпотенуза
+        self.a = float(params.get('a', 0))
+        self.b = float(params.get('b', 0))
+        self.c = float(params.get('c', 0))
 
     def validate(self) -> bool:
         if self.task_type == "RIGHT_LEGS":
@@ -28,7 +28,6 @@ class RightTriangleSolver(GeometricSolver):
         return True
 
     def _compute_hypotenuse(self) -> float:
-        """Обчислює гіпотенузу. Проміжний крок — тільки якщо 'side' не в targets."""
         if 'c' in self._computed:
             return self._computed['c']
 
@@ -37,9 +36,9 @@ class RightTriangleSolver(GeometricSolver):
         else:
             value = self.c
 
-        if not self._is_target("side"):
+        if not self._is_target("side") and self.task_type == "RIGHT_LEGS":
             self._add_step(
-                "Знаходимо гіпотенузу (проміжне)",
+                f"Крок {self.step_num}. (Проміжний крок) Знаходимо гіпотенузу",
                 "c = √(a² + b²)",
                 f"c = √({self.a}² + {self.b}²)",
                 value,
@@ -47,12 +46,12 @@ class RightTriangleSolver(GeometricSolver):
                      "дорівнює сумі квадратів катетів.",
                 is_intermediate=True
             )
+            self.step_num += 1
 
         self._computed['c'] = value
         return value
 
     def _compute_second_leg(self) -> float:
-        """Обчислює другий катет. Проміжний крок — тільки якщо 'side' не в targets."""
         if 'b' in self._computed:
             return self._computed['b']
 
@@ -60,7 +59,7 @@ class RightTriangleSolver(GeometricSolver):
 
         if not self._is_target("side"):
             self._add_step(
-                "Знаходимо другий катет (проміжне)",
+                f"Крок {self.step_num}. (Проміжний крок) Знаходимо другий катет",
                 "b = √(c² - a²)",
                 f"b = √({self.c}² - {self.a}²)",
                 value,
@@ -68,16 +67,14 @@ class RightTriangleSolver(GeometricSolver):
                      "дорівнює сумі квадратів катетів.",
                 is_intermediate=True
             )
+            self.step_num += 1
 
         self._computed['b'] = value
         return value
 
-    def calculate(self):
-        if not self.validate():
-            return {"success": False, "error": self._steps[-1]["text"]}
-
+    def _calculate(self):
+        self.step_num = 1
         result = {}
-        step_num = 1
         plot_b = 0.0
         c = 0.0
 
@@ -87,56 +84,54 @@ class RightTriangleSolver(GeometricSolver):
             if self._is_target("side"):
                 c = self._compute_hypotenuse()
                 result["side_c"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо гіпотенузу",
+                    f"Крок {self.step_num}. Знаходимо гіпотенузу",
                     "c = √(a² + b²)",
                     f"c = √({self.a}² + {self.b}²)",
                     c,
-                    rule="Теорема Піфагора: у прямокутному трикутнику квадрат гіпотенузи "
-                         "дорівнює сумі квадратів катетів."
+                    rule="Теорема Піфагора: у прямокутному трикутнику квадрат гіпотенузи дорівнює сумі квадратів катетів."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("area"):
                 result["area"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо площу",
+                    f"Крок {self.step_num}. Знаходимо площу",
                     "S = (a · b) / 2",
                     f"S = ({self.a} · {self.b}) / 2",
                     (self.a * self.b) / 2,
                     rule="Площа прямокутного трикутника дорівнює половині добутку катетів."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("perimeter"):
                 c = self._compute_hypotenuse()
                 result["perimeter"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо периметр",
+                    f"Крок {self.step_num}. Знаходимо периметр",
                     "P = a + b + c",
                     f"P = {self.a} + {self.b} + {c:.2f}",
                     self.a + self.b + c,
                     rule="Периметр трикутника — сума довжин усіх його сторін."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("incircle"):
                 c = self._compute_hypotenuse()
                 result["r_inscribed"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо радіус вписаного кола",
+                    f"Крок {self.step_num}. Знаходимо радіус вписаного кола",
                     "r = (a + b - c) / 2",
                     f"r = ({self.a} + {self.b} - {c:.2f}) / 2",
                     (self.a + self.b - c) / 2,
                     rule="У прямокутному трикутнику радіус вписаного кола: r = (a + b - c) / 2."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("circumcircle"):
                 c = self._compute_hypotenuse()
                 result["r_circumscribed"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо радіус описаного кола",
+                    f"Крок {self.step_num}. Знаходимо радіус описаного кола",
                     "R = c / 2",
                     f"R = {c:.2f} / 2",
                     c / 2,
-                    rule="У прямокутному трикутнику описане коло будується на гіпотенузі "
-                         "як на діаметрі, тому R = c / 2."
+                    rule="У прямокутному трикутнику описане коло будується на гіпотенузі як на діаметрі, тому R = c / 2."
                 )
 
             c = self._compute_hypotenuse()
@@ -148,56 +143,54 @@ class RightTriangleSolver(GeometricSolver):
             if self._is_target("side"):
                 b = self._compute_second_leg()
                 result["side_b"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо другий катет",
+                    f"Крок {self.step_num}. Знаходимо другий катет",
                     "b = √(c² - a²)",
                     f"b = √({self.c}² - {self.a}²)",
                     b,
-                    rule="Теорема Піфагора: у прямокутному трикутнику квадрат гіпотенузи "
-                         "дорівнює сумі квадратів катетів."
+                    rule="Теорема Піфагора: у прямокутному трикутнику квадрат гіпотенузи дорівнює сумі квадратів катетів."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("area"):
                 b = self._compute_second_leg()
                 result["area"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо площу",
+                    f"Крок {self.step_num}. Знаходимо площу",
                     "S = (a · b) / 2",
                     f"S = ({self.a} · {b:.2f}) / 2",
                     (self.a * b) / 2,
                     rule="Площа прямокутного трикутника дорівнює половині добутку катетів."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("perimeter"):
                 b = self._compute_second_leg()
                 result["perimeter"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо периметр",
+                    f"Крок {self.step_num}. Знаходимо периметр",
                     "P = a + b + c",
                     f"P = {self.a} + {b:.2f} + {self.c}",
                     self.a + b + self.c,
                     rule="Периметр трикутника — сума довжин усіх його сторін."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("incircle"):
                 b = self._compute_second_leg()
                 result["r_inscribed"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо радіус вписаного кола",
+                    f"Крок {self.step_num}. Знаходимо радіус вписаного кола",
                     "r = (a + b - c) / 2",
                     f"r = ({self.a} + {b:.2f} - {self.c}) / 2",
                     (self.a + b - self.c) / 2,
                     rule="У прямокутному трикутнику радіус вписаного кола: r = (a + b - c) / 2."
                 )
-                step_num += 1
+                self.step_num += 1
 
             if self._is_target("circumcircle"):
                 result["r_circumscribed"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо радіус описаного кола",
+                    f"Крок {self.step_num}. Знаходимо радіус описаного кола",
                     "R = c / 2",
                     f"R = {self.c} / 2",
                     self.c / 2,
-                    rule="У прямокутному трикутнику описане коло будується на гіпотенузі "
-                         "як на діаметрі, тому R = c / 2."
+                    rule="У прямокутному трикутнику описане коло будується на гіпотенузі як на діаметрі, тому R = c / 2."
                 )
 
             plot_b = self._compute_second_leg()

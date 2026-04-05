@@ -39,12 +39,7 @@ class TrapezoidSolver(GeometricSolver):
                 return False
         return True
 
-    # noinspection PyDuplicateCode
-    def calculate(self):
-        if not self.validate():
-            error_msg = self._steps[-1]["text"] if isinstance(self._steps[-1], dict) else self._steps[-1]
-            return {"success": False, "error": error_msg}
-
+    def _calculate(self):
         result = {}
         step_num = 1
 
@@ -52,7 +47,6 @@ class TrapezoidSolver(GeometricSolver):
         plot_a, plot_b, plot_h, plot_m, plot_c = self.a, self.b, self.h, self.m, self.c
         d_val = None
 
-        # ─── ДОВІЛЬНА: ОСНОВИ ТА ВИСОТА ────────────────────────────────
         if self.task_type == "TRAPEZOID_ABH":
             self._add_info(f"Трапеція: основи a={self.a}, b={self.b}, висота h={self.h}")
 
@@ -73,7 +67,6 @@ class TrapezoidSolver(GeometricSolver):
                 step_num += 1
             plot_m = m_val
 
-        # ─── ДОВІЛЬНА: ПЛОЩА ТА ОСНОВИ ─────────────────────────────────
         elif self.task_type == "TRAPEZOID_AREA_BASES":
             self._add_info(f"Трапеція: основи a={self.a}, b={self.b}, площа S={self.S}")
 
@@ -104,13 +97,11 @@ class TrapezoidSolver(GeometricSolver):
                 step_num += 1
             plot_h = h_val
 
-        # ─── ДОВІЛЬНА: СЕРЕДНЯ ЛІНІЯ ТА ВИСОТА ─────────────────────────
         elif self.task_type == "TRAPEZOID_MIDLINE_HEIGHT":
             self._add_info(f"Трапеція: середня лінія m={self.m}, висота h={self.h}")
             plot_m = self.m
             plot_h = self.h
 
-        # ─── РІВНОБІЧНА ТРАПЕЦІЯ ───────────────────────────────────────
         elif self.task_type == "ISOSCELES_TRAPEZOID_BASES_LEG":
             plot_type = 'isosceles'
             self._add_info(f"Рівнобічна трапеція: основи a={self.a}, b={self.b}, бічна сторона c={self.c}")
@@ -201,7 +192,6 @@ class TrapezoidSolver(GeometricSolver):
                 )
                 step_num += 1
 
-            # Кола для рівнобічної
             if self._is_target("incircle"):
                 self._add_header(f"Крок {step_num}. Перевірка вписаного кола")
                 step_num += 1
@@ -237,7 +227,6 @@ class TrapezoidSolver(GeometricSolver):
                     rule="Радіус кола, описаного навколо рівнобічної трапеції, дорівнює радіусу кола навколо трикутника (основа, діагональ, бічна сторона)."
                 )
 
-        # ─── ПРЯМОКУТНА ТРАПЕЦІЯ ───────────────────────────────────────
         elif self.task_type == "RIGHT_TRAPEZOID_BASES_HEIGHT":
             plot_type = 'right'
             self._add_info(f"Прямокутна трапеція: основи a={self.a}, b={self.b}, висота (бічна сторона) h={self.h}")
@@ -258,7 +247,6 @@ class TrapezoidSolver(GeometricSolver):
                 step_num += 1
             plot_m = m_val
 
-            # Обчислення похилої бічної сторони
             diff = abs(self.a - self.b)
             c2_val = math.sqrt(self.h ** 2 + diff ** 2)
 
@@ -340,7 +328,6 @@ class TrapezoidSolver(GeometricSolver):
                     self._add_info(f"❌ Вписане коло НЕ ІСНУЄ ({self.a} + {self.b} ≠ {self.h} + {c2_val:.2f}).")
                     self._add_rule("У трапецію можна вписати коло лише якщо сума основ дорівнює сумі бічних сторін.")
 
-        # ─── ПЛОЩА (ДЛЯ ВСІХ ЗАДАЧ) ────────────────────────────────────
         if self._is_target("area") and self.task_type != "TRAPEZOID_AREA_BASES":
             area_val = plot_m * plot_h
             result["area"] = self._add_step(

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class GeometricSolver(ABC):
     def __init__(self, targets: list = None):
         self.targets = targets or []
@@ -28,17 +29,40 @@ class GeometricSolver(ABC):
             "title": title,
             "formula": formula,
             "solution": solution_str,
-            "value": f"{value:.2f}",
+            "value": f"{value:.2f}" if isinstance(value, (int, float)) else value,
             "rule": rule
         }
         self._steps.append(step)
-        return round(value, 2)
+
+        # Повертаємо округлене значення, якщо це число
+        if isinstance(value, (int, float)):
+            return round(value, 2)
+        return value
 
     @abstractmethod
     def validate(self) -> bool:
+        """Перевірка вхідних даних. Реалізується в кожній фігурі."""
         pass
 
-    @abstractmethod
     def calculate(self) -> dict:
+        """
+        Шаблонний метод: виконує валідацію, формує помилку або запускає обчислення.
+        """
+        if not self.validate():
+            # Надійно дістаємо повідомлення про помилку з останнього кроку
+            if self._steps and isinstance(self._steps[-1], dict) and "text" in self._steps[-1]:
+                error_msg = self._steps[-1]["text"]
+            else:
+                error_msg = "Невідома помилка валідації даних."
+            return {"success": False, "error": error_msg}
+
+        # Якщо валідація успішна — викликаємо логіку конкретної фігури
+        return self._calculate()
+
+    @abstractmethod
+    def _calculate(self) -> dict:
+        """
+        Основна логіка обчислень.
+        """
         pass
 

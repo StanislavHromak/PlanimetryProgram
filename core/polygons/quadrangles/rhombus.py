@@ -43,11 +43,7 @@ class RhombusSolver(GeometricSolver):
                 return False
         return True
 
-    def calculate(self):
-        if not self.validate():
-            return {"success": False,
-                    "error": self._steps[-1]["text"] if isinstance(self._steps[-1], dict) else self._steps[-1]}
-
+    def _calculate(self):
         result = {}
         step_num = 1
         show_incircle = False

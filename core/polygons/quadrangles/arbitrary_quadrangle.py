@@ -91,11 +91,7 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
         v3 = (self.a + self.b * math.cos(theta - beta), self.b * math.sin(theta - beta))
         return [(0, 0), (self.a, 0), v3, v4]
 
-    def calculate(self):
-        if not self.validate():
-            return {"success": False,
-                    "error": self._steps[-1]["text"] if isinstance(self._steps[-1], dict) else self._steps[-1]}
-
+    def _calculate(self):
         result = {}
         step_num = 1
         can_inscribe = False

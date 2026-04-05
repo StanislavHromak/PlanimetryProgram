@@ -84,13 +84,14 @@ export const uiConfig = {
                 name: "Рівнобедрений трикутник",
                 targets: [
                     { id: "area", label: "Площу (S)", checked: true },
-                    { id: "perimeter", label: "Периметр (P)", checked: false }
+                    { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "height", label: "Висоту (h)", checked: false }
                 ],
                 tasks: {
                     "ISOSCELES_BASE_SIDE": {
                         name: "За основою та бічною стороною",
                         inputs: [ { id: "base", label: "Основа a" }, { id: "side", label: "Бічна сторона b" } ],
-                        validTargets: ["area", "perimeter"]
+                        validTargets: ["area", "perimeter", "height"]
                     }
                 }
             },

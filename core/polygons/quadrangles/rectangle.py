@@ -41,22 +41,12 @@ class RectangleSolver(GeometricSolver):
                 return False
         return True
 
-    def calculate(self):
-        if not self.validate():
-            # Залежить від того, як працює ваш базовий клас,
-            # зазвичай _add_error додає словник з ключем "text"
-            error_msg = self._steps[-1]["text"] if isinstance(self._steps[-1], dict) else self._steps[-1]
-            return {"success": False, "error": error_msg}
-
+    def _calculate(self):
         result = {}
         step_num = 1
         show_diagonal = False
         show_circumcircle = False
         diag_val = self.d if self.d > 0 else 0.0
-
-        # ---------------------------------------------------------------- #
-        #  БЛОК 1: ЗНАХОДЖЕННЯ ДРУГОЇ СТОРОНИ (b) ДЛЯ ОБЕРНЕНИХ ЗАДАЧ    #
-        # ---------------------------------------------------------------- #
 
         if self.task_type == "RECTANGLE_SIDES":
             self._add_info(f"Прямокутник: a={self.a}, b={self.b}")

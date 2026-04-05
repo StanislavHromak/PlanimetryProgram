@@ -100,11 +100,7 @@ class ParallelogramSolver(GeometricSolver):
         self._computed['area'] = value
         return value
 
-    def calculate(self):
-        if not self.validate():
-            error_msg = self._steps[-1]["text"] if isinstance(self._steps[-1], dict) else self._steps[-1]
-            return {"success": False, "error": error_msg}
-
+    def _calculate(self):
         result = {}
         step_num = 1
         show_height = False
