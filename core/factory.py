@@ -45,15 +45,18 @@ class GeometryFactory:
         elif figure == "quadrangle":
             if task_type == "ARB_SIDES_ANGLES":
                 return ArbitraryQuadrangleSolver(task_type, params, targets)
-            elif task_type == "SQUARE_SIDE":
+            elif task_type in ["SQUARE_SIDE", "SQUARE_AREA", "SQUARE_PERIMETER", "SQUARE_DIAGONAL"]:
                 return SquareSolver(task_type, params, targets)
-            elif task_type == "RECTANGLE_SIDES":
+            elif task_type in ["RECTANGLE_SIDES", "RECTANGLE_AREA_SIDE", "RECTANGLE_PERIMETER_SIDE",
+                               "RECTANGLE_DIAGONAL_SIDE"]:
                 return RectangleSolver(task_type, params, targets)
-            elif task_type in ["RHOMBUS_DIAGONALS", "RHOMBUS_SIDE_ANGLE"]:
+            elif task_type in ["RHOMBUS_DIAGONALS", "RHOMBUS_SIDE_ANGLE", "RHOMBUS_AREA_SIDE",
+                               "RHOMBUS_DIAGONAL_SIDE"]:
                 return RhombusSolver(task_type, params, targets)
             elif task_type in ["PARALLELOGRAM_S_A", "PARALLELOGRAM_D_A"]:
                 return ParallelogramSolver(task_type, params, targets)
-            elif task_type == "TRAPEZOID_ABH":
+            elif task_type in ["TRAPEZOID_ABH", "TRAPEZOID_AREA_BASES", "TRAPEZOID_MIDLINE_HEIGHT",
+                               "ISOSCELES_TRAPEZOID_BASES_LEG"]:
                 return TrapezoidSolver(task_type, params, targets)
 
         # --- БЛОК КІЛ ---

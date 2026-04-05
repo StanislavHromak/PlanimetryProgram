@@ -1,5 +1,4 @@
 export const uiConfig = {
-    // Додай у uiConfig
     regular_polygon: {
         name: "Правильний багатокутник",
         targets: [
@@ -34,6 +33,7 @@ export const uiConfig = {
             arbitrary: {
                 name: "Довільний трикутник",
                 targets: [
+                    { id: "angles", label: "Кути (α, β, γ)", checked: false },
                     { id: "side", label: "Знайти невідомі сторони/кути", checked: true },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
@@ -44,7 +44,7 @@ export const uiConfig = {
                     "SSS": {
                         name: "За трьома сторонами (SSS)",
                         inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ],
-                        validTargets: ["side", "area", "perimeter", "incircle", "circumcircle"]
+                        validTargets: ["angles", "area", "perimeter", "incircle", "circumcircle"]
                     },
                     "SAS": {
                         name: "Дві сторони і кут між ними (SAS)",
@@ -84,13 +84,14 @@ export const uiConfig = {
                 name: "Рівнобедрений трикутник",
                 targets: [
                     { id: "area", label: "Площу (S)", checked: true },
-                    { id: "perimeter", label: "Периметр (P)", checked: false }
+                    { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "height", label: "Висоту (h)", checked: false }
                 ],
                 tasks: {
                     "ISOSCELES_BASE_SIDE": {
                         name: "За основою та бічною стороною",
                         inputs: [ { id: "base", label: "Основа a" }, { id: "side", label: "Бічна сторона b" } ],
-                        validTargets: ["area", "perimeter"]
+                        validTargets: ["area", "perimeter", "height"]
                     }
                 }
             },
@@ -194,25 +195,38 @@ export const uiConfig = {
             parallelogram: {
                 name: "Паралелограм",
                 targets: [
-                    { id: "area", label: "Площу (S)", checked: true },
-                    { id: "perimeter", label: "Периметр (P)", checked: false }
+                    { id: "area",      label: "Площу (S)",             checked: true  },
+                    { id: "perimeter", label: "Периметр (P)",           checked: false },
+                    { id: "angles",    label: "Кут(и) (α, β)",       checked: false },
+                    { id: "diagonals", label: "Діагоналі (d1, d2)",     checked: false },
+                    { id: "height",    label: "Висоту (h)",              checked: false },
+                    { id: "sides",     label: "Сторони (a, b)",          checked: false }
                 ],
                 tasks: {
                     "PARALLELOGRAM_S_A": {
                         name: "Дві сторони і кут",
-                        inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "angle", label: "Кут α (°)" } ],
-                        validTargets: ["area", "perimeter"]
+                        inputs: [
+                            { id: "a",     label: "Сторона a"  },
+                            { id: "b",     label: "Сторона b"  },
+                            { id: "angle", label: "Кут α (°)"  }
+                        ],
+                        validTargets: ["area", "perimeter", "angles", "diagonals", "height"]
                     },
                     "PARALLELOGRAM_D_A": {
                         name: "Діагоналі і кут між ними",
-                        inputs: [ { id: "d1", label: "Діагональ d1" }, { id: "d2", label: "Діагональ d2" }, { id: "angle", label: "Кут між ними γ (°)" } ],
-                        validTargets: ["area"]
+                        inputs: [
+                            { id: "d1",    label: "Діагональ d1"       },
+                            { id: "d2",    label: "Діагональ d2"       },
+                            { id: "angle", label: "Кут між ними γ (°)" }
+                        ],
+                        validTargets: ["area", "sides", "perimeter", "angles", "height"]
                     }
                 }
             },
             rectangle: {
                 name: "Прямокутник",
                 targets: [
+                    { id: "side_b", label: "Другу сторону (b)", checked: true },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
                     { id: "diagonal", label: "Діагональ (d)", checked: false },
@@ -220,35 +234,77 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "RECTANGLE_SIDES": {
-                        name: "Відомі сторони",
-                        inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" } ],
+                        name: "Відомі обидві сторони",
+                        inputs: [
+                            { id: "a", label: "Сторона a" },
+                            { id: "b", label: "Сторона b" }
+                        ],
                         validTargets: ["area", "perimeter", "diagonal", "circumcircle"]
+                    },
+                    "RECTANGLE_AREA_SIDE": {
+                        name: "Через площу і сторону",
+                        inputs: [
+                            { id: "a", label: "Відома сторона" },
+                            { id: "S", label: "Площа S" }
+                        ],
+                        validTargets: ["side_b", "perimeter", "diagonal", "circumcircle"]
+                    },
+                    "RECTANGLE_PERIMETER_SIDE": {
+                        name: "Через периметр і сторону",
+                        inputs: [
+                            { id: "a", label: "Відома сторона" },
+                            { id: "P", label: "Периметр P" }
+                        ],
+                        validTargets: ["side_b", "area", "diagonal", "circumcircle"]
+                    },
+                    "RECTANGLE_DIAGONAL_SIDE": {
+                        name: "Через діагональ і сторону",
+                        inputs: [
+                            { id: "a", label: "Відома сторона" },
+                            { id: "d", label: "Діагональ d" }
+                        ],
+                        validTargets: ["side_b", "area", "perimeter", "circumcircle"]
                     }
                 }
             },
             rhombus: {
                 name: "Ромб",
                 targets: [
+                    { id: "side_a", label: "Сторону (a)", checked: false },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "height", label: "Висоту (h)", checked: false },
+                    { id: "diagonals", label: "Діагоналі (d1, d2)", checked: false },
+                    { id: "angles", label: "Кути (α, β)", checked: false },
                     { id: "incircle", label: "Вписане коло (r)", checked: false }
                 ],
                 tasks: {
                     "RHOMBUS_DIAGONALS": {
-                        name: "Через діагоналі",
+                        name: "Діагоналі",
                         inputs: [ { id: "d1", label: "Діагональ d1" }, { id: "d2", label: "Діагональ d2" } ],
-                        validTargets: ["area", "perimeter", "incircle"]
+                        validTargets: ["side_a", "area", "perimeter", "height", "angles", "incircle"]
                     },
                     "RHOMBUS_SIDE_ANGLE": {
-                        name: "Через сторону і кут",
+                        name: "Сторона і кут",
                         inputs: [ { id: "a", label: "Сторона a" }, { id: "angle", label: "Кут α (°)" } ],
-                        validTargets: ["area", "perimeter", "incircle"]
+                        validTargets: ["area", "perimeter", "height", "diagonals", "angles", "incircle"]
+                    },
+                    "RHOMBUS_AREA_SIDE": {
+                        name: "Площа і сторона",
+                        inputs: [ { id: "a", label: "Сторона a" }, { id: "S", label: "Площа S" } ],
+                        validTargets: ["perimeter", "height", "diagonals", "angles", "incircle"]
+                    },
+                    "RHOMBUS_DIAGONAL_SIDE": {
+                        name: "Діагональ і сторона",
+                        inputs: [ { id: "a", label: "Сторона a" }, { id: "d1", label: "Відома діагональ" } ],
+                        validTargets: ["area", "perimeter", "height", "diagonals", "angles", "incircle"]
                     }
                 }
             },
             square: {
                 name: "Квадрат",
                 targets: [
+                    { id: "side_a", label: "Сторону (a)", checked: false },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
                     { id: "diagonal", label: "Діагональ (d)", checked: false },
@@ -260,19 +316,56 @@ export const uiConfig = {
                         name: "Відома сторона",
                         inputs: [ { id: "a", label: "Сторона a" } ],
                         validTargets: ["area", "perimeter", "diagonal", "incircle", "circumcircle"]
+                    },
+                    "SQUARE_AREA": {
+                        name: "Через площу",
+                        inputs: [ { id: "S", label: "Площа S" } ],
+                        validTargets: ["side_a", "perimeter", "diagonal", "incircle", "circumcircle"]
+                    },
+                    "SQUARE_PERIMETER": {
+                        name: "Через периметр",
+                        inputs: [ { id: "P", label: "Периметр P" } ],
+                        validTargets: ["side_a", "area", "diagonal", "incircle", "circumcircle"]
+                    },
+                    "SQUARE_DIAGONAL": {
+                        name: "Через діагональ",
+                        inputs: [ { id: "d", label: "Діагональ d" } ],
+                        validTargets: ["side_a", "area", "perimeter", "incircle", "circumcircle"]
                     }
                 }
             },
             trapezoid: {
                 name: "Трапеція",
                 targets: [
-                    { id: "area", label: "Площу (S)", checked: true }
+                    { id: "midline", label: "Середню лінію (m)", checked: false },
+                    { id: "height", label: "Висоту (h)", checked: false },
+                    { id: "area", label: "Площу (S)", checked: true },
+                    { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "angles", label: "Кути (α, β)", checked: false },
+                    { id: "diagonals", label: "Діагональ (d)", checked: false },
+                    { id: "incircle", label: "Вписане коло (r)", checked: false },
+                    { id: "circumcircle", label: "Описане коло (R)", checked: false }
                 ],
                 tasks: {
                     "TRAPEZOID_ABH": {
                         name: "Основи і висота",
                         inputs: [ { id: "a", label: "Основа a" }, { id: "b", label: "Основа b" }, { id: "h", label: "Висота h" } ],
+                        validTargets: ["midline", "area"]
+                    },
+                    "TRAPEZOID_AREA_BASES": {
+                        name: "Площа і основи",
+                        inputs: [ { id: "a", label: "Основа a" }, { id: "b", label: "Основа b" }, { id: "S", label: "Площа S" } ],
+                        validTargets: ["midline", "height"]
+                    },
+                    "TRAPEZOID_MIDLINE_HEIGHT": {
+                        name: "Середня лінія і висота",
+                        inputs: [ { id: "m", label: "Середня лінія m" }, { id: "h", label: "Висота h" } ],
                         validTargets: ["area"]
+                    },
+                    "ISOSCELES_TRAPEZOID_BASES_LEG": {
+                        name: "Рівнобічна: основи і бічна сторона",
+                        inputs: [ { id: "a", label: "Основа a" }, { id: "b", label: "Основа b" }, { id: "c", label: "Бічна сторона c" } ],
+                        validTargets: ["midline", "height", "area", "perimeter", "angles", "diagonals", "incircle", "circumcircle"]
                     }
                 }
             }

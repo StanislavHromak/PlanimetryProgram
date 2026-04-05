@@ -6,7 +6,6 @@ from core.factory import GeometryFactory
 
 app = FastAPI(title="Universal Planimetry Solver API")
 
-# Підключаємо папку зі статикою (HTML/CSS/JS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -22,7 +21,6 @@ async def solve_geometry(request: GeometryRequest):
     Універсальний ендпоінт для всіх геометричних задач.
     """
     try:
-        # 1. Фабрика створює потрібний об'єкт (TriangleSolver, CircleSolver тощо)
         solver = GeometryFactory.create_solver(
             figure=request.figure,
             task_type=request.task_type,
@@ -30,7 +28,6 @@ async def solve_geometry(request: GeometryRequest):
             targets=request.targets
         )
 
-        # 2. Об'єкт сам себе валідує, рахує і дістає правила з БД
         result = solver.calculate()
         return result
 
@@ -43,5 +40,4 @@ async def solve_geometry(request: GeometryRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    # Запуск сервера
     uvicorn.run(app, host="127.0.0.1", port=8000)
