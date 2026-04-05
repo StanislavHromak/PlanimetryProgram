@@ -1,7 +1,7 @@
 // 1. Ініціалізація сторінки
-import { uiConfig } from './config.js';
-import { openImageModal, initModalListeners } from './modal.js';
-import { renderStep } from './renderer.js';
+import { uiConfig } from '/static/js/config.js';
+import { openImageModal, initModalListeners } from '/static/js/modal.js';
+import { renderStep } from '/static/js/renderer.js';
 
 // Робимо функції доступними глобально для inline-обробників у HTML
 window.solve = solve;
