@@ -1,28 +1,45 @@
 export const uiConfig = {
     regular_polygon: {
-        name: "Правильний багатокутник",
+        name: "Правильний n-кутник",
         targets: [
+            { id: "side", label: "Сторону (a)", checked: false },
             { id: "area", label: "Площу (S)", checked: true },
-            { id: "perimeter", label: "Периметр (P)", checked: true },
+            { id: "perimeter", label: "Периметр (P)", checked: false },
             { id: "angles", label: "Кути", checked: false },
-            { id: "radii", label: "Радіуси (R, r)", checked: false }
+            { id: "diagonal", label: "Діагональ (d)", checked: false },
+            { id: "circumcircle", label: "Описане коло (R)", checked: false },
+            { id: "incircle", label: "Вписане коло (r)", checked: false }
         ],
         tasks: {
             "REGULAR_SIDE": {
                 name: "За стороною",
-                inputs: [
-                    { id: "n", label: "Кількість сторін n" },
-                    { id: "side", label: "Довжина сторони a" }
-                ],
-                validTargets: ["area", "perimeter", "angles", "radii"]
+                inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "a", label: "Сторона a" } ],
+                validTargets: ["area", "perimeter", "angles", "diagonal", "circumcircle", "incircle"]
             },
             "REGULAR_R_CIRCUM": {
-                name: "За радіусом описаного кола (R)",
-                inputs: [
-                    { id: "n", label: "Кількість сторін n" },
-                    { id: "R", label: "Радіус R" }
-                ],
-                validTargets: ["area", "perimeter", "angles", "radii"]
+                name: "За радіусом описаного кола",
+                inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "R", label: "Радіус R" } ],
+                validTargets: ["side", "area", "perimeter", "angles", "diagonal", "incircle"]
+            },
+            "REGULAR_R_IN": {
+                name: "За радіусом вписаного кола",
+                inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "r", label: "Радіус r" } ],
+                validTargets: ["side", "area", "perimeter", "angles", "diagonal", "circumcircle"]
+            },
+            "REGULAR_AREA": {
+                name: "За площею",
+                inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "S", label: "Площа S" } ],
+                validTargets: ["side", "perimeter", "angles", "diagonal", "circumcircle", "incircle"]
+            },
+            "REGULAR_PERIMETER": {
+                name: "За периметром",
+                inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "P", label: "Периметр P" } ],
+                validTargets: ["side", "area", "angles", "diagonal", "circumcircle", "incircle"]
+            },
+            "REGULAR_ANGLE_SIDE": {
+                name: "За внутрішнім кутом і стороною",
+                inputs: [ { id: "alpha", label: "Внутрішній кут α (°)" }, { id: "a", label: "Сторона a" } ],
+                validTargets: ["area", "perimeter", "diagonal", "circumcircle", "incircle"]
             }
         }
     },
