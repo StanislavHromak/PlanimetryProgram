@@ -130,60 +130,6 @@ export const uiConfig = {
             }
         }
     },
-    circle: {
-        name: "Коло",
-        targets: [
-            { id: "radius", label: "Радіус (r)", checked: false },
-            { id: "diameter", label: "Діаметр (d)", checked: false },
-            { id: "area", label: "Площу круга (S)", checked: true },
-            { id: "circumference", label: "Довжину кола (C)", checked: true }
-        ],
-        tasks: {
-            "RADIUS": { name: "За радіусом", inputs: [ { id: "radius", label: "Радіус r" } ], validTargets: ["diameter", "area", "circumference"] },
-            "DIAMETER": { name: "За діаметром", inputs: [ { id: "diameter", label: "Діаметр d" } ], validTargets: ["radius", "area", "circumference"] },
-            "CIRCUMFERENCE": { name: "За довжиною кола", inputs: [ { id: "circumference", label: "Довжина C" } ], validTargets: ["radius", "diameter", "area"] },
-            "AREA": { name: "За площею", inputs: [ { id: "area", label: "Площа S" } ], validTargets: ["radius", "diameter", "circumference"] }
-        }
-    },
-    sector: {
-        name: "Сектор та Сегмент",
-        targets: [
-            { id: "arc_length", label: "Довжину дуги (L)", checked: true },
-            { id: "sector_area", label: "Площу сектора", checked: true },
-            { id: "perimeter_sector", label: "Периметр сектора", checked: false },
-            { id: "chord_length", label: "Довжину хорди (c)", checked: false },
-            { id: "segment_area", label: "Площу сегмента", checked: false },
-            { id: "segment_height", label: "Висоту сегмента (h)", checked: false }
-        ],
-        tasks: {
-            "SECTOR_AND_ARC": {
-                name: "За радіусом та центральним кутом",
-                inputs: [
-                    { id: "radius", label: "Радіус r" },
-                    { id: "angle", label: "Кут α (°)" }
-                ],
-                validTargets: ["arc_length", "sector_area", "perimeter_sector", "chord_length", "segment_area", "segment_height"]
-            }
-        }
-    },
-    ellipse: {
-        name: "Еліпс",
-        targets: [
-            { id: "area", label: "Площу (S)", checked: true },
-            { id: "perimeter", label: "Периметр (P)", checked: true },
-            { id: "eccentricity", label: "Ексцентриситет (e)", checked: false }
-        ],
-        tasks: {
-            "ELLIPSE_AXES": {
-                name: "За піввісями a та b",
-                inputs: [
-                    { id: "a", label: "Велика піввісь a" },
-                    { id: "b", label: "Мала піввісь b" }
-                ],
-                validTargets: ["area", "perimeter", "eccentricity"]
-            }
-        }
-    },
     quadrangle: {
         name: "Чотирикутник",
         hasSubFigures: true,
@@ -383,6 +329,82 @@ export const uiConfig = {
                         name: "Рівнобічна: основи і бічна сторона",
                         inputs: [ { id: "a", label: "Основа a" }, { id: "b", label: "Основа b" }, { id: "c", label: "Бічна сторона c" } ],
                         validTargets: ["midline", "height", "area", "perimeter", "angles", "diagonals", "incircle", "circumcircle"]
+                    }
+                }
+            }
+        }
+    },
+    curves: {
+        name: "Криволінійні фігури",
+        hasSubFigures: true,
+        subFigures: {
+            circle: {
+                name: "Коло та Круг",
+                targets: [
+                    { id: "radius", label: "Радіус (r)", checked: false },
+                    { id: "diameter", label: "Діаметр (d)", checked: false },
+                    { id: "area", label: "Площу круга (S)", checked: true },
+                    { id: "circumference", label: "Довжину кола (C)", checked: true }
+                ],
+                tasks: {
+                    "CIRCLE_RADIUS": {
+                        name: "За радіусом",
+                        inputs: [ { id: "radius", label: "Радіус r" } ],
+                        validTargets: ["diameter", "area", "circumference"]
+                    },
+                    "CIRCLE_DIAMETER": {
+                        name: "За діаметром",
+                        inputs: [ { id: "diameter", label: "Діаметр d" } ],
+                        validTargets: ["radius", "area", "circumference"]
+                    },
+                    "CIRCLE_CIRCUMFERENCE": {
+                        name: "За довжиною кола",
+                        inputs: [ { id: "circumference", label: "Довжина C" } ],
+                        validTargets: ["radius", "diameter", "area"]
+                    },
+                    "CIRCLE_AREA": {
+                        name: "За площею",
+                        inputs: [ { id: "area", label: "Площа S" } ],
+                        validTargets: ["radius", "diameter", "circumference"]
+                    }
+                }
+            },
+            sector: {
+                name: "Сектор та Сегмент",
+                targets: [
+                    { id: "arc_length", label: "Довжину дуги (L)", checked: true },
+                    { id: "sector_area", label: "Площу сектора", checked: true },
+                    { id: "perimeter_sector", label: "Периметр сектора", checked: false },
+                    { id: "chord_length", label: "Довжину хорди (c)", checked: false },
+                    { id: "segment_area", label: "Площу сегмента", checked: false },
+                    { id: "segment_height", label: "Висоту сегмента (h)", checked: false }
+                ],
+                tasks: {
+                    "SECTOR_AND_ARC": {
+                        name: "За радіусом та центральним кутом",
+                        inputs: [
+                            { id: "radius", label: "Радіус r" },
+                            { id: "angle", label: "Кут α (°)" }
+                        ],
+                        validTargets: ["arc_length", "sector_area", "perimeter_sector", "chord_length", "segment_area", "segment_height"]
+                    }
+                }
+            },
+            ellipse: {
+                name: "Еліпс",
+                targets: [
+                    { id: "area", label: "Площу (S)", checked: true },
+                    { id: "perimeter", label: "Периметр (P)", checked: true },
+                    { id: "eccentricity", label: "Ексцентриситет (e)", checked: false }
+                ],
+                tasks: {
+                    "ELLIPSE_AXES": {
+                        name: "За піввісями a та b",
+                        inputs: [
+                            { id: "a", label: "Велика піввісь a" },
+                            { id: "b", label: "Мала піввісь b" }
+                        ],
+                        validTargets: ["area", "perimeter", "eccentricity"]
                     }
                 }
             }
