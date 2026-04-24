@@ -1,14 +1,24 @@
-// 1. Ініціалізація сторінки
 import { uiConfig } from '/static/js/config.js';
 import { openImageModal, initModalListeners } from '/static/js/modal.js';
 import { renderStep } from '/static/js/renderer.js';
+import {
+    switchTab, loadHistory,
+    repeatSolution, exportPDF, deleteSolution
+} from '/static/js/history.js';
 
-// Робимо функції доступними глобально для inline-обробників у HTML
-window.solve = solve;
-window.openImageModal = openImageModal;
+// Глобальні функції
+window.solve               = solve;
+window.openImageModal      = openImageModal;
+window.switchTab           = switchTab;
+window.repeatSolution      = repeatSolution;
+window.exportPDF           = exportPDF;
+window.deleteSolution      = deleteSolution;
+window.exportCurrentResult = exportCurrentResult;
 
-window.onload = function() {
-    // Ініціалізуємо слухачі для модального вікна
+// ID останнього збереженого розв'язку (для кнопки експорту)
+let lastSolutionId = null;
+
+window.onload = function () {
     initModalListeners();
 
     const figureSelect = document.getElementById('figure-select');
@@ -16,7 +26,6 @@ window.onload = function() {
         `<option value="${key}">${uiConfig[key].name}</option>`
     ).join('');
 
-    // Прив'язуємо події до селектів напряму з JS (краща практика, ніж onclick в HTML)
     figureSelect.addEventListener('change', updateUI);
     document.getElementById('sub-figure-select').addEventListener('change', updateTasks);
     document.getElementById('task-select').addEventListener('change', updateInputs);
@@ -24,6 +33,7 @@ window.onload = function() {
     updateUI();
 };
 
+// ── Конфігурація UI ───────────────────────────────────────────────────────────
 function getActiveConfigNode() {
     const figure = document.getElementById('figure-select').value;
     if (uiConfig[figure].hasSubFigures) {
@@ -33,28 +43,23 @@ function getActiveConfigNode() {
     return uiConfig[figure];
 }
 
-// 2. Оновлення списку задач при зміні фігури
 function updateUI() {
     const figure = document.getElementById('figure-select').value;
-    const subFigureGroup = document.getElementById('sub-figure-group');
+    const subFigureGroup  = document.getElementById('sub-figure-group');
     const subFigureSelect = document.getElementById('sub-figure-select');
 
     if (uiConfig[figure].hasSubFigures) {
-        // Показуємо вибір виду і заповнюємо його
         subFigureGroup.style.display = 'flex';
         const subFigures = uiConfig[figure].subFigures;
         subFigureSelect.innerHTML = Object.keys(subFigures).map(subKey =>
             `<option value="${subKey}">${subFigures[subKey].name}</option>`
         ).join('');
     } else {
-        // Ховаємо вибір виду для простих фігур (коло, трикутник)
         subFigureGroup.style.display = 'none';
     }
-
-    updateTasks(); // Одразу оновлюємо задачі
+    updateTasks();
 }
 
-// 3. Оновлення списку задач (Що відомо?)
 function updateTasks() {
     const configNode = getActiveConfigNode();
     const taskSelect = document.getElementById('task-select');
@@ -63,34 +68,29 @@ function updateTasks() {
         `<option value="${taskKey}">${configNode.tasks[taskKey].name}</option>`
     ).join('');
 
-    updateInputs(); // Одразу оновлюємо інпути та чекбокси
+    updateInputs();
 }
 
-// 4. Оновлення полів вводу та чекбоксів при зміні задачі
 function updateInputs() {
     const configNode = getActiveConfigNode();
     const task = document.getElementById('task-select').value;
-
     if (!configNode.tasks[task]) return;
 
-    const inputsDiv = document.getElementById('dynamic-inputs');
+    const inputsDiv  = document.getElementById('dynamic-inputs');
     const targetsDiv = document.getElementById('target-checkboxes');
 
-    // Оновлюємо інпути
-    const requiredInputs = configNode.tasks[task].inputs;
-    inputsDiv.innerHTML = requiredInputs.map(inp => `
+    inputsDiv.innerHTML = configNode.tasks[task].inputs.map(inp => `
         <div class="input-group">
             <label for="${inp.id}">${inp.label}</label>
             <input type="number" id="${inp.id}" step="0.1" placeholder="0.0">
         </div>
     `).join('');
 
-    // Оновлюємо чекбокси з фільтрацією
-    const allTargets = configNode.targets;
+    const allTargets     = configNode.targets;
     const validTargetIds = configNode.tasks[task].validTargets;
-    const filteredTargets = allTargets.filter(t => validTargetIds.includes(t.id));
+    const filtered       = allTargets.filter(t => validTargetIds.includes(t.id));
 
-    targetsDiv.innerHTML = filteredTargets.map(t => `
+    targetsDiv.innerHTML = filtered.map(t => `
         <label class="chip-checkbox">
             <input type="checkbox" value="${t.id}" ${t.checked ? 'checked' : ''}>
             <span class="chip-label">${t.label}</span>
@@ -98,33 +98,21 @@ function updateInputs() {
     `).join('');
 }
 
-/**
- * @typedef {Object} SolveResponse
- * @property {boolean} success
- * @property {string} [error]
- * @property {Object} [data]
- * @property {string[]} [steps]
- * @property {string} [image]
- */
-
-// 5. Головна функція відправки даних на сервер
+// ── Розв'язання ───────────────────────────────────────────────────────────────
 async function solve() {
     document.getElementById('error-msg').innerText = '';
     document.getElementById('results').style.display = 'none';
+    document.getElementById('export-btn').style.display = 'none';
+    lastSolutionId = null;
 
-    const figure = document.getElementById('figure-select').value;
-    const task = document.getElementById('task-select').value;
+    const figure     = document.getElementById('figure-select').value;
+    const task       = document.getElementById('task-select').value;
+    const configNode = getActiveConfigNode();
 
     let params = {};
     let hasEmptyFields = false;
 
-    // Отримуємо правильний конфіг
-    const configNode = getActiveConfigNode();
-
-    // Використовуємо configNode замість жорсткого uiConfig[figure]
-    const requiredInputs = configNode.tasks[task].inputs;
-
-    requiredInputs.forEach(inp => {
+    configNode.tasks[task].inputs.forEach(inp => {
         const val = document.getElementById(inp.id).value;
         if (val === '') hasEmptyFields = true;
         params[inp.id] = parseFloat(val);
@@ -135,60 +123,73 @@ async function solve() {
         return;
     }
 
-    // Збираємо всі відмічені чекбокси у масив
-    const targetCheckboxes = document.querySelectorAll('#target-checkboxes input[type="checkbox"]:checked');
-    const targets = Array.from(targetCheckboxes).map(cb => cb.value);
+    const targets = Array.from(
+        document.querySelectorAll('#target-checkboxes input[type="checkbox"]:checked')
+    ).map(cb => cb.value);
 
     if (targets.length === 0) {
         document.getElementById('error-msg').innerText = 'Оберіть хоча б один параметр для пошуку!';
         return;
     }
 
-    const requestData = {
-        figure: figure,
-        task_type: task,
-        targets: targets,
-        params: params
-    };
-
     try {
         const response = await fetch('/api/solve', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData)
+            body: JSON.stringify({ figure, task_type: task, targets, params }),
         });
 
-        /** @type {SolveResponse} */
         const result = await response.json();
 
         if (!result.success) {
             document.getElementById('error-msg').innerText = result.error;
-        } else {
-            document.getElementById('results').style.display = 'block';
+            return;
+        }
 
-            document.getElementById('params-list').innerHTML = Object.entries(result.data || {}).map(([key, val]) =>
-                `<li><b>${key}</b>: <span style="color:#007bff; font-weight:bold;">${val}</span></li>`
+        // Відображаємо результати
+        document.getElementById('results').style.display = 'block';
+
+        document.getElementById('params-list').innerHTML =
+            Object.entries(result.data || {}).map(([key, val]) =>
+                `<li><b>${key}</b>: <span style="color:#007bff;font-weight:bold;">${val}</span></li>`
             ).join('');
 
-            document.getElementById('steps-list').innerHTML = (result.steps || [])
-                .map(renderStep)
-                .join('');
+        document.getElementById('steps-list').innerHTML =
+            (result.steps || []).map(renderStep).join('');
 
-            const plotSection = document.getElementById('plot-section');
-            if (result.image) {
-                document.getElementById('plot-container').innerHTML =
-                    `<img class="geometry-plot"
-                    src="data:image/svg+xml;base64,${result.image}"
-                    alt="Креслення"
-                    style="cursor: zoom-in;"
-                    onclick="openImageModal(this.src)" />`; // Залишив виклик модалки, яку ми зробили в минулому кроці
-                plotSection.style.display = 'block';
-            } else {
-                plotSection.style.display = 'none';
-            }
+        const plotSection = document.getElementById('plot-section');
+        if (result.image) {
+            document.getElementById('plot-container').innerHTML =
+                `<img class="geometry-plot"
+                      src="data:image/svg+xml;base64,${result.image}"
+                      alt="Креслення"
+                      style="cursor:zoom-in"
+                      onclick="openImageModal(this.src)">`;
+            plotSection.style.display = 'block';
+        } else {
+            plotSection.style.display = 'none';
         }
+
+        // Отримуємо ID збереженого запису для кнопки експорту
+        try {
+            const histRes  = await fetch('/api/history');
+            const histJson = await histRes.json();
+            if (histJson.success && histJson.data.length > 0) {
+                lastSolutionId = histJson.data[0].id;
+                document.getElementById('export-btn').style.display = 'inline-flex';
+            }
+        } catch (histErr) {
+            console.warn('Не вдалося отримати ID для експорту:', histErr);
+        }
+
     } catch (e) {
         console.error(e);
-        document.getElementById('error-msg').innerText = 'Внутрішня помилка з\'єднання з сервером.';
+        document.getElementById('error-msg').innerText = "Внутрішня помилка з'єднання з сервером.";
     }
+}
+
+// ── Експорт поточного результату ─────────────────────────────────────────────
+async function exportCurrentResult() {
+    if (!lastSolutionId) return;
+    await exportPDF(lastSolutionId);
 }

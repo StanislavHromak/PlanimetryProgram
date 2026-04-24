@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/static/css/components.css">
     <link rel="stylesheet" href="/static/css/results.css">
     <link rel="stylesheet" href="/static/css/modal.css">
+    <link rel="stylesheet" href="/static/css/history.css">
 </head>
 
 <body>
@@ -20,69 +21,109 @@
             <p>Швидке розв'язання задач з детальним поясненням</p>
         </header>
 
+        <!-- Вкладки -->
+        <div class="tabs-bar">
+            <button class="tab-btn tab-btn--active" data-tab="solver"
+                    onclick="window.switchTab('solver')">
+                ⚡ Розв'язувач
+            </button>
+            <button class="tab-btn" data-tab="history"
+                    onclick="window.switchTab('history')">
+                🕓 Історія
+            </button>
+        </div>
+
         <main class="main-content">
-            <section class="card config-card">
-                <div class="settings-grid">
-                    <div class="setting-group">
-                        <label for="figure-select">Оберіть фігуру</label>
-                        <select id="figure-select" class="modern-select" onchange="updateUI()"></select>
-                    </div>
 
-                    <div id="sub-figure-group" class="setting-group" style="display: none;">
-                        <label for="sub-figure-select">Оберіть вид</label>
-                        <select id="sub-figure-select" class="modern-select" onchange="updateTasks()"></select>
-                    </div>
+            <!-- Вкладка: Розв'язувач -->
+            <div id="tab-solver" class="tab-content">
 
-                    <div class="setting-group">
-                        <label for="task-select">Що відомо?</label>
-                        <select id="task-select" class="modern-select" onchange="updateInputs()"></select>
-                    </div>
+                <section class="card config-card">
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label for="figure-select">Оберіть фігуру</label>
+                            <select id="figure-select" class="modern-select"></select>
+                        </div>
 
-                    <div class="setting-group targets-group">
-                        <label>Що знайти?</label>
-                        <div id="target-checkboxes" class="chips-group">
+                        <div id="sub-figure-group" class="setting-group" style="display: none;">
+                            <label for="sub-figure-select">Оберіть вид</label>
+                            <select id="sub-figure-select" class="modern-select"></select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label for="task-select">Що відомо?</label>
+                            <select id="task-select" class="modern-select"></select>
+                        </div>
+
+                        <div class="setting-group targets-group">
+                            <label>Що знайти?</label>
+                            <div id="target-checkboxes" class="chips-group"></div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="card input-card">
-                <h2>Введіть дані</h2>
-                <div id="dynamic-inputs" class="input-grid"></div>
-                <button class="btn-primary" onclick="solve()">
-                    <span class="btn-icon">⚡</span> Розрахувати
-                </button>
-                <div id="error-msg" class="error-msg"></div>
-            </section>
+                <section class="card input-card">
+                    <h2>Введіть дані</h2>
+                    <div id="dynamic-inputs" class="input-grid"></div>
+                    <button class="btn-primary" onclick="solve()">
+                        <span class="btn-icon">⚡</span> Розрахувати
+                    </button>
+                    <div id="error-msg" class="error-msg"></div>
+                </section>
 
-            <section id="results" class="card results-card" style="display: none;">
-                <div class="results-layout">
-                    <div class="data-section">
-                        <h2>✅ Результати</h2>
-                        <ul id="params-list" class="modern-list"></ul>
+                <section id="results" class="card results-card" style="display: none;">
+                    <div class="results-layout">
+                        <div class="data-section">
+                            <h2>✅ Результати</h2>
+                            <ul id="params-list" class="modern-list"></ul>
+                            <button id="export-btn" class="btn-export" style="display:none"
+                                    onclick="window.exportCurrentResult()">
+                                📄 Експортувати PDF
+                            </button>
+                        </div>
+
+                        <div class="plot-section" id="plot-section" style="display: none;">
+                            <h2>🎨 Креслення</h2>
+                            <div id="plot-container" class="image-wrapper"></div>
+                        </div>
                     </div>
 
-                    <div class="plot-section" id="plot-section" style="display: none;">
-                        <h2>🎨 Креслення</h2>
-                        <div id="plot-container" class="image-wrapper"></div>
+                    <div class="steps-section">
+                        <h2>🧠 Хід розв'язання</h2>
+                        <div id="steps-list" class="steps-container"></div>
                     </div>
-                </div>
+                </section>
 
-                <div class="steps-section">
-                    <h2>🧠 Хід розв'язання</h2>
-                    <div id="steps-list" class="steps-container"></div>
-                </div>
-            </section>
+            </div>
+
+            <!-- Вкладка: Історія -->
+            <div id="tab-history" class="tab-content" style="display: none;">
+                <section class="card">
+                    <div class="history-header">
+                        <h2 style="margin:0">🕓 Історія розв'язань</h2>
+                        <span class="history-hint">
+                            Натисніть «Повторити» щоб заповнити форму знову
+                        </span>
+                    </div>
+                    <div id="history-list">
+                        <div class="history-loading">⏳ Завантаження...</div>
+                    </div>
+                </section>
+            </div>
+
         </main>
     </div>
 
+    <!-- Модальне вікно для зображень -->
     <div id="image-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-btn" id="close-modal-btn">&times;</span>
             <div id="zoom-container">
                 <img id="modal-image" src="" alt="Масштабоване креслення">
             </div>
-            <div class="zoom-hint">🖱️ Використовуйте коліщатко миші для масштабування. Затисніть ЛКМ для переміщення.</div>
+            <div class="zoom-hint">
+                🖱️ Використовуйте коліщатко миші для масштабування. Затисніть ЛКМ для переміщення.
+            </div>
         </div>
     </div>
 
