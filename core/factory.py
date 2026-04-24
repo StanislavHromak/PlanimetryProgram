@@ -59,23 +59,13 @@ class GeometryFactory:
                                "ISOSCELES_TRAPEZOID_BASES_LEG"]:
                 return TrapezoidSolver(task_type, params, targets)
 
-        # --- БЛОК КІЛ ---
-        elif figure == "circle":
-            val = params.get(task_type.lower())
-            return CircleSolver(task_type, val, targets)
-
-        # --- БЛОК СЕКТОРІВ ТА СЕГМЕНТІВ ---
-        elif figure == "sector":
-            if task_type == "SECTOR_AND_ARC":
-                return SectorSolver(
-                    radius=params.get('radius'),
-                    angle=params.get('angle'),
-                    targets=targets
-                )
-
-        # --- БЛОК ЕЛІПСІВ ---
-        elif figure == "ellipse":
-            if task_type == "ELLIPSE_AXES":
+        # --- БЛОК КРИВОЛІНІЙНИХ ФІГУР ---
+        elif figure == "curves":
+            if task_type in ["CIRCLE_RADIUS", "CIRCLE_DIAMETER", "CIRCLE_CIRCUMFERENCE", "CIRCLE_AREA"]:
+                return CircleSolver(task_type, params, targets)
+            elif task_type == "SECTOR_AND_ARC":
+                return SectorSolver(task_type, params, targets)
+            elif task_type == "ELLIPSE_AXES":
                 return EllipseSolver(task_type, params, targets)
 
         # Якщо нічого не підійшло
