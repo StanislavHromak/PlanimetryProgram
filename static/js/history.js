@@ -44,7 +44,7 @@ const TASK_NAMES = {
     ARB_SIDES_ANGLES:              "4 сторони та кут",
 };
 
-// ── Завантаження та відображення історії ─────────────────────────────────────
+// Завантаження та відображення історії
 export async function loadHistory() {
     const container = document.getElementById('history-list');
     container.innerHTML = '<div class="history-loading">⏳ Завантаження...</div>';
@@ -117,7 +117,7 @@ function renderHistoryCard(item) {
     `;
 }
 
-// ── Повторення задачі ─────────────────────────────────────────────────────────
+// Повторення задачі
 export async function repeatSolution(id) {
     let item;
     try {
@@ -161,7 +161,7 @@ export async function repeatSolution(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Експорт PDF ───────────────────────────────────────────────────────────────
+// Експорт PDF
 export async function exportPDF(id) {
     const card = document.querySelector(`.history-card[data-id="${id}"]`);
     const btn  = card ? card.querySelector('.btn-history--export') : null;
@@ -200,7 +200,7 @@ export async function exportPDF(id) {
     }
 }
 
-// ── Видалення ─────────────────────────────────────────────────────────────────
+// Видалення
 export async function deleteSolution(id, btnEl) {
     if (!confirm('Видалити цей розв\'язок з історії?')) return;
 
@@ -230,7 +230,7 @@ export async function deleteSolution(id, btnEl) {
     }
 }
 
-// ── Перемикання вкладок ───────────────────────────────────────────────────────
+// Перемикання вкладок
 export function switchTab(tabName) {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('tab-btn--active', btn.dataset.tab === tabName);
