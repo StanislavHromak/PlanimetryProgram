@@ -1,6 +1,8 @@
 import base64
 import io
 import logging
+import tempfile
+import os
 from datetime import datetime, timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
@@ -72,45 +74,45 @@ FIGURE_NAMES = {
 }
 
 TASK_NAMES = {
-    "RIGHT_LEGS":                   "За двома катетами",
-    "RIGHT_LEG_HYPOTENUSE":         "За катетом і гіпотенузою",
-    "SSS":                          "За трьома сторонами (SSS)",
-    "SAS":                          "Дві сторони і кут між ними (SAS)",
-    "ASA":                          "Сторона і два прилеглі кути (ASA)",
-    "ISOSCELES_BASE_SIDE":          "За основою та бічною стороною",
-    "EQUILATERAL_SIDE":             "За відомою стороною",
-    "RADIUS":                       "За радіусом",
-    "DIAMETER":                     "За діаметром",
-    "CIRCUMFERENCE":                "За довжиною кола",
-    "AREA":                         "За площею",
-    "SECTOR_AND_ARC":               "За радіусом та центральним кутом",
-    "ELLIPSE_AXES":                 "За піввісями a та b",
-    "REGULAR_SIDE":                 "За стороною",
-    "REGULAR_R_CIRCUM":             "За радіусом описаного кола (R)",
-    "REGULAR_R_IN":                 "За радіусом вписаного кола (r)",
-    "RECTANGLE_SIDES":              "Відомі обидві сторони",
-    "RECTANGLE_AREA_SIDE":          "Через площу і сторону",
-    "RECTANGLE_PERIMETER_SIDE":     "Через периметр і сторону",
-    "RECTANGLE_DIAGONAL_SIDE":      "Через діагональ і сторону",
-    "SQUARE_SIDE":                  "Відома сторона",
-    "SQUARE_AREA":                  "Через площу",
-    "SQUARE_PERIMETER":             "Через периметр",
-    "SQUARE_DIAGONAL":              "Через діагональ",
+    "RIGHT_LEGS":                   "Два катети",
+    "RIGHT_LEG_HYPOTENUSE":         "Катет і гіпотенуза",
+    "SSS":                          "Три сторони",
+    "SAS":                          "Дві сторони і кут",
+    "ASA":                          "Сторона і два кути",
+    "ISOSCELES_BASE_SIDE":          "Основа та бічна сторона",
+    "EQUILATERAL_SIDE":             "Сторона",
+    "RADIUS":                       "Радіус",
+    "DIAMETER":                     "Діаметр",
+    "CIRCUMFERENCE":                "Довжина кола",
+    "AREA":                         "Площею",
+    "SECTOR_AND_ARC":               "Радіус та кут",
+    "ELLIPSE_AXES":                 "Пів вісі a та b",
+    "REGULAR_SIDE":                 "Сторона",
+    "REGULAR_R_CIRCUM":             "R описаного кола",
+    "REGULAR_R_IN":                 "r вписаного кола",
+    "RECTANGLE_SIDES":              "Обидві сторони",
+    "RECTANGLE_AREA_SIDE":          "Площа і сторона",
+    "RECTANGLE_PERIMETER_SIDE":     "Периметр і сторона",
+    "RECTANGLE_DIAGONAL_SIDE":      "Діагональ і сторона",
+    "SQUARE_SIDE":                  "Сторона",
+    "SQUARE_AREA":                  "Площа",
+    "SQUARE_PERIMETER":             "Периметр",
+    "SQUARE_DIAGONAL":              "Діагональ",
     "RHOMBUS_DIAGONALS":            "Діагоналі",
     "RHOMBUS_SIDE_ANGLE":           "Сторона і кут",
     "RHOMBUS_AREA_SIDE":            "Площа і сторона",
     "RHOMBUS_DIAGONAL_SIDE":        "Діагональ і сторона",
     "PARALLELOGRAM_S_A":            "Дві сторони і кут",
-    "PARALLELOGRAM_D_A":            "Діагоналі і кут між ними",
+    "PARALLELOGRAM_D_A":            "Діагоналі і кут",
     "TRAPEZOID_ABH":                "Основи і висота",
     "TRAPEZOID_AREA_BASES":         "Площа і основи",
     "TRAPEZOID_MIDLINE_HEIGHT":     "Середня лінія і висота",
-    "ISOSCELES_TRAPEZOID_BASES_LEG":"Рівнобічна: основи і бічна сторона",
+    "ISOSCELES_TRAPEZOID_BASES_LEG":"Рівнобічна: основи і бічна",
     "ARB_SIDES_ANGLES":             "4 сторони та кут",
 }
 
 
-# ── Стилі ────────────────────────────────────────────────────────────────────
+# Стилі
 def _make_styles() -> dict:
     def ps(name, **kw) -> ParagraphStyle:
         return ParagraphStyle(name, **kw)
@@ -164,7 +166,7 @@ def _make_styles() -> dict:
     }
 
 
-# ── Допоміжні функції ────────────────────────────────────────────────────────
+# Допоміжні функції
 def _card(content_rows: list, bg: colors.Color, border: colors.Color,
           col_widths=None, padding: int = 8) -> Table:
     """Картка з кольоровим фоном і лівою межею."""
@@ -195,7 +197,16 @@ def _try_embed_image(image_b64: str, content_w: float) -> list:
         return []
 
     try:
-        drawing = svg2rlg(io.BytesIO(svg_bytes))
+        with tempfile.NamedTemporaryFile(suffix=".svg", delete=False) as tmp_file:
+            tmp_file.write(svg_bytes)
+            tmp_path = tmp_file.name
+
+        try:
+            drawing = svg2rlg(tmp_path)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
     except Exception as parse_err:
         logger.warning("Помилка парсингу SVG: %s", parse_err)
         return []
@@ -296,7 +307,7 @@ def _render_step(step: dict, styles: dict, page_w: float) -> list:
     return elems
 
 
-# ── Головна функція ───────────────────────────────────────────────────────────
+# Головна функція
 def generate_pdf(solution: dict) -> bytes:
     """
     Генерує PDF з покроковим розв'язком.
@@ -341,7 +352,7 @@ def generate_pdf(solution: dict) -> bytes:
     story.append(header_table)
     story.append(Spacer(1, 14))
 
-    # ── Умова задачі ─────────────────────────────────────────────────────────
+    # Умова задачі
     story.append(Paragraph("Умова задачі", styles["section"]))
 
     params  = solution.get("params", {})
@@ -375,7 +386,7 @@ def generate_pdf(solution: dict) -> bytes:
     story.append(cond_table)
     story.append(Spacer(1, 14))
 
-    # ── Результати ───────────────────────────────────────────────────────────
+    # Результати
     result = solution.get("result", {})
     if result:
         story.append(Paragraph("Результати", styles["section"]))
@@ -398,7 +409,7 @@ def generate_pdf(solution: dict) -> bytes:
         story.append(res_table)
         story.append(Spacer(1, 14))
 
-    # ── Малюнок ──────────────────────────────────────────────────────────────
+    # Малюнок
     image_b64 = solution.get("image")
     if image_b64:
         image_flowables = _try_embed_image(image_b64, CONTENT_W)
@@ -406,7 +417,7 @@ def generate_pdf(solution: dict) -> bytes:
             story.append(Paragraph("Креслення", styles["section"]))
             story.extend(image_flowables)
 
-    # ── Хід розв'язання ──────────────────────────────────────────────────────
+    # Хід розв'язання
     steps = solution.get("steps", [])
     if steps:
         story.append(Paragraph("Хід розв'язання", styles["section"]))
@@ -420,7 +431,7 @@ def generate_pdf(solution: dict) -> bytes:
                 story.append(Paragraph(step, styles["info"]))
                 story.append(Spacer(1, 4))
 
-    # ── Підвал ────────────────────────────────────────────────────────────────
+    # Підвал
     story.append(Spacer(1, 20))
     story.append(HRFlowable(width="100%", thickness=0.5, color=MUTED))
     story.append(Spacer(1, 4))
