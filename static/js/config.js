@@ -12,32 +12,32 @@ export const uiConfig = {
         ],
         tasks: {
             "REGULAR_SIDE": {
-                name: "За стороною",
+                name: "Сторона",
                 inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "a", label: "Сторона a" } ],
                 validTargets: ["area", "perimeter", "angles", "diagonal", "circumcircle", "incircle"]
             },
             "REGULAR_R_CIRCUM": {
-                name: "За радіусом описаного кола",
+                name: "Радіус описаного кола",
                 inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "R", label: "Радіус R" } ],
                 validTargets: ["side", "area", "perimeter", "angles", "diagonal", "incircle"]
             },
             "REGULAR_R_IN": {
-                name: "За радіусом вписаного кола",
+                name: "Радіус вписаного кола",
                 inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "r", label: "Радіус r" } ],
                 validTargets: ["side", "area", "perimeter", "angles", "diagonal", "circumcircle"]
             },
             "REGULAR_AREA": {
-                name: "За площею",
+                name: "Площа",
                 inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "S", label: "Площа S" } ],
                 validTargets: ["side", "perimeter", "angles", "diagonal", "circumcircle", "incircle"]
             },
             "REGULAR_PERIMETER": {
-                name: "За периметром",
+                name: "Периметр",
                 inputs: [ { id: "n", label: "Кількість сторін n" }, { id: "P", label: "Периметр P" } ],
                 validTargets: ["side", "area", "angles", "diagonal", "circumcircle", "incircle"]
             },
             "REGULAR_ANGLE_SIDE": {
-                name: "За внутрішнім кутом і стороною",
+                name: "Внутрішній кут і сторона",
                 inputs: [ { id: "alpha", label: "Внутрішній кут α (°)" }, { id: "a", label: "Сторона a" } ],
                 validTargets: ["area", "perimeter", "diagonal", "circumcircle", "incircle"]
             }
@@ -51,7 +51,7 @@ export const uiConfig = {
                 name: "Довільний трикутник",
                 targets: [
                     { id: "angles", label: "Кути (α, β, γ)", checked: false },
-                    { id: "side", label: "Знайти невідомі сторони/кути", checked: true },
+                    { id: "side", label: "Невідомі сторони/кути", checked: true },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
                     { id: "incircle", label: "Вписане коло (r)", checked: false },
@@ -59,7 +59,7 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "SSS": {
-                        name: "За трьома сторонами (SSS)",
+                        name: "Три сторони (SSS)",
                         inputs: [ { id: "a", label: "Сторона a" }, { id: "b", label: "Сторона b" }, { id: "c", label: "Сторона c" } ],
                         validTargets: ["angles", "area", "perimeter", "incircle", "circumcircle"]
                     },
@@ -78,7 +78,7 @@ export const uiConfig = {
             right: {
                 name: "Прямокутний трикутник",
                 targets: [
-                    { id: "side", label: "Знайти невідому сторону", checked: true },
+                    { id: "side", label: "Невідому сторону (a)", checked: true },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
                     { id: "incircle", label: "Вписане коло (r)", checked: false },
@@ -86,12 +86,12 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "RIGHT_LEGS": {
-                        name: "За двома катетами",
+                        name: "Два катети",
                         inputs: [ { id: "a", label: "Катет a" }, { id: "b", label: "Катет b" } ],
                         validTargets: ["side", "area", "perimeter", "incircle", "circumcircle"]
                     },
                     "RIGHT_LEG_HYPOTENUSE": {
-                        name: "За катетом і гіпотенузою",
+                        name: "Катет і гіпотенуза",
                         inputs: [ { id: "a", label: "Катет a" }, { id: "c", label: "Гіпотенуза c" } ],
                         validTargets: ["side", "area", "perimeter", "incircle", "circumcircle"]
                     }
@@ -106,7 +106,7 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "ISOSCELES_BASE_SIDE": {
-                        name: "За основою та бічною стороною",
+                        name: "Основа та бічна сторона",
                         inputs: [ { id: "base", label: "Основа a" }, { id: "side", label: "Бічна сторона b" } ],
                         validTargets: ["area", "perimeter", "height"]
                     }
@@ -122,7 +122,7 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "EQUILATERAL_SIDE": {
-                        name: "За відомою стороною",
+                        name: "Сторона",
                         inputs: [ { id: "a", label: "Сторона a" } ],
                         validTargets: ["area", "perimeter", "incircle", "circumcircle"]
                     }
@@ -197,7 +197,7 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "RECTANGLE_SIDES": {
-                        name: "Відомі обидві сторони",
+                        name: "Сторони",
                         inputs: [
                             { id: "a", label: "Сторона a" },
                             { id: "b", label: "Сторона b" }
@@ -205,7 +205,7 @@ export const uiConfig = {
                         validTargets: ["area", "perimeter", "diagonal", "circumcircle"]
                     },
                     "RECTANGLE_AREA_SIDE": {
-                        name: "Через площу і сторону",
+                        name: "Площа і сторона",
                         inputs: [
                             { id: "a", label: "Відома сторона" },
                             { id: "S", label: "Площа S" }
@@ -213,7 +213,7 @@ export const uiConfig = {
                         validTargets: ["side_b", "perimeter", "diagonal", "circumcircle"]
                     },
                     "RECTANGLE_PERIMETER_SIDE": {
-                        name: "Через периметр і сторону",
+                        name: "Периметр і сторона",
                         inputs: [
                             { id: "a", label: "Відома сторона" },
                             { id: "P", label: "Периметр P" }
@@ -221,7 +221,7 @@ export const uiConfig = {
                         validTargets: ["side_b", "area", "diagonal", "circumcircle"]
                     },
                     "RECTANGLE_DIAGONAL_SIDE": {
-                        name: "Через діагональ і сторону",
+                        name: "Діагональ і сторона",
                         inputs: [
                             { id: "a", label: "Відома сторона" },
                             { id: "d", label: "Діагональ d" }
@@ -276,22 +276,22 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "SQUARE_SIDE": {
-                        name: "Відома сторона",
+                        name: "Сторона",
                         inputs: [ { id: "a", label: "Сторона a" } ],
                         validTargets: ["area", "perimeter", "diagonal", "incircle", "circumcircle"]
                     },
                     "SQUARE_AREA": {
-                        name: "Через площу",
+                        name: "Площа",
                         inputs: [ { id: "S", label: "Площа S" } ],
                         validTargets: ["side_a", "perimeter", "diagonal", "incircle", "circumcircle"]
                     },
                     "SQUARE_PERIMETER": {
-                        name: "Через периметр",
+                        name: "Периметр",
                         inputs: [ { id: "P", label: "Периметр P" } ],
                         validTargets: ["side_a", "area", "diagonal", "incircle", "circumcircle"]
                     },
                     "SQUARE_DIAGONAL": {
-                        name: "Через діагональ",
+                        name: "Діагональ",
                         inputs: [ { id: "d", label: "Діагональ d" } ],
                         validTargets: ["side_a", "area", "perimeter", "incircle", "circumcircle"]
                     }
@@ -348,22 +348,22 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "CIRCLE_RADIUS": {
-                        name: "За радіусом",
+                        name: "Радіус",
                         inputs: [ { id: "radius", label: "Радіус r" } ],
                         validTargets: ["diameter", "area", "circumference"]
                     },
                     "CIRCLE_DIAMETER": {
-                        name: "За діаметром",
+                        name: "Діаметр",
                         inputs: [ { id: "diameter", label: "Діаметр d" } ],
                         validTargets: ["radius", "area", "circumference"]
                     },
                     "CIRCLE_CIRCUMFERENCE": {
-                        name: "За довжиною кола",
+                        name: "Довжина кола",
                         inputs: [ { id: "circumference", label: "Довжина C" } ],
                         validTargets: ["radius", "diameter", "area"]
                     },
                     "CIRCLE_AREA": {
-                        name: "За площею",
+                        name: "Площа",
                         inputs: [ { id: "area", label: "Площа S" } ],
                         validTargets: ["radius", "diameter", "circumference"]
                     }
@@ -381,7 +381,7 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "SECTOR_AND_ARC": {
-                        name: "За радіусом та центральним кутом",
+                        name: "Радіус та центральний кут",
                         inputs: [
                             { id: "radius", label: "Радіус r" },
                             { id: "angle", label: "Кут α (°)" }
@@ -399,7 +399,7 @@ export const uiConfig = {
                 ],
                 tasks: {
                     "ELLIPSE_AXES": {
-                        name: "За піввісями a та b",
+                        name: "Пів вісі a та b",
                         inputs: [
                             { id: "a", label: "Велика піввісь a" },
                             { id: "b", label: "Мала піввісь b" }
