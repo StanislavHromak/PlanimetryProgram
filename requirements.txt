@@ -1,4 +1,9 @@
+svglib
+reportlab
+sqlalchemy
 uvicorn
 pydantic
 fastapi
 matplotlib
+aiosqlite
+tzdata
