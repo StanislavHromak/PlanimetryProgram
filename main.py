@@ -31,7 +31,7 @@ async def read_root():
     return FileResponse("static/index.html")
 
 
-# ── Розв'язання задачі ────────────────────────────────────────────────────────
+# Розв'язання задачі
 @app.post("/api/solve")
 async def solve_geometry(
     request: GeometryRequest,
@@ -66,7 +66,7 @@ async def solve_geometry(
         return {"success": False, "error": f"Внутрішня помилка сервера: {str(e)}"}
 
 
-# ── Історія ───────────────────────────────────────────────────────────────────
+# Історія
 @app.get("/api/history")
 async def get_solutions_history(db: AsyncSession = Depends(get_db)):
     records = await get_history(db, limit=50)
@@ -89,7 +89,7 @@ async def remove_solution(solution_id: int, db: AsyncSession = Depends(get_db)):
     return {"success": True}
 
 
-# ── Експорт PDF ───────────────────────────────────────────────────────────────
+# Експорт PDF
 @app.get("/api/export/pdf/{solution_id}")
 async def export_pdf(solution_id: int, db: AsyncSession = Depends(get_db)):
     record = await get_solution_by_id(db, solution_id)

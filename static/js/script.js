@@ -1,8 +1,8 @@
-import { uiConfig } from '/static/js/config.js';
+import { uiConfig, TARGET_NAMES } from '/static/js/config.js';
 import { openImageModal, initModalListeners } from '/static/js/modal.js';
 import { renderStep } from '/static/js/renderer.js';
 import {
-    switchTab, loadHistory,
+    switchTab,
     repeatSolution, exportPDF, deleteSolution
 } from '/static/js/history.js';
 
@@ -33,7 +33,7 @@ window.onload = function () {
     updateUI();
 };
 
-// ── Конфігурація UI ───────────────────────────────────────────────────────────
+// Конфігурація UI
 function getActiveConfigNode() {
     const figure = document.getElementById('figure-select').value;
     if (uiConfig[figure].hasSubFigures) {
@@ -98,7 +98,7 @@ function updateInputs() {
     `).join('');
 }
 
-// ── Розв'язання ───────────────────────────────────────────────────────────────
+// Розв'язання
 async function solve() {
     document.getElementById('error-msg').innerText = '';
     document.getElementById('results').style.display = 'none';
@@ -150,9 +150,11 @@ async function solve() {
         document.getElementById('results').style.display = 'block';
 
         document.getElementById('params-list').innerHTML =
-            Object.entries(result.data || {}).map(([key, val]) =>
-                `<li><b>${key}</b>: <span style="color:#007bff;font-weight:bold;">${val}</span></li>`
-            ).join('');
+            Object.entries(result.data || {}).map(([key, val]) => {
+                // Використовуємо словник, якщо ключа немає - виводимо оригінальний ключ
+                const beautifulName = TARGET_NAMES[key] || key;
+                return `<li><b>${beautifulName}</b>: <span style="color:#007bff;font-weight:bold;">${val}</span></li>`;
+            }).join('');
 
         document.getElementById('steps-list').innerHTML =
             (result.steps || []).map(renderStep).join('');
@@ -188,7 +190,7 @@ async function solve() {
     }
 }
 
-// ── Експорт поточного результату ─────────────────────────────────────────────
+// Експорт поточного результату
 async function exportCurrentResult() {
     if (!lastSolutionId) return;
     await exportPDF(lastSolutionId);

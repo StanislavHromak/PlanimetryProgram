@@ -411,3 +411,42 @@ export const uiConfig = {
         }
     }
 };
+
+// Словник для красивого відображення результатів з бекенду
+export const TARGET_NAMES = {
+    "area": "Площа (S)",
+    "perimeter": "Периметр (P)",
+    "circumcircle": "Радіус описаного кола (R)",
+    "r_circumscribed": "Радіус описаного кола (R)",
+    "incircle": "Радіус вписаного кола (r)",
+    "r_inscribed": "Радіус вписаного кола (r)",
+    "height": "Висота (h)",
+    "side": "Сторона",
+    "side_a": "Сторона a",
+    "side_b": "Сторона b",
+    "sides": "Сторони",
+    "angles": "Кути",
+    "angle_a": "Кут α",
+    "angle_b": "Кут β",
+    "angle_c": "Кут γ",
+    "diagonal": "Діагональ (d)",
+    "diagonals": "Діагоналі",
+    "radius": "Радіус (r)",
+    "diameter": "Діаметр (d)",
+    "circumference": "Довжина кола (C)",
+    "arc_length": "Довжина дуги (L)",
+    "sector_area": "Площа сектора",
+    "perimeter_sector": "Периметр сектора",
+    "chord_length": "Довжина хорди (c)",
+    "segment_area": "Площа сегмента",
+    "segment_height": "Висота сегмента (h)",
+    "eccentricity": "Ексцентриситет (e)",
+    "midline": "Середня лінія (m)",
+    "circles_check": "Вписане/Описане коло",
+
+    // Проміжні результати
+    "intermediate_side_a": "Сторона a (проміжний рез.)",
+    "intermediate_side_b": "Сторона b (проміжний рез.)",
+    "intermediate_side_c": "Сторона c (проміжний рез.)",
+    "intermediate_diagonal": "Діагональ (проміжний рез.)"
+};
