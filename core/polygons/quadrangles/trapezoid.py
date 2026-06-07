@@ -1,350 +1,622 @@
 import math
+from abc import ABC, abstractmethod
+from typing import ClassVar
+
 from core.base import GeometricSolver
 from core.polygons.quadrangles.plotters.trapezoid_plotter import TrapezoidPlotter
+
+
+class TrapezoidTask(ABC):
+    task_type: str
+
+    @abstractmethod
+    def validate(self, solver: "TrapezoidSolver") -> bool:
+        pass
+
+    @abstractmethod
+    def prepare(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_prerequisites(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_midline_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_height_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_perimeter_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_angles_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_diagonals_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_incircle_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+    def add_circumcircle_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+
+class BasesAndHeightTask(TrapezoidTask):
+    task_type = "TRAPEZOID_ABH"
+
+    def validate(self, solver: "TrapezoidSolver") -> bool:
+        if solver.a <= 0 or solver.b <= 0 or solver.h <= 0:
+            solver.add_error("Основи та висота мають бути додатними.")
+            return False
+        return True
+
+    def prepare(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_info(f"Трапеція: основи a={solver.a}, b={solver.b}, висота h={solver.h}")
+        solver.plot_a = solver.a
+        solver.plot_b = solver.b
+        solver.plot_h = solver.h
+        solver.plot_m = solver.compute_midline_from_bases()
+
+    def add_prerequisites(self, solver: "TrapezoidSolver", result: dict) -> None:
+        if solver.is_target("midline") or solver.is_target("area"):
+            solver.add_midline_from_bases_result(result, is_intermediate=not solver.is_target("midline"))
+
+    def add_midline_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_midline_from_bases_result(result, is_intermediate=False)
+
+
+class AreaAndBasesTask(TrapezoidTask):
+    task_type = "TRAPEZOID_AREA_BASES"
+
+    def validate(self, solver: "TrapezoidSolver") -> bool:
+        if solver.a <= 0 or solver.b <= 0 or solver.S <= 0:
+            solver.add_error("Основи та площа мають бути додатними.")
+            return False
+        return True
+
+    def prepare(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_info(f"Трапеція: основи a={solver.a}, b={solver.b}, площа S={solver.S}")
+        solver.plot_a = solver.a
+        solver.plot_b = solver.b
+        solver.plot_m = solver.compute_midline_from_bases()
+        solver.plot_h = solver.compute_height_from_area()
+
+    def add_prerequisites(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_midline_from_bases_result(result, is_intermediate=not solver.is_target("midline"))
+
+    def add_midline_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_midline_from_bases_result(result, is_intermediate=False)
+
+    def add_height_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        result["height"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо висоту h",
+            "h = S / m",
+            f"h = {solver.S} / {solver.plot_m:.2f}",
+            solver.plot_h,
+            rule="З формули площі виражаємо висоту: відношення площі до середньої лінії."
+        )
+        solver.step_num += 1
+
+
+class MidlineAndHeightTask(TrapezoidTask):
+    task_type = "TRAPEZOID_MIDLINE_HEIGHT"
+
+    def validate(self, solver: "TrapezoidSolver") -> bool:
+        if solver.m <= 0 or solver.h <= 0:
+            solver.add_error("Середня лінія та висота мають бути додатними.")
+            return False
+        return True
+
+    def prepare(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_info(f"Трапеція: середня лінія m={solver.m}, висота h={solver.h}")
+        solver.plot_m = solver.m
+        solver.plot_h = solver.h
+
+
+class IsoscelesBasesAndLegTask(TrapezoidTask):
+    task_type = "ISOSCELES_TRAPEZOID_BASES_LEG"
+
+    def validate(self, solver: "TrapezoidSolver") -> bool:
+        if solver.a <= 0 or solver.b <= 0 or solver.c <= 0:
+            solver.add_error("Основи та бічна сторона мають бути додатними.")
+            return False
+        diff = solver.compute_half_base_difference()
+        if solver.c <= diff:
+            solver.add_error("Бічна сторона занадто коротка. Вона має бути більшою за піврізницю основ.")
+            return False
+        return True
+
+    def prepare(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.plot_type = "isosceles"
+        solver.add_info(f"Рівнобічна трапеція: основи a={solver.a}, b={solver.b}, бічна сторона c={solver.c}")
+        solver.plot_a = solver.a
+        solver.plot_b = solver.b
+        solver.plot_c = solver.c
+        solver.plot_h = solver.compute_isosceles_height()
+        solver.plot_m = solver.compute_midline_from_bases()
+
+    def add_prerequisites(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_isosceles_projection_step()
+
+        if (
+            solver.is_target("height")
+            or solver.is_target("area")
+            or solver.is_target("diagonals")
+            or solver.is_target("incircle")
+            or solver.is_target("circumcircle")
+        ):
+            solver.add_isosceles_height_result(result, is_intermediate=not solver.is_target("height"))
+
+        if (
+            solver.is_target("midline")
+            or solver.is_target("area")
+            or solver.is_target("diagonals")
+            or solver.is_target("circumcircle")
+        ):
+            solver.add_midline_from_bases_result(result, is_intermediate=not solver.is_target("midline"))
+
+    def add_midline_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_midline_from_bases_result(result, is_intermediate=False)
+
+    def add_height_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_isosceles_height_result(result, is_intermediate=False)
+
+    def add_perimeter_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        p_val = solver.a + solver.b + 2 * solver.c
+        result["perimeter"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо периметр",
+            "P = a + b + 2c",
+            f"P = {solver.a} + {solver.b} + 2·{solver.c}",
+            p_val
+        )
+        solver.step_num += 1
+
+    def add_angles_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        diff = solver.compute_half_base_difference()
+        alpha = math.degrees(math.acos(diff / solver.c))
+        beta = 180.0 - alpha
+        result["angle_alpha"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо гострий кут при основі α",
+            "α = arccos(x / c)",
+            f"α = arccos({diff:.2f} / {solver.c})",
+            alpha
+        )
+        solver.step_num += 1
+        result["angle_beta"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо тупий кут β",
+            "β = 180° - α",
+            f"β = 180° - {alpha:.1f}°",
+            beta,
+            rule="Сума кутів, прилеглих до бічної сторони, дорівнює 180°."
+        )
+        solver.step_num += 1
+
+    def add_diagonals_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.d_val = solver.compute_isosceles_diagonal()
+        result["diagonals"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо діагоналі (вони рівні)",
+            "d = √(h² + m²)",
+            f"d = √({solver.plot_h:.2f}² + {solver.plot_m:.2f}²)",
+            solver.d_val,
+            rule="Діагональ, висота та середня лінія рівнобічної трапеції утворюють прямокутний трикутник."
+        )
+        solver.step_num += 1
+
+    def add_incircle_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_header(f"Крок {solver.step_num}. Перевірка вписаного кола")
+        solver.step_num += 1
+        if math.isclose(solver.a + solver.b, 2 * solver.c, rel_tol=1e-3):
+            solver.add_info("Вписане коло існує (a + b = 2c).")
+            result["incircle"] = solver.add_step(
+                "Знаходимо радіус вписаного кола r",
+                "r = h / 2",
+                f"r = {solver.plot_h:.2f} / 2",
+                solver.plot_h / 2,
+                rule="Діаметр вписаного в трапецію кола дорівнює її висоті."
+            )
+        else:
+            solver.add_info(f"Вписане коло не існує ({solver.a} + {solver.b} ≠ 2 · {solver.c}).")
+            solver.add_rule("У трапецію можна вписати коло лише якщо сума основ дорівнює сумі бічних сторін.")
+
+    def add_circumcircle_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_header(f"Крок {solver.step_num}. Описане коло")
+        solver.step_num += 1
+        solver.add_info("Описане коло існує (навколо рівнобічної трапеції завжди можна описати коло).")
+
+        if solver.d_val is None:
+            solver.d_val = solver.compute_isosceles_diagonal()
+            solver.add_step(
+                "(Проміжний крок) Знаходимо діагональ d",
+                "d = √(h² + m²)",
+                f"d = {solver.d_val:.2f}",
+                solver.d_val,
+                is_intermediate=True
+            )
+
+        r_circ = (solver.c * solver.d_val) / (2 * solver.plot_h)
+        result["circumcircle"] = solver.add_step(
+            "Знаходимо радіус описаного кола R",
+            "R = (c · d) / (2 · h)",
+            f"R = ({solver.c} · {solver.d_val:.2f}) / (2 · {solver.plot_h:.2f})",
+            r_circ,
+            rule="Радіус кола, описаного навколо рівнобічної трапеції, дорівнює радіусу кола навколо трикутника (основа, діагональ, бічна сторона)."
+        )
+
+
+class RightBasesAndHeightTask(TrapezoidTask):
+    task_type = "RIGHT_TRAPEZOID_BASES_HEIGHT"
+
+    def validate(self, solver: "TrapezoidSolver") -> bool:
+        if solver.a <= 0 or solver.b <= 0 or solver.h <= 0:
+            solver.add_error("Основи та висота мають бути додатними.")
+            return False
+        return True
+
+    def prepare(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.plot_type = "right"
+        solver.add_info(
+            f"Прямокутна трапеція: основи a={solver.a}, b={solver.b}, "
+            f"висота (бічна сторона) h={solver.h}"
+        )
+        solver.plot_a = solver.a
+        solver.plot_b = solver.b
+        solver.plot_h = solver.h
+        solver.plot_m = solver.compute_midline_from_bases()
+
+    def add_prerequisites(self, solver: "TrapezoidSolver", result: dict) -> None:
+        if solver.is_target("midline") or solver.is_target("area"):
+            solver.add_midline_from_bases_result(result, is_intermediate=not solver.is_target("midline"))
+        if solver.is_target("perimeter") or solver.is_target("angles") or solver.is_target("incircle"):
+            solver.add_right_slanted_side_step()
+
+    def add_midline_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.add_midline_from_bases_result(result, is_intermediate=False)
+
+    def add_perimeter_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        c2_val = solver.compute_right_slanted_side()
+        p_val = solver.a + solver.b + solver.h + c2_val
+        result["perimeter"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо периметр",
+            "P = a + b + h + c_похила",
+            f"P = {solver.a} + {solver.b} + {solver.h} + {c2_val:.2f}",
+            p_val
+        )
+        solver.step_num += 1
+
+    def add_diagonals_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        d1 = math.sqrt(solver.a ** 2 + solver.h ** 2)
+        result["diagonal_1"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо першу діагональ d1",
+            "d1 = √(a² + h²)",
+            f"d1 = √({solver.a}² + {solver.h}²)",
+            d1,
+            rule="За теоремою Піфагора для прямокутного трикутника з катетами a (основа) та h (висота)."
+        )
+        solver.step_num += 1
+
+        d2 = math.sqrt(solver.b ** 2 + solver.h ** 2)
+        result["diagonal_2"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо другу діагональ d2",
+            "d2 = √(b² + h²)",
+            f"d2 = √({solver.b}² + {solver.h}²)",
+            d2,
+            rule="За теоремою Піфагора для прямокутного трикутника з катетами b (друга основа) та h."
+        )
+        solver.step_num += 1
+
+    def add_angles_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        diff = abs(solver.a - solver.b)
+        alpha = math.degrees(math.atan(solver.h / diff))
+        beta = 180.0 - alpha
+        solver.add_info("Два кути прямокутної трапеції дорівнюють 90°.")
+        result["angle_alpha"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо гострий кут α",
+            "α = arctg(h / |a-b|)",
+            f"α = arctg({solver.h} / {diff})",
+            alpha
+        )
+        solver.step_num += 1
+        result["angle_beta"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо тупий кут β",
+            "β = 180° - α",
+            f"β = 180° - {alpha:.1f}°",
+            beta
+        )
+        solver.step_num += 1
+
+    def add_incircle_result(self, solver: "TrapezoidSolver", result: dict) -> None:
+        c2_val = solver.compute_right_slanted_side()
+        solver.add_header(f"Крок {solver.step_num}. Перевірка вписаного кола")
+        solver.step_num += 1
+        if math.isclose(solver.a + solver.b, solver.h + c2_val, rel_tol=1e-3):
+            solver.add_info("Вписане коло існує (a + b = h + c_похила).")
+            result["incircle"] = solver.add_step(
+                "Знаходимо радіус вписаного кола r",
+                "r = h / 2",
+                f"r = {solver.h:.2f} / 2",
+                solver.h / 2,
+                rule="Діаметр вписаного в трапецію кола завжди дорівнює її висоті."
+            )
+        else:
+            solver.add_info(f"Вписане коло не існує ({solver.a} + {solver.b} ≠ {solver.h} + {c2_val:.2f}).")
+            solver.add_rule("У трапецію можна вписати коло лише якщо сума основ дорівнює сумі бічних сторін.")
+
+
+class TrapezoidTarget(ABC):
+    target_name: str
+
+    @abstractmethod
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        pass
+
+
+class MidlineTarget(TrapezoidTarget):
+    target_name = "midline"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_midline_result(solver, result)
+
+
+class HeightTarget(TrapezoidTarget):
+    target_name = "height"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_height_result(solver, result)
+
+
+class PerimeterTarget(TrapezoidTarget):
+    target_name = "perimeter"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_perimeter_result(solver, result)
+
+
+class AnglesTarget(TrapezoidTarget):
+    target_name = "angles"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_angles_result(solver, result)
+
+
+class DiagonalsTarget(TrapezoidTarget):
+    target_name = "diagonals"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_diagonals_result(solver, result)
+
+
+class IncircleTarget(TrapezoidTarget):
+    target_name = "incircle"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_incircle_result(solver, result)
+
+
+class CircumcircleTarget(TrapezoidTarget):
+    target_name = "circumcircle"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        solver.task.add_circumcircle_result(solver, result)
+
+
+class AreaTarget(TrapezoidTarget):
+    target_name = "area"
+
+    def calculate(self, solver: "TrapezoidSolver", result: dict) -> None:
+        if solver.task_type == "TRAPEZOID_AREA_BASES":
+            return
+
+        area_val = solver.plot_m * solver.plot_h
+        result["area"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо площу",
+            "S = m · h",
+            f"S = {solver.plot_m:.2f} · {solver.plot_h:.2f}",
+            area_val,
+            rule="Площа трапеції дорівнює добутку середньої лінії на висоту."
+        )
+        solver.step_num += 1
 
 
 class TrapezoidSolver(GeometricSolver):
     """Розв'язувач задач з трапецією."""
 
+    TASKS: ClassVar[dict[str, TrapezoidTask]] = {
+        task.task_type: task
+        for task in (
+            BasesAndHeightTask(),
+            AreaAndBasesTask(),
+            MidlineAndHeightTask(),
+            IsoscelesBasesAndLegTask(),
+            RightBasesAndHeightTask(),
+        )
+    }
+    SUPPORTED_TASKS: ClassVar[tuple[str, ...]] = (
+        "TRAPEZOID_ABH",
+        "TRAPEZOID_AREA_BASES",
+        "TRAPEZOID_MIDLINE_HEIGHT",
+        "ISOSCELES_TRAPEZOID_BASES_LEG",
+    )
+
+    TARGETS: ClassVar[dict[str, TrapezoidTarget]] = {
+        target.target_name: target
+        for target in (
+            MidlineTarget(),
+            HeightTarget(),
+            PerimeterTarget(),
+            AnglesTarget(),
+            DiagonalsTarget(),
+            IncircleTarget(),
+            CircumcircleTarget(),
+            AreaTarget(),
+        )
+    }
+    TARGET_ORDER: ClassVar[tuple[str, ...]] = (
+        "midline",
+        "height",
+        "perimeter",
+        "angles",
+        "diagonals",
+        "incircle",
+        "circumcircle",
+        "area",
+    )
+
     def __init__(self, task_type: str, params: dict, targets: list = None):
         super().__init__(targets)
         self.task_type = task_type
-        self.a = float(params.get('a', 0))
-        self.b = float(params.get('b', 0))
-        self.h = float(params.get('h', 0))
-        self.m = float(params.get('m', 0))
-        self.S = float(params.get('S', 0))
-        self.c = float(params.get('c', 0))  # бічна сторона (для рівнобічної)
+        self.task = self.TASKS.get(task_type)
+        self.a = float(params.get("a", 0))
+        self.b = float(params.get("b", 0))
+        self.h = float(params.get("h", 0))
+        self.m = float(params.get("m", 0))
+        self.S = float(params.get("S", 0))
+        self.c = float(params.get("c", 0))
+        self.step_num = 1
+        self.plot_type = "arbitrary"
+        self.plot_a = self.a
+        self.plot_b = self.b
+        self.plot_h = self.h
+        self.plot_m = self.m
+        self.plot_c = self.c
+        self.d_val = None
+        self.midline_step_added = False
+        self.height_step_added = False
+        self.projection_step_added = False
+        self.right_slanted_side_step_added = False
 
     def validate(self) -> bool:
-        if self.task_type == "TRAPEZOID_ABH" or self.task_type == "RIGHT_TRAPEZOID_BASES_HEIGHT":
-            if self.a <= 0 or self.b <= 0 or self.h <= 0:
-                self._add_error("Основи та висота мають бути додатними.")
-                return False
-        elif self.task_type == "TRAPEZOID_AREA_BASES":
-            if self.a <= 0 or self.b <= 0 or self.S <= 0:
-                self._add_error("Основи та площа мають бути додатними.")
-                return False
-        elif self.task_type == "TRAPEZOID_MIDLINE_HEIGHT":
-            if self.m <= 0 or self.h <= 0:
-                self._add_error("Середня лінія та висота мають бути додатними.")
-                return False
-        elif self.task_type == "ISOSCELES_TRAPEZOID_BASES_LEG":
-            if self.a <= 0 or self.b <= 0 or self.c <= 0:
-                self._add_error("Основи та бічна сторона мають бути додатними.")
-                return False
-            diff = abs(self.a - self.b) / 2
-            if self.c <= diff:
-                self._add_error("Бічна сторона занадто коротка. Вона має бути більшою за піврізницю основ.")
-                return False
-        return True
+        if self.task is None:
+            self.add_error(f"Невідомий тип задачі для трапеції: {self.task_type}")
+            return False
+        return self.task.validate(self)
 
-    def _calculate(self):
-        result = {}
-        step_num = 1
+    def compute_midline_from_bases(self) -> float:
+        if "midline" in self._computed:
+            return self._computed["midline"]
+        value = (self.a + self.b) / 2
+        self._computed["midline"] = value
+        return value
 
-        plot_type = 'arbitrary'
-        plot_a, plot_b, plot_h, plot_m, plot_c = self.a, self.b, self.h, self.m, self.c
-        d_val = None
+    def compute_height_from_area(self) -> float:
+        if "height_from_area" in self._computed:
+            return self._computed["height_from_area"]
+        value = self.S / self.compute_midline_from_bases()
+        self._computed["height_from_area"] = value
+        return value
 
-        if self.task_type == "TRAPEZOID_ABH":
-            self._add_info(f"Трапеція: основи a={self.a}, b={self.b}, висота h={self.h}")
+    def compute_half_base_difference(self) -> float:
+        return abs(self.a - self.b) / 2
 
-            m_val = (self.a + self.b) / 2
-            if self._is_target("midline") or self._is_target("area"):
-                is_int = not self._is_target("midline")
-                pref = "(Проміжний крок) " if is_int else ""
-                key = "intermediate_midline" if is_int else "midline"
+    def compute_isosceles_height(self) -> float:
+        if "isosceles_height" in self._computed:
+            return self._computed["isosceles_height"]
+        diff = self.compute_half_base_difference()
+        value = math.sqrt(self.c ** 2 - diff ** 2)
+        self._computed["isosceles_height"] = value
+        return value
 
-                result[key] = self._add_step(
-                    f"Крок {step_num}. {pref}Знаходимо середню лінію m",
-                    "m = (a + b) / 2",
-                    f"m = ({self.a} + {self.b}) / 2",
-                    m_val,
-                    rule="Середня лінія трапеції дорівнює півсумі її основ.",
-                    is_intermediate=is_int
-                )
-                step_num += 1
-            plot_m = m_val
+    def compute_isosceles_diagonal(self) -> float:
+        if "isosceles_diagonal" in self._computed:
+            return self._computed["isosceles_diagonal"]
+        value = math.sqrt(self.plot_h ** 2 + self.plot_m ** 2)
+        self._computed["isosceles_diagonal"] = value
+        return value
 
-        elif self.task_type == "TRAPEZOID_AREA_BASES":
-            self._add_info(f"Трапеція: основи a={self.a}, b={self.b}, площа S={self.S}")
+    def compute_right_slanted_side(self) -> float:
+        if "right_slanted_side" in self._computed:
+            return self._computed["right_slanted_side"]
+        diff = abs(self.a - self.b)
+        value = math.sqrt(self.h ** 2 + diff ** 2)
+        self._computed["right_slanted_side"] = value
+        return value
 
-            m_val = (self.a + self.b) / 2
-            is_int = not self._is_target("midline")
-            pref = "(Проміжний крок) " if is_int else ""
-            key = "intermediate_midline" if is_int else "midline"
+    def add_midline_from_bases_result(self, result: dict, is_intermediate: bool) -> float:
+        if self.midline_step_added:
+            return self.plot_m
 
-            result[key] = self._add_step(
-                f"Крок {step_num}. {pref}Знаходимо середню лінію m",
-                "m = (a + b) / 2",
-                f"m = ({self.a} + {self.b}) / 2",
-                m_val,
-                is_intermediate=is_int
-            )
-            step_num += 1
-            plot_m = m_val
+        prefix = "(Проміжний крок) " if is_intermediate else ""
+        key = "intermediate_midline" if is_intermediate else "midline"
+        result[key] = self.add_step(
+            f"Крок {self.step_num}. {prefix}Знаходимо середню лінію m",
+            "m = (a + b) / 2",
+            f"m = ({self.a} + {self.b}) / 2",
+            self.plot_m,
+            rule="Середня лінія трапеції дорівнює півсумі її основ.",
+            is_intermediate=is_intermediate
+        )
+        self.step_num += 1
+        self.midline_step_added = True
+        return self.plot_m
 
-            h_val = self.S / m_val
-            if self._is_target("height"):
-                result["height"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо висоту h",
-                    "h = S / m",
-                    f"h = {self.S} / {m_val:.2f}",
-                    h_val,
-                    rule="З формули площі виражаємо висоту: відношення площі до середньої лінії."
-                )
-                step_num += 1
-            plot_h = h_val
+    def add_isosceles_projection_step(self) -> None:
+        if self.projection_step_added:
+            return
 
-        elif self.task_type == "TRAPEZOID_MIDLINE_HEIGHT":
-            self._add_info(f"Трапеція: середня лінія m={self.m}, висота h={self.h}")
-            plot_m = self.m
-            plot_h = self.h
+        diff = self.compute_half_base_difference()
+        self.add_step(
+            f"Крок {self.step_num}. (Проміжний крок) Проекція бічної сторони",
+            "x = |a - b| / 2",
+            f"x = |{self.a} - {self.b}| / 2 = {diff:.2f}",
+            diff,
+            rule="У рівнобічній трапеції проекція бічної сторони дорівнює піврізниці основ.",
+            is_intermediate=True
+        )
+        self.step_num += 1
+        self.projection_step_added = True
 
-        elif self.task_type == "ISOSCELES_TRAPEZOID_BASES_LEG":
-            plot_type = 'isosceles'
-            self._add_info(f"Рівнобічна трапеція: основи a={self.a}, b={self.b}, бічна сторона c={self.c}")
+    def add_isosceles_height_result(self, result: dict, is_intermediate: bool) -> float:
+        if self.height_step_added:
+            return self.plot_h
 
-            diff = abs(self.a - self.b) / 2
-            self._add_step(
-                f"Крок {step_num}. (Проміжний крок) Проекція бічної сторони",
-                "x = |a - b| / 2",
-                f"x = |{self.a} - {self.b}| / 2 = {diff:.2f}",
-                diff,
-                rule="У рівнобічній трапеції проекція бічної сторони дорівнює піврізниці основ.",
-                is_intermediate=True
-            )
-            step_num += 1
+        diff = self.compute_half_base_difference()
+        prefix = "(Проміжний крок) " if is_intermediate else ""
+        key = "intermediate_height" if is_intermediate else "height"
+        result[key] = self.add_step(
+            f"Крок {self.step_num}. {prefix}Знаходимо висоту h",
+            "h = √(c² - x²)",
+            f"h = √({self.c}² - {diff:.2f}²)",
+            self.plot_h,
+            rule="Знаходимо висоту за теоремою Піфагора з прямокутного трикутника.",
+            is_intermediate=is_intermediate
+        )
+        self.step_num += 1
+        self.height_step_added = True
+        return self.plot_h
 
-            h_val = math.sqrt(self.c ** 2 - diff ** 2)
-            if self._is_target("height") or self._is_target("area") or self._is_target("diagonals") or self._is_target(
-                    "incircle") or self._is_target("circumcircle"):
-                is_int = not self._is_target("height")
-                pref = "(Проміжний крок) " if is_int else ""
-                key = "intermediate_height" if is_int else "height"
+    def add_right_slanted_side_step(self) -> float:
+        if self.right_slanted_side_step_added:
+            return self.compute_right_slanted_side()
 
-                result[key] = self._add_step(
-                    f"Крок {step_num}. {pref}Знаходимо висоту h",
-                    "h = √(c² - x²)",
-                    f"h = √({self.c}² - {diff:.2f}²)",
-                    h_val,
-                    rule="Знаходимо висоту за теоремою Піфагора з прямокутного трикутника.",
-                    is_intermediate=is_int
-                )
-                step_num += 1
-            plot_h = h_val
+        diff = abs(self.a - self.b)
+        c2_val = self.compute_right_slanted_side()
+        self.add_step(
+            f"Крок {self.step_num}. (Проміжний крок) Знаходимо похилу бічну сторону c_похила",
+            "c_похила = √(h² + |a-b|²)",
+            f"c_похила = √({self.h}² + {diff}²)",
+            c2_val,
+            rule="У прямокутній трапеції похила сторона утворює прямокутний трикутник з висотою та різницею основ.",
+            is_intermediate=True
+        )
+        self.step_num += 1
+        self.right_slanted_side_step_added = True
+        return c2_val
 
-            m_val = (self.a + self.b) / 2
-            if self._is_target("midline") or self._is_target("area") or self._is_target("diagonals") or self._is_target(
-                    "circumcircle"):
-                is_int = not self._is_target("midline")
-                pref = "(Проміжний крок) " if is_int else ""
-                key = "intermediate_midline" if is_int else "midline"
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
+        self.task.add_prerequisites(self, self._result)
 
-                result[key] = self._add_step(
-                    f"Крок {step_num}. {pref}Знаходимо середню лінію m",
-                    "m = (a + b) / 2",
-                    f"m = ({self.a} + {self.b}) / 2",
-                    m_val,
-                    is_intermediate=is_int
-                )
-                step_num += 1
-            plot_m = m_val
+    def _generate_image(self) -> str:
+        draw_m = self.is_target("midline") or self.task_type == "TRAPEZOID_MIDLINE_HEIGHT"
 
-            if self._is_target("perimeter"):
-                p_val = self.a + self.b + 2 * self.c
-                result["perimeter"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо периметр",
-                    "P = a + b + 2c",
-                    f"P = {self.a} + {self.b} + 2·{self.c}",
-                    p_val
-                )
-                step_num += 1
-
-            if self._is_target("angles"):
-                alpha = math.degrees(math.acos(diff / self.c))
-                beta = 180.0 - alpha
-                result["angle_alpha"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо гострий кут при основі α",
-                    "α = arccos(x / c)",
-                    f"α = arccos({diff:.2f} / {self.c})",
-                    alpha
-                )
-                step_num += 1
-                result["angle_beta"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо тупий кут β",
-                    "β = 180° - α",
-                    f"β = 180° - {alpha:.1f}°",
-                    beta,
-                    rule="Сума кутів, прилеглих до бічної сторони, дорівнює 180°."
-                )
-                step_num += 1
-
-            if self._is_target("diagonals"):
-                d_val = math.sqrt(plot_h ** 2 + plot_m ** 2)
-                result["diagonals"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо діагоналі (вони рівні)",
-                    "d = √(h² + m²)",
-                    f"d = √({plot_h:.2f}² + {plot_m:.2f}²)",
-                    d_val,
-                    rule="Діагональ, висота та середня лінія рівнобічної трапеції утворюють прямокутний трикутник."
-                )
-                step_num += 1
-
-            if self._is_target("incircle"):
-                self._add_header(f"Крок {step_num}. Перевірка вписаного кола")
-                step_num += 1
-                if math.isclose(self.a + self.b, 2 * self.c, rel_tol=1e-3):
-                    self._add_info("✅ Вписане коло ІСНУЄ (a + b = 2c).")
-                    result["incircle"] = self._add_step(
-                        "Знаходимо радіус вписаного кола r",
-                        "r = h / 2",
-                        f"r = {plot_h:.2f} / 2",
-                        plot_h / 2,
-                        rule="Діаметр вписаного в трапецію кола дорівнює її висоті."
-                    )
-                else:
-                    self._add_info(f"❌ Вписане коло НЕ ІСНУЄ ({self.a} + {self.b} ≠ 2 · {self.c}).")
-                    self._add_rule("У трапецію можна вписати коло лише якщо сума основ дорівнює сумі бічних сторін.")
-
-            if self._is_target("circumcircle"):
-                self._add_header(f"Крок {step_num}. Описане коло")
-                step_num += 1
-                self._add_info("✅ Описане коло ІСНУЄ (навколо рівнобічної трапеції завжди можна описати коло).")
-
-                if d_val is None:
-                    d_val = math.sqrt(plot_h ** 2 + plot_m ** 2)
-                    self._add_step(f"(Проміжний крок) Знаходимо діагональ d", "d = √(h² + m²)", f"d = {d_val:.2f}",
-                                   d_val, is_intermediate=True)
-
-                r_circ = (self.c * d_val) / (2 * plot_h)
-                result["circumcircle"] = self._add_step(
-                    "Знаходимо радіус описаного кола R",
-                    "R = (c · d) / (2 · h)",
-                    f"R = ({self.c} · {d_val:.2f}) / (2 · {plot_h:.2f})",
-                    r_circ,
-                    rule="Радіус кола, описаного навколо рівнобічної трапеції, дорівнює радіусу кола навколо трикутника (основа, діагональ, бічна сторона)."
-                )
-
-        elif self.task_type == "RIGHT_TRAPEZOID_BASES_HEIGHT":
-            plot_type = 'right'
-            self._add_info(f"Прямокутна трапеція: основи a={self.a}, b={self.b}, висота (бічна сторона) h={self.h}")
-
-            m_val = (self.a + self.b) / 2
-            if self._is_target("midline") or self._is_target("area"):
-                is_int = not self._is_target("midline")
-                pref = "(Проміжний крок) " if is_int else ""
-                key = "intermediate_midline" if is_int else "midline"
-
-                result[key] = self._add_step(
-                    f"Крок {step_num}. {pref}Знаходимо середню лінію m",
-                    "m = (a + b) / 2",
-                    f"m = ({self.a} + {self.b}) / 2",
-                    m_val,
-                    is_intermediate=is_int
-                )
-                step_num += 1
-            plot_m = m_val
-
-            diff = abs(self.a - self.b)
-            c2_val = math.sqrt(self.h ** 2 + diff ** 2)
-
-            needs_c2 = self._is_target("perimeter") or self._is_target("angles") or self._is_target("incircle")
-            if needs_c2:
-                self._add_step(
-                    f"Крок {step_num}. (Проміжний крок) Знаходимо похилу бічну сторону c_похила",
-                    "c_похила = √(h² + |a-b|²)",
-                    f"c_похила = √({self.h}² + {diff}²)",
-                    c2_val,
-                    rule="У прямокутній трапеції похила сторона утворює прямокутний трикутник з висотою та різницею основ.",
-                    is_intermediate=True
-                )
-                step_num += 1
-
-            if self._is_target("perimeter"):
-                p_val = self.a + self.b + self.h + c2_val
-                result["perimeter"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо периметр",
-                    "P = a + b + h + c_похила",
-                    f"P = {self.a} + {self.b} + {self.h} + {c2_val:.2f}",
-                    p_val
-                )
-                step_num += 1
-
-            if self._is_target("diagonals"):
-                d1 = math.sqrt(self.a ** 2 + self.h ** 2)
-                result["diagonal_1"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо першу діагональ d1",
-                    "d1 = √(a² + h²)",
-                    f"d1 = √({self.a}² + {self.h}²)",
-                    d1,
-                    rule="За теоремою Піфагора для прямокутного трикутника з катетами a (основа) та h (висота)."
-                )
-                step_num += 1
-
-                d2 = math.sqrt(self.b ** 2 + self.h ** 2)
-                result["diagonal_2"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо другу діагональ d2",
-                    "d2 = √(b² + h²)",
-                    f"d2 = √({self.b}² + {self.h}²)",
-                    d2,
-                    rule="За теоремою Піфагора для прямокутного трикутника з катетами b (друга основа) та h."
-                )
-                step_num += 1
-
-            if self._is_target("angles"):
-                alpha = math.degrees(math.atan(self.h / diff))
-                beta = 180.0 - alpha
-                self._add_info("Два кути прямокутної трапеції дорівнюють 90°.")
-                result["angle_alpha"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо гострий кут α",
-                    "α = arctg(h / |a-b|)",
-                    f"α = arctg({self.h} / {diff})",
-                    alpha
-                )
-                step_num += 1
-                result["angle_beta"] = self._add_step(
-                    f"Крок {step_num}. Знаходимо тупий кут β",
-                    "β = 180° - α",
-                    f"β = 180° - {alpha:.1f}°",
-                    beta
-                )
-                step_num += 1
-
-            if self._is_target("incircle"):
-                self._add_header(f"Крок {step_num}. Перевірка вписаного кола")
-                step_num += 1
-                if math.isclose(self.a + self.b, self.h + c2_val, rel_tol=1e-3):
-                    self._add_info("✅ Вписане коло ІСНУЄ (a + b = h + c_похила).")
-                    result["incircle"] = self._add_step(
-                        "Знаходимо радіус вписаного кола r",
-                        "r = h / 2",
-                        f"r = {self.h:.2f} / 2",
-                        self.h / 2,
-                        rule="Діаметр вписаного в трапецію кола завжди дорівнює її висоті."
-                    )
-                else:
-                    self._add_info(f"❌ Вписане коло НЕ ІСНУЄ ({self.a} + {self.b} ≠ {self.h} + {c2_val:.2f}).")
-                    self._add_rule("У трапецію можна вписати коло лише якщо сума основ дорівнює сумі бічних сторін.")
-
-        if self._is_target("area") and self.task_type != "TRAPEZOID_AREA_BASES":
-            area_val = plot_m * plot_h
-            result["area"] = self._add_step(
-                f"Крок {step_num}. Знаходимо площу",
-                "S = m · h",
-                f"S = {plot_m:.2f} · {plot_h:.2f}",
-                area_val,
-                rule="Площа трапеції дорівнює добутку середньої лінії на висоту."
-            )
-            step_num += 1
-
-        draw_m = self._is_target("midline") or self.task_type == "TRAPEZOID_MIDLINE_HEIGHT"
-
-        image_base64 = TrapezoidPlotter(
-            plot_a, plot_b, plot_h, m=plot_m, c=plot_c if plot_type == 'isosceles' else None,
-            trap_type=plot_type, draw_m=draw_m,
-            r_in=result.get("incircle"), r_circ=result.get("circumcircle")
+        return TrapezoidPlotter(
+            self.plot_a,
+            self.plot_b,
+            self.plot_h,
+            m=self.plot_m,
+            c=self.plot_c if self.plot_type == "isosceles" else None,
+            trap_type=self.plot_type,
+            draw_m=draw_m,
+            r_in=self._result.get("incircle"),
+            r_circ=self._result.get("circumcircle")
         ).plot()
-
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
