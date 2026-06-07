@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import matplotlib
 
 matplotlib.use('Agg')
@@ -6,7 +7,7 @@ import io
 import base64
 
 
-class BasePlotter:
+class BasePlotter(ABC):
     """
     Абстрактний базовий клас для всіх плоттерів.
     Відповідає за ініціалізацію полотна, допоміжні методи малювання та збереження.
@@ -34,6 +35,7 @@ class BasePlotter:
         buf.seek(0)
         return base64.b64encode(buf.read()).decode('utf-8')
 
+    @abstractmethod
     def plot(self) -> str:
         """Цей метод має бути реалізований у нащадках."""
-        raise NotImplementedError("Метод plot() не реалізовано")
+        pass

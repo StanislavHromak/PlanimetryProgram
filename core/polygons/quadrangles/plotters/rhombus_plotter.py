@@ -6,7 +6,7 @@ from core.plotter import BasePlotter
 
 
 class RhombusPlotter(BasePlotter):
-    """Малює ромб з діагоналями і (опціонально) вписаним колом."""
+    """Малює ромб з діагоналями та (опціонально) вписаним колом."""
 
     def __init__(self, d1: float, d2: float, a: float, angle: float, incircle_r: float = None):
         super().__init__(figsize=(6, 6))
