@@ -1,3 +1,6 @@
+from core.base import GeometricSolver
+from core.interfaces import Solver, SolverCreator
+
 from core.curves.circle import CircleSolver
 from core.curves.sector import SectorSolver
 from core.curves.ellipse import EllipseSolver
@@ -16,57 +19,68 @@ from core.polygons.quadrangles.rhombus import RhombusSolver
 from core.polygons.quadrangles.square import SquareSolver
 from core.polygons.quadrangles.trapezoid import TrapezoidSolver
 
+
 class GeometryFactory:
-    """Патерн Factory Method для створення правильного об'єкта-розв'язувача."""
+    """Фабрика реєстрації солверів."""
 
-    @staticmethod
-    def create_solver(figure: str, task_type: str, params: dict, targets: list):
+    _registry: dict[tuple[str, str], SolverCreator] = {}
 
-        # --- БЛОК БАГАТОКУТНИКІВ ---
-        if figure == "regular_polygon":
-            n = params.get('n', 3)
-            return RegularPolygonSolver(n, task_type, params, targets)
+    @classmethod
+    def register(cls, figure: str, task_type: str, creator: SolverCreator) -> None:
+        cls._registry[(figure, task_type)] = creator
 
-        # --- БЛОК ТРИКУТНИКІВ ---
-        elif figure == "triangle":
-            if task_type in ["SSS", "SAS", "ASA"]:
-                return ArbitraryTriangleSolver(task_type, params, targets)
+    @classmethod
+    def register_solver(
+        cls,
+        figure: str,
+        solver_cls: type[GeometricSolver],
+        creator: SolverCreator | None = None,
+    ) -> None:
+        solver_creator = creator or solver_cls
+        for task_type in solver_cls.supported_tasks():
+            cls.register(figure, task_type, solver_creator)
 
-            elif task_type in ["RIGHT_LEGS", "RIGHT_LEG_HYPOTENUSE"]:
-                return RightTriangleSolver(task_type, params, targets)
+    @classmethod
+    def create_solver(
+        cls,
+        figure: str,
+        task_type: str,
+        params: dict,
+        targets: list,
+    ) -> Solver:
+        creator = cls._registry.get((figure, task_type))
+        if creator is None:
+            raise ValueError(
+                f"Фабрика не знає як створити: фігура '{figure}', "
+                f"тип задачі '{task_type}'"
+            )
 
-            elif task_type == "ISOSCELES_BASE_SIDE":
-                return IsoscelesTriangleSolver(task_type, params, targets)
+        return creator(task_type, params, targets)
 
-            elif task_type == "EQUILATERAL_SIDE":
-                return EquilateralTriangleSolver(task_type, params, targets)
 
-        # --- БЛОК ЧОТИРИКУТНИКІВ ---
-        elif figure == "quadrangle":
-            if task_type == "ARB_SIDES_ANGLES":
-                return ArbitraryQuadrangleSolver(task_type, params, targets)
-            elif task_type in ["SQUARE_SIDE", "SQUARE_AREA", "SQUARE_PERIMETER", "SQUARE_DIAGONAL"]:
-                return SquareSolver(task_type, params, targets)
-            elif task_type in ["RECTANGLE_SIDES", "RECTANGLE_AREA_SIDE", "RECTANGLE_PERIMETER_SIDE",
-                               "RECTANGLE_DIAGONAL_SIDE"]:
-                return RectangleSolver(task_type, params, targets)
-            elif task_type in ["RHOMBUS_DIAGONALS", "RHOMBUS_SIDE_ANGLE", "RHOMBUS_AREA_SIDE",
-                               "RHOMBUS_DIAGONAL_SIDE"]:
-                return RhombusSolver(task_type, params, targets)
-            elif task_type in ["PARALLELOGRAM_S_A", "PARALLELOGRAM_D_A"]:
-                return ParallelogramSolver(task_type, params, targets)
-            elif task_type in ["TRAPEZOID_ABH", "TRAPEZOID_AREA_BASES", "TRAPEZOID_MIDLINE_HEIGHT",
-                               "ISOSCELES_TRAPEZOID_BASES_LEG"]:
-                return TrapezoidSolver(task_type, params, targets)
+def _create_regular_polygon(task_type: str, params: dict, targets: list) -> Solver:
+    n = params.get("n", 3)
+    return RegularPolygonSolver(n, task_type, params, targets)
 
-        # --- БЛОК КРИВОЛІНІЙНИХ ФІГУР ---
-        elif figure == "curves":
-            if task_type in ["CIRCLE_RADIUS", "CIRCLE_DIAMETER", "CIRCLE_CIRCUMFERENCE", "CIRCLE_AREA"]:
-                return CircleSolver(task_type, params, targets)
-            elif task_type == "SECTOR_AND_ARC":
-                return SectorSolver(task_type, params, targets)
-            elif task_type == "ELLIPSE_AXES":
-                return EllipseSolver(task_type, params, targets)
 
-        # Якщо нічого не підійшло
-        raise ValueError(f"Фабрика не знає як створити: фігура '{figure}', тип задачі '{task_type}'")
+def _register_solvers() -> None:
+    GeometryFactory.register_solver("regular_polygon", RegularPolygonSolver, _create_regular_polygon)
+
+    GeometryFactory.register_solver("triangle", ArbitraryTriangleSolver)
+    GeometryFactory.register_solver("triangle", RightTriangleSolver)
+    GeometryFactory.register_solver("triangle", IsoscelesTriangleSolver)
+    GeometryFactory.register_solver("triangle", EquilateralTriangleSolver)
+
+    GeometryFactory.register_solver("quadrangle", ArbitraryQuadrangleSolver)
+    GeometryFactory.register_solver("quadrangle", SquareSolver)
+    GeometryFactory.register_solver("quadrangle", RectangleSolver)
+    GeometryFactory.register_solver("quadrangle", RhombusSolver)
+    GeometryFactory.register_solver("quadrangle", ParallelogramSolver)
+    GeometryFactory.register_solver("quadrangle", TrapezoidSolver)
+
+    GeometryFactory.register_solver("curves", CircleSolver)
+    GeometryFactory.register_solver("curves", SectorSolver)
+    GeometryFactory.register_solver("curves", EllipseSolver)
+
+
+_register_solvers()
