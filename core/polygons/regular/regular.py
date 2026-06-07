@@ -245,11 +245,11 @@ class DiagonalTarget(RegularPolygonTarget):
             solver.add_info("У правильного трикутника немає діагоналей.")
             return
 
-        solver.diag_val = 2 * solver.plot_R() * math.sin(2 * math.pi / solver.n)
+        solver.diag_val = 2 * solver.plot_big_r() * math.sin(2 * math.pi / solver.n)
         result["diagonal"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо найменшу діагональ d",
             "d = 2 * R * sin(360 / n)",
-            f"d = 2 * {solver.plot_R():.2f} * sin(360 / {solver.n})",
+            f"d = 2 * {solver.plot_big_r():.2f} * sin(360 / {solver.n})",
             solver.diag_val,
             rule=(
                 "Найменша діагональ правильного багатокутника з'єднує вершину "
@@ -266,7 +266,7 @@ class CircumcircleTarget(RegularPolygonTarget):
         if solver.task.input_target == self.target_name:
             return
 
-        solver.R = solver.plot_R()
+        solver.R = solver.plot_big_r()
         result["circumcircle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус описаного кола R",
             "R = a / (2 * sin(180/n))",
@@ -361,33 +361,20 @@ class RegularPolygonSolver(GeometricSolver):
     def angle_rad(self) -> float:
         return math.pi / self.n
 
-    def plot_R(self) -> float:
+    def plot_big_r(self) -> float:
         return self.side / (2 * math.sin(self.angle_rad()))
 
     def plot_r(self) -> float:
         return self.side / (2 * math.tan(self.angle_rad()))
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
-
+    def _prepare(self) -> None:
         self.add_info(f"Фігура: Правильний {self.n}-кутник")
-        self.task.normalize(self, result)
+        self.task.normalize(self, self._result)
 
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
+    def _generate_image(self) -> str:
         draw_R = self.is_target("circumcircle") or self.task_type == "REGULAR_R_CIRCUM"
         draw_r = self.is_target("incircle") or self.task_type == "REGULAR_R_IN"
 
-        image_base64 = RegularPolygonPlotter(
-            self.n,
-            self.side,
-            self.plot_R(),
-            self.plot_r(),
-            draw_R,
-            draw_r,
-            d=self.diag_val,
+        return RegularPolygonPlotter(
+            self.n, self.side, self.plot_big_r(), self.plot_r(), draw_R, draw_r, d=self.diag_val
         ).plot()
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}

@@ -449,17 +449,9 @@ class ArbitraryTriangleSolver(GeometricSolver):
         self._computed["area"] = value
         return value
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
 
-        self.task.prepare(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
+    def _generate_image(self) -> str:
         self.task.ensure_sides(self)
-
-        image_base64 = TrianglePlotter(self.a, self.b, self.c).plot()
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
+        return TrianglePlotter(self.a, self.b, self.c).plot()

@@ -4,11 +4,15 @@ from typing import ClassVar
 
 class GeometricSolver(ABC):
     SUPPORTED_TASKS: ClassVar[tuple[str, ...]] = ()
+    TARGET_ORDER: ClassVar[tuple[str, ...]] = ()
+    TARGETS: ClassVar[dict] = {}
 
     def __init__(self, targets: list = None):
         self.targets = targets or []
         self._steps = []
         self._computed = {}  # кеш вже обчислених значень
+        self.step_num = 1
+        self._result = {}
 
     @classmethod
     def supported_tasks(cls) -> tuple[str, ...]:
@@ -72,23 +76,40 @@ class GeometricSolver(ABC):
 
     def calculate(self) -> dict:
         """
-        Шаблонний метод: виконує валідацію, формує помилку або запускає обчислення.
+        Головний Шаблонний метод: керує всім життєвим циклом обчислення.
         """
         if not self.validate():
-            # Надійно дістаємо повідомлення про помилку з останнього кроку
-            if self._steps and isinstance(self._steps[-1], dict) and "text" in self._steps[-1]:
-                error_msg = self._steps[-1]["text"]
-            else:
-                error_msg = "Невідома помилка валідації даних."
+            error_msg = self._steps[-1].get("text",
+                                            "Невідома помилка валідації даних.") if self._steps else "Помилка валідації."
             return {"success": False, "error": error_msg}
 
-        # Якщо валідація успішна — викликаємо логіку конкретної фігури
-        return self._calculate()
+        self.step_num = 1
+        self._result = {}
+        self._prepare()
+
+        # Загальний для всіх фігур цикл обчислення цілей
+        for target_name in self.TARGET_ORDER:
+            if self.is_target(target_name) and target_name in self.TARGETS:
+                self.TARGETS[target_name].calculate(self, self._result)
+
+        # Делегуємо фігурі генерацію графіка
+        image_base64 = self._generate_image()
+
+        # Універсальне повернення результату
+        return {
+            "success": True,
+            "data": self._result,
+            "steps": self._steps,
+            "image": image_base64
+        }
 
     @abstractmethod
-    def _calculate(self) -> dict:
-        """
-        Основна логіка обчислень.
-        """
+    def _prepare(self) -> None:
+        """Специфічна підготовка фігури перед обчисленням цілей."""
+        pass
+
+    @abstractmethod
+    def _generate_image(self) -> str | None:
+        """Специфічна генерація графіка для фігури."""
         pass
 

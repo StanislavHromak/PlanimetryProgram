@@ -430,25 +430,12 @@ class ParallelogramSolver(GeometricSolver):
         self.sides_step_added = True
         return self.a, self.b
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
+        self.task.add_prerequisites(self, self._result)
 
-        self.task.prepare(self, result)
-        self.task.add_prerequisites(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
-        image_base64 = ParallelogramPlotter(
-            self.a,
-            self.b,
-            self.angle_plot,
-            opp_angle=self.adj_angle_plot,
-            d1=self.d1_plot,
-            d2=self.d2_plot,
-            height=self.height_val if self.show_height else None,
+    def _generate_image(self) -> str:
+        return ParallelogramPlotter(
+            self.a, self.b, self.angle_plot, opp_angle=self.adj_angle_plot,
+            d1=self.d1_plot, d2=self.d2_plot, height=self.height_val if self.show_height else None,
         ).plot()
-
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}

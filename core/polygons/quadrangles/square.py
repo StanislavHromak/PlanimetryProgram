@@ -275,21 +275,13 @@ class SquareSolver(GeometricSolver):
             self.show_diagonal = True
         return self.d
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.normalize(self, self._result)
 
-        self.task.normalize(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
-        image_base64 = RectanglePlotter(
+    def _generate_image(self) -> str:
+        return RectanglePlotter(
             self.a,
             self.a,
-            d=self.d if self.show_diagonal else None,
-            R_circum=self.d / 2 if self.show_circumcircle else None,
+            d=self.d if getattr(self, "show_diagonal", False) else None,
+            R_circum=self.d / 2 if getattr(self, "show_circumcircle", False) else None,
         ).plot()
-
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}

@@ -287,24 +287,17 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
         v3 = (self.a + self.b * math.cos(theta - beta), self.b * math.sin(theta - beta))
         return [(0, 0), (self.a, 0), v3, v4]
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
-
+    def _prepare(self) -> None:
         self.task.prepare(self)
 
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
+    def _generate_image(self) -> str:
         vertices = self.get_vertices()
         r_in = self.get_incircle_radius()
         r_circ = self.get_circumcircle_radius()
 
-        image_base64 = ArbitraryQuadranglePlotter(
+        return ArbitraryQuadranglePlotter(
             vertices, self.a, self.b, self.c, self.d, self.angle,
             r_inscribed=r_in,
             r_circumscribed=r_circ
         ).plot()
 
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}

@@ -10,7 +10,8 @@ class CircleTask(ABC):
     task_type: str
     input_target: str
 
-    def validate(self, solver: "CircleSolver") -> bool:
+    @staticmethod
+    def validate(solver: "CircleSolver") -> bool:
         if solver.val <= 0:
             solver.add_error("Вхідне значення має бути додатним числом.")
             return False
@@ -193,15 +194,8 @@ class CircleSolver(GeometricSolver):
         key = f"intermediate_{target_name}" if is_int else target_name
         return is_int, pref, key
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.normalize(self, self._result)
 
-        self.task.normalize(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
-        image_base64 = CirclePlotter(self.r).plot()
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
+    def _generate_image(self) -> str:
+        return CirclePlotter(self.r).plot()

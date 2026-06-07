@@ -202,15 +202,8 @@ class SectorSolver(GeometricSolver):
         self._sector_area_step_added = True
         return sector_area
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
 
-        self.task.prepare(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
-        image_base64 = SectorPlotter(self.r, self.angle).plot()
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
+    def _generate_image(self) -> str:
+        return SectorPlotter(self.r, self.angle).plot()

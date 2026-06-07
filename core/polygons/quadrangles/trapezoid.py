@@ -602,20 +602,14 @@ class TrapezoidSolver(GeometricSolver):
         self.right_slanted_side_step_added = True
         return c2_val
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
+        self.task.add_prerequisites(self, self._result)
 
-        self.task.prepare(self, result)
-        self.task.add_prerequisites(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
+    def _generate_image(self) -> str:
         draw_m = self.is_target("midline") or self.task_type == "TRAPEZOID_MIDLINE_HEIGHT"
 
-        image_base64 = TrapezoidPlotter(
+        return TrapezoidPlotter(
             self.plot_a,
             self.plot_b,
             self.plot_h,
@@ -623,8 +617,6 @@ class TrapezoidSolver(GeometricSolver):
             c=self.plot_c if self.plot_type == "isosceles" else None,
             trap_type=self.plot_type,
             draw_m=draw_m,
-            r_in=result.get("incircle"),
-            r_circ=result.get("circumcircle")
+            r_in=self._result.get("incircle"),
+            r_circ=self._result.get("circumcircle")
         ).plot()
-
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}

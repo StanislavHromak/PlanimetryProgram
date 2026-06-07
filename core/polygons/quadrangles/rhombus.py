@@ -428,23 +428,15 @@ class RhombusSolver(GeometricSolver):
         self.area_step_added = True
         return area_val
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
+        self.task.add_prerequisites(self, self._result)
 
-        self.task.prepare(self, result)
-        self.task.add_prerequisites(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
-        image_base64 = RhombusPlotter(
+    def _generate_image(self) -> str:
+        return RhombusPlotter(
             d1=self.d1,
             d2=self.d2,
             a=self.a,
             angle=self.angle,
-            incircle_r=(self.compute_height() / 2) if self.show_incircle else None,
+            incircle_r=(self.compute_height() / 2) if getattr(self, "show_incircle", False) else None,
         ).plot()
-
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}

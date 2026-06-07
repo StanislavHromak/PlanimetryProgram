@@ -134,15 +134,8 @@ class EquilateralTriangleSolver(GeometricSolver):
             return False
         return self.task.validate(self)
 
-    def _calculate(self):
-        self.step_num = 1
-        result = {}
+    def _prepare(self) -> None:
+        self.task.prepare(self, self._result)
 
-        self.task.prepare(self, result)
-
-        for target_name in self.TARGET_ORDER:
-            if self.is_target(target_name):
-                self.TARGETS[target_name].calculate(self, result)
-
-        image_base64 = TrianglePlotter(self.a, self.a, self.a).plot()
-        return {"success": True, "data": result, "steps": self._steps, "image": image_base64}
+    def _generate_image(self) -> str:
+        return TrianglePlotter(self.a, self.a, self.a).plot()
