@@ -1,11 +1,37 @@
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 
 class GeometricSolver(ABC):
+    SUPPORTED_TASKS: ClassVar[tuple[str, ...]] = ()
+
     def __init__(self, targets: list = None):
         self.targets = targets or []
         self._steps = []
         self._computed = {}  # кеш вже обчислених значень
+
+    @classmethod
+    def supported_tasks(cls) -> tuple[str, ...]:
+        return cls.SUPPORTED_TASKS
+
+    def is_target(self, param: str) -> bool:
+        return self._is_target(param)
+
+    def add_header(self, text: str):
+        self._add_header(text)
+
+    def add_rule(self, text: str):
+        self._add_rule(text)
+
+    def add_info(self, text: str):
+        self._add_info(text)
+
+    def add_error(self, text: str):
+        self._add_error(text)
+
+    def add_step(self, title: str, formula: str, solution_str: str,
+                 value: float, rule: str = None, is_intermediate: bool = False) -> float:
+        return self._add_step(title, formula, solution_str, value, rule, is_intermediate)
 
     def _is_target(self, param: str) -> bool:
         return param in self.targets
