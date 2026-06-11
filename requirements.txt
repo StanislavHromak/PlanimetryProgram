@@ -7,3 +7,6 @@ fastapi
 matplotlib
 aiosqlite
 tzdata
+pytest
+pytest-asyncio
+httpx
