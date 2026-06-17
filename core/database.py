@@ -17,10 +17,17 @@ AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
+    """Базовий клас для всіх декларативних моделей SQLAlchemy."""
     pass
 
 
 class SolutionRecord(Base):
+    """
+        Модель бази даних для збереження історії розв'язаних задач з планіметрії.
+
+        Зберігає інформацію про фігуру, тип задачі, вхідні параметри, цілі,
+        покроковий розв'язок, фінальний результат та згенероване креслення (base64).
+    """
     __tablename__ = "solutions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

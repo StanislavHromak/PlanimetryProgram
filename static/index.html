@@ -17,7 +17,7 @@
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>📐 PlanimetrySolver <span class="badge">Розв'язувач задач з планіметрії</span></h1>
+            <h1>PlanimetrySolver <span class="badge">Розв'язувач задач з планіметрії</span></h1>
             <p>Швидке розв'язання задач з детальним поясненням</p>
         </header>
 
@@ -25,11 +25,11 @@
         <div class="tabs-bar">
             <button class="tab-btn tab-btn--active" data-tab="solver"
                     onclick="window.switchTab('solver')">
-                ⚡ Розв'язувач
+                Розв'язувач
             </button>
             <button class="tab-btn" data-tab="history"
                     onclick="window.switchTab('history')">
-                🕓 Історія
+                Історія
             </button>
         </div>
 
@@ -66,7 +66,7 @@
                     <h2>Введіть дані</h2>
                     <div id="dynamic-inputs" class="input-grid"></div>
                     <button class="btn-primary" onclick="solve()">
-                        <span class="btn-icon">⚡</span> Розрахувати
+                        <span class="btn-icon"></span> Розрахувати
                     </button>
                     <div id="error-msg" class="error-msg"></div>
                 </section>
@@ -74,22 +74,22 @@
                 <section id="results" class="card results-card" style="display: none;">
                     <div class="results-layout">
                         <div class="data-section">
-                            <h2>✅ Результати</h2>
+                            <h2>Результати</h2>
                             <ul id="params-list" class="modern-list"></ul>
                             <button id="export-btn" class="btn-export" style="display:none"
                                     onclick="window.exportCurrentResult()">
-                                📄 Експортувати PDF
+                                Експортувати PDF
                             </button>
                         </div>
 
                         <div class="plot-section" id="plot-section" style="display: none;">
-                            <h2>🎨 Креслення</h2>
+                            <h2>Креслення</h2>
                             <div id="plot-container" class="image-wrapper"></div>
                         </div>
                     </div>
 
                     <div class="steps-section">
-                        <h2>🧠 Хід розв'язання</h2>
+                        <h2>Хід розв'язання</h2>
                         <div id="steps-list" class="steps-container"></div>
                     </div>
                 </section>
@@ -100,13 +100,13 @@
             <div id="tab-history" class="tab-content" style="display: none;">
                 <section class="card">
                     <div class="history-header">
-                        <h2 style="margin:0">🕓 Історія розв'язань</h2>
+                        <h2 style="margin:0">Історія розв'язань</h2>
                         <span class="history-hint">
                             Натисніть «Повторити» щоб заповнити форму знову
                         </span>
                     </div>
                     <div id="history-list">
-                        <div class="history-loading">⏳ Завантаження...</div>
+                        <div class="history-loading">Завантаження...</div>
                     </div>
                 </section>
             </div>
@@ -122,7 +122,7 @@
                 <img id="modal-image" src="" alt="Масштабоване креслення">
             </div>
             <div class="zoom-hint">
-                🖱️ Використовуйте коліщатко миші для масштабування. Затисніть ЛКМ для переміщення.
+                Використовуйте коліщатко миші для масштабування. Затисніть ЛКМ для переміщення.
             </div>
         </div>
     </div>

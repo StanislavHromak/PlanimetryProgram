@@ -78,9 +78,11 @@ export const uiConfig = {
             right: {
                 name: "Прямокутний трикутник",
                 targets: [
-                    { id: "side", label: "Невідому сторону (a)", checked: true },
+                    { id: "side", label: "Невідому сторону (a/b/c)", checked: true },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
+                    { id: "altitude_to_hypotenuse", label: "Висоту до гіпотенузи", checked: false },
+                    { id: "median_to_hypotenuse", label: "Медіану до гіпотенузи", checked: false },
                     { id: "incircle", label: "Вписане коло (r)", checked: false },
                     { id: "circumcircle", label: "Описане коло (R)", checked: false }
                 ],
@@ -88,33 +90,50 @@ export const uiConfig = {
                     "RIGHT_LEGS": {
                         name: "Два катети",
                         inputs: [ { id: "a", label: "Катет a" }, { id: "b", label: "Катет b" } ],
-                        validTargets: ["side", "area", "perimeter", "incircle", "circumcircle"]
+                        validTargets: ["side", "area", "perimeter", "altitude_to_hypotenuse", "median_to_hypotenuse", "incircle", "circumcircle"]
                     },
                     "RIGHT_LEG_HYPOTENUSE": {
                         name: "Катет і гіпотенуза",
                         inputs: [ { id: "a", label: "Катет a" }, { id: "c", label: "Гіпотенуза c" } ],
-                        validTargets: ["side", "area", "perimeter", "incircle", "circumcircle"]
+                        validTargets: ["side", "area", "perimeter", "altitude_to_hypotenuse", "median_to_hypotenuse", "incircle", "circumcircle"]
+                    },
+                    "RIGHT_AREA_LEG": {
+                        name: "Площа і катет",
+                        inputs: [ { id: "area", label: "Площа S" }, { id: "a", label: "Катет a" } ],
+                        validTargets: ["side", "perimeter", "altitude_to_hypotenuse", "median_to_hypotenuse", "incircle", "circumcircle"] // Прибрано "area"
                     }
                 }
             },
             isosceles: {
                 name: "Рівнобедрений трикутник",
                 targets: [
+                    { id: "side", label: "Невідому сторону", checked: true },
+                    { id: "angle_base", label: "Кут при основі (α)", checked: false },
+                    { id: "angle_vertex", label: "Кут при вершині (β)", checked: false },
+                    { id: "height", label: "Висоту (h)", checked: false },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
-                    { id: "height", label: "Висоту (h)", checked: false }
+                    { id: "incircle", label: "Вписане коло (r)", checked: false },
+                    { id: "circumcircle", label: "Описане коло (R)", checked: false }
                 ],
                 tasks: {
                     "ISOSCELES_BASE_SIDE": {
                         name: "Основа та бічна сторона",
                         inputs: [ { id: "base", label: "Основа a" }, { id: "side", label: "Бічна сторона b" } ],
-                        validTargets: ["area", "perimeter", "height"]
+                        validTargets: ["height", "angle_base", "angle_vertex", "area", "perimeter", "incircle", "circumcircle"]
+                    },
+                    "ISOSCELES_BASE_HEIGHT": {
+                        name: "Основа та висота",
+                        inputs: [ { id: "base", label: "Основа a" }, { id: "height", label: "Висота h" } ],
+                        validTargets: ["side", "angle_base", "angle_vertex", "area", "perimeter", "incircle", "circumcircle"]
                     }
                 }
             },
             equilateral: {
                 name: "Рівносторонній трикутник",
                 targets: [
+                    { id: "side", label: "Сторону (a)", checked: true },
+                    { id: "height", label: "Висоту (h)", checked: false },
                     { id: "area", label: "Площу (S)", checked: true },
                     { id: "perimeter", label: "Периметр (P)", checked: false },
                     { id: "incircle", label: "Вписане коло (r)", checked: false },
@@ -124,6 +143,16 @@ export const uiConfig = {
                     "EQUILATERAL_SIDE": {
                         name: "Сторона",
                         inputs: [ { id: "a", label: "Сторона a" } ],
+                        validTargets: ["height", "area", "perimeter", "incircle", "circumcircle"]
+                    },
+                    "EQUILATERAL_AREA": {
+                        name: "Площа",
+                        inputs: [ { id: "area", label: "Площа S" } ],
+                        validTargets: ["side", "height", "perimeter", "incircle", "circumcircle"]
+                    },
+                    "EQUILATERAL_HEIGHT": {
+                        name: "Висота",
+                        inputs: [ { id: "height", label: "Висота h" } ],
                         validTargets: ["area", "perimeter", "incircle", "circumcircle"]
                     }
                 }
@@ -421,14 +450,19 @@ export const TARGET_NAMES = {
     "incircle": "Радіус вписаного кола (r)",
     "r_inscribed": "Радіус вписаного кола (r)",
     "height": "Висота (h)",
+    "altitude": "Висота (h)",
+    "median": "Медіана (m)",
     "side": "Сторона",
     "side_a": "Сторона a",
     "side_b": "Сторона b",
+    "side_c": "Сторона c",
     "sides": "Сторони",
     "angles": "Кути",
     "angle_a": "Кут α",
     "angle_b": "Кут β",
     "angle_c": "Кут γ",
+    "angle_base": "Кути при основі (α)",
+    "angle_vertex": "Кут при вершині (β)",
     "diagonal": "Діагональ (d)",
     "diagonals": "Діагоналі",
     "radius": "Радіус (r)",
@@ -448,5 +482,6 @@ export const TARGET_NAMES = {
     "intermediate_side_a": "Сторона a (проміжний рез.)",
     "intermediate_side_b": "Сторона b (проміжний рез.)",
     "intermediate_side_c": "Сторона c (проміжний рез.)",
-    "intermediate_diagonal": "Діагональ (проміжний рез.)"
+    "intermediate_diagonal": "Діагональ (проміжний рез.)",
+    "intermediate_height": "Висота (проміжний рез.)"
 };

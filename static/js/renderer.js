@@ -21,7 +21,7 @@ export function renderStep(step) {
         case 'rule':
             return `
                 <div class="rule-box">
-                    📌 ${step.text}
+                    ${step.text}
                 </div>`;
 
         case 'info':
@@ -34,10 +34,12 @@ export function renderStep(step) {
             return `
                 <div class="step-card">
                     <div class="step-title">➤ ${step.title}</div>
-                    ${step.rule ? `<div class="rule-box">📌 ${step.rule}</div>` : ''}
-                    ${step.formula ? `<div class="formula-box">${step.formula}</div>` : ''}
-                    <div class="step-description">
-                        ${step.solution} = <span class="step-result">${step.value}</span>
+                    ${step.rule ? `<div class="rule-box">${step.rule}</div>` : ''}
+                    
+                    ${step.formula ? `<div class="formula-box" style="font-size: 1.1em; overflow-x: auto;">$$${step.formula}$$</div>` : ''}
+                    
+                    <div class="step-description" style="margin-top: 10px; font-size: 1.15em;">
+                        \\(${step.solution}\\) = <span class="step-result">${step.value}</span>
                     </div>
                 </div>`;
 
@@ -45,10 +47,12 @@ export function renderStep(step) {
             return `
                 <div class="step-card step-card--intermediate">
                     <div class="step-title--intermediate">↳ ${step.title}</div>
-                    ${step.rule ? `<div class="rule-box">📌 ${step.rule}</div>` : ''}
-                    ${step.formula ? `<div class="formula-box formula-box--sm">${step.formula}</div>` : ''}
-                    <div class="step-description">
-                        ${step.solution} = <span class="step-result">${step.value}</span>
+                    ${step.rule ? `<div class="rule-box">${step.rule}</div>` : ''}
+                    
+                    ${step.formula ? `<div class="formula-box formula-box--sm" style="overflow-x: auto;">$$${step.formula}$$</div>` : ''}
+                    
+                    <div class="step-description" style="margin-top: 8px;">
+                        \\(${step.solution}\\) = <span class="step-result">${step.value}</span>
                     </div>
                 </div>`;
 

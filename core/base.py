@@ -10,7 +10,7 @@ class GeometricSolver(ABC):
     def __init__(self, targets: list = None):
         self.targets = targets or []
         self._steps = []
-        self._computed = {}  # кеш вже обчислених значень
+        self._computed = {}
         self.step_num = 1
         self._result = {}
 
@@ -64,7 +64,6 @@ class GeometricSolver(ABC):
         }
         self._steps.append(step)
 
-        # Повертаємо округлене значення, якщо це число
         if isinstance(value, (int, float)):
             return round(value, 2)
         return value
@@ -87,15 +86,12 @@ class GeometricSolver(ABC):
         self._result = {}
         self._prepare()
 
-        # Загальний для всіх фігур цикл обчислення цілей
         for target_name in self.TARGET_ORDER:
             if self.is_target(target_name) and target_name in self.TARGETS:
                 self.TARGETS[target_name].calculate(self, self._result)
 
-        # Делегуємо фігурі генерацію графіка
         image_base64 = self._generate_image()
 
-        # Універсальне повернення результату
         return {
             "success": True,
             "data": self._result,

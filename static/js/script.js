@@ -159,6 +159,10 @@ async function solve() {
         document.getElementById('steps-list').innerHTML =
             (result.steps || []).map(renderStep).join('');
 
+        if (window.MathJax && MathJax.typeset) {
+            MathJax.typeset();
+        }
+
         const plotSection = document.getElementById('plot-section');
         if (result.image) {
             document.getElementById('plot-container').innerHTML =

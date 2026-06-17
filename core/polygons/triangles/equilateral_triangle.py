@@ -31,6 +31,52 @@ class SideTask(EquilateralTriangleTask):
         solver.add_info(f"Рівносторонній трикутник зі стороною a={solver.a}")
 
 
+class AreaTask(EquilateralTriangleTask):
+    """Зворотна задача: відома площа, знаходимо сторону."""
+    task_type = "EQUILATERAL_AREA"
+
+    def validate(self, solver: "EquilateralTriangleSolver") -> bool:
+        if solver.given_area <= 0:
+            solver.add_error("Площа має бути додатною.")
+            return False
+        return True
+
+    def prepare(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        solver.add_info(f"Рівносторонній трикутник з площею S={solver.given_area}")
+        solver.a = math.sqrt((4 * solver.given_area) / math.sqrt(3))
+        result["side"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо сторону через площу",
+            r"a = \sqrt{\frac{4 \cdot S}{\sqrt{3}}}",
+            f"a = \\sqrt{{\\frac{{4 \\cdot {solver.given_area:.2f}}}{{\\sqrt{{3}}}}}}",
+            round(solver.a, 2),
+            rule="Зворотна формула площі рівностороннього трикутника."
+        )
+        solver.step_num += 1
+
+
+class HeightTask(EquilateralTriangleTask):
+    """Зворотна задача: відома висота, знаходимо сторону."""
+    task_type = "EQUILATERAL_HEIGHT"
+
+    def validate(self, solver: "EquilateralTriangleSolver") -> bool:
+        if solver.given_height <= 0:
+            solver.add_error("Висота має бути додатною.")
+            return False
+        return True
+
+    def prepare(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        solver.add_info(f"Рівносторонній трикутник з висотою h={solver.given_height}")
+        solver.a = (2 * solver.given_height) / math.sqrt(3)
+        result["side"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо сторону через висоту",
+            r"a = \frac{2 \cdot h}{\sqrt{3}}",
+            f"a = \\frac{{2 \\cdot {solver.given_height:.2f}}}{{\\sqrt{{3}}}}",
+            round(solver.a, 2),
+            rule="Сторона рівностороннього трикутника виражена через його висоту."
+        )
+        solver.step_num += 1
+
+
 class EquilateralTriangleTarget(ABC):
     target_name: str
 
@@ -39,16 +85,35 @@ class EquilateralTriangleTarget(ABC):
         pass
 
 
+class HeightTarget(EquilateralTriangleTarget):
+    target_name = "height"
+
+    def calculate(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        val = (solver.a * math.sqrt(3)) / 2
+        result["height"] = solver.add_step(
+            f"Крок {solver.step_num}. Знаходимо висоту (медіану, бісектрису)",
+            r"h = \frac{a \cdot \sqrt{3}}{2}",
+            f"h = \\frac{{{solver.a:.2f} \\cdot \\sqrt{{3}}}}{{2}}",
+            round(val, 2),
+            rule="У рівносторонньому трикутнику висота, медіана і бісектриса співпадають.",
+        )
+        solver.step_num += 1
+
+
 class AreaTarget(EquilateralTriangleTarget):
     target_name = "area"
 
     def calculate(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        if solver.task_type == "EQUILATERAL_AREA":
+            return
+
+        val = (solver.a ** 2 * math.sqrt(3)) / 4
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу",
-            "S = (a^2 * sqrt(3)) / 4",
-            f"S = ({solver.a}^2 * sqrt(3)) / 4",
-            (solver.a ** 2 * math.sqrt(3)) / 4,
-            rule="Площа рівностороннього трикутника зі стороною a: S = (a^2*sqrt(3)) / 4.",
+            r"S = \frac{a^2 \cdot \sqrt{3}}{4}",
+            f"S = \\frac{{{solver.a:.2f}^2 \\cdot \\sqrt{{3}}}}{{4}}",
+            round(val, 2),
+            rule="Площа рівностороннього трикутника зі стороною a.",
         )
         solver.step_num += 1
 
@@ -57,11 +122,12 @@ class PerimeterTarget(EquilateralTriangleTarget):
     target_name = "perimeter"
 
     def calculate(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        val = 3 * solver.a
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = 3 * a",
-            f"P = 3 * {solver.a}",
-            3 * solver.a,
+            r"P = 3 \cdot a",
+            f"P = 3 \\cdot {solver.a:.2f}",
+            round(val, 2),
             rule="Периметр рівностороннього трикутника утричі більший за його сторону.",
         )
         solver.step_num += 1
@@ -71,12 +137,13 @@ class IncircleTarget(EquilateralTriangleTarget):
     target_name = "incircle"
 
     def calculate(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        val = (solver.a * math.sqrt(3)) / 6
         result["r_inscribed"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус вписаного кола",
-            "r = (a * sqrt(3)) / 6",
-            f"r = ({solver.a} * sqrt(3)) / 6",
-            (solver.a * math.sqrt(3)) / 6,
-            rule="Радіус вписаного кола рівностороннього трикутника: r = a*sqrt(3) / 6.",
+            r"r = \frac{a \cdot \sqrt{3}}{6}",
+            f"r = \\frac{{{solver.a:.2f} \\cdot \\sqrt{{3}}}}{{6}}",
+            round(val, 2),
+            rule="Радіус вписаного кола рівностороннього трикутника.",
         )
         solver.step_num += 1
 
@@ -85,12 +152,13 @@ class CircumcircleTarget(EquilateralTriangleTarget):
     target_name = "circumcircle"
 
     def calculate(self, solver: "EquilateralTriangleSolver", result: dict) -> None:
+        val = (solver.a * math.sqrt(3)) / 3
         result["r_circumscribed"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус описаного кола",
-            "R = (a * sqrt(3)) / 3",
-            f"R = ({solver.a} * sqrt(3)) / 3",
-            (solver.a * math.sqrt(3)) / 3,
-            rule="Радіус описаного кола рівностороннього трикутника: R = a*sqrt(3) / 3.",
+            r"R = \frac{a \cdot \sqrt{3}}{3}",
+            f"R = \\frac{{{solver.a:.2f} \\cdot \\sqrt{{3}}}}{{3}}",
+            round(val, 2),
+            rule="Радіус описаного кола рівностороннього трикутника.",
         )
         solver.step_num += 1
 
@@ -102,6 +170,8 @@ class EquilateralTriangleSolver(GeometricSolver):
         task.task_type: task
         for task in (
             SideTask(),
+            AreaTask(),
+            HeightTask(),
         )
     }
     SUPPORTED_TASKS: ClassVar[tuple[str, ...]] = tuple(TASKS.keys())
@@ -109,6 +179,7 @@ class EquilateralTriangleSolver(GeometricSolver):
     TARGETS: ClassVar[dict[str, EquilateralTriangleTarget]] = {
         target.target_name: target
         for target in (
+            HeightTarget(),
             AreaTarget(),
             PerimeterTarget(),
             IncircleTarget(),
@@ -116,6 +187,7 @@ class EquilateralTriangleSolver(GeometricSolver):
         )
     }
     TARGET_ORDER: ClassVar[tuple[str, ...]] = (
+        "height",
         "area",
         "perimeter",
         "incircle",
@@ -127,6 +199,8 @@ class EquilateralTriangleSolver(GeometricSolver):
         self.task_type = task_type
         self.task = self.TASKS.get(task_type)
         self.a = float(params.get("a", 0))
+        self.given_area = float(params.get("area", 0))
+        self.given_height = float(params.get("height", 0))
 
     def validate(self) -> bool:
         if self.task is None:
@@ -138,4 +212,7 @@ class EquilateralTriangleSolver(GeometricSolver):
         self.task.prepare(self, self._result)
 
     def _generate_image(self) -> str:
-        return TrianglePlotter(self.a, self.a, self.a).plot()
+        draw_alt = self.is_target("height")
+        draw_in = self.is_target("incircle")
+        draw_circ = self.is_target("circumcircle")
+        return TrianglePlotter(self.a, self.a, self.a, draw_altitude=draw_alt, draw_incircle=draw_in, draw_circumcircle=draw_circ).plot()
