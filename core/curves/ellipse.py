@@ -46,8 +46,8 @@ class AreaTarget(EllipseTarget):
         area = math.pi * solver.a * solver.b
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу",
-            "S = pi * a * b",
-            f"S = pi * {solver.a} * {solver.b}",
+            r"S = \pi a b",
+            fr"S = \pi \cdot {solver.a} \cdot {solver.b}",
             area,
         )
         solver.step_num += 1
@@ -60,8 +60,8 @@ class PerimeterTarget(EllipseTarget):
         h = solver.ramanujan_h()
         solver.add_step(
             f"Крок {solver.step_num}. (Проміжний крок) Знаходимо допоміжний параметр h",
-            "h = (a - b)^2 / (a + b)^2",
-            f"h = ({solver.a} - {solver.b})^2 / ({solver.a} + {solver.b})^2",
+            r"h = \frac{(a - b)^2}{(a + b)^2}",
+            fr"h = \frac{{ ({solver.a} - {solver.b})^2 }}{{ ({solver.a} + {solver.b})^2 }}",
             h,
             is_intermediate=True,
         )
@@ -72,8 +72,8 @@ class PerimeterTarget(EllipseTarget):
 
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр еліпса",
-            "P ~= pi(a + b) * (1 + 3h / (10 + sqrt(4 - 3h)))",
-            f"P ~= pi({solver.a} + {solver.b}) * (1 + (3 * {h:.4f}) / (10 + sqrt(4 - 3 * {h:.4f})))",
+            r"P \approx \pi(a + b) \left(1 + \frac{3h}{10 + \sqrt{4 - 3h}}\right)",
+            fr"P \approx \pi({solver.a} + {solver.b}) \left(1 + \frac{{ 3 \cdot {h:.4f} }}{{ 10 + \sqrt{{ 4 - 3 \cdot {h:.4f} }} }}\right)",
             perim,
             rule=(
                 "Точного значення периметра еліпса не існує у вигляді простої формули. "
@@ -92,8 +92,8 @@ class EccentricityTarget(EllipseTarget):
         ecc = math.sqrt(1 - (minor ** 2 / major ** 2))
         result["eccentricity"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо ексцентриситет",
-            "e = sqrt(1 - (b/a)^2)",
-            f"e = sqrt(1 - ({minor}/{major})^2)",
+            r"e = \sqrt{1 - \left(\frac{b}{a}\right)^2}",
+            fr"e = \sqrt{{ 1 - \left(\frac{{ {minor} }}{{ {major} }}\right)^2 }}",
             ecc,
             rule="Ексцентриситет показує ступінь сплюснутості еліпса і лежить у межах від 0 до 1.",
         )

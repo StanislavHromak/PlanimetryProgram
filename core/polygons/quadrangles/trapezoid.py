@@ -91,8 +91,8 @@ class AreaAndBasesTask(TrapezoidTask):
     def add_height_result(self, solver: "TrapezoidSolver", result: dict) -> None:
         result["height"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту h",
-            "h = S / m",
-            f"h = {solver.S} / {solver.plot_m:.2f}",
+            r"h = \frac{S}{m}",
+            fr"h = \frac{{ {solver.S} }}{{ {solver.plot_m:.2f} }}",
             solver.plot_h,
             rule="З формули площі виражаємо висоту: відношення площі до середньої лінії."
         )
@@ -274,12 +274,11 @@ class RightBasesAndHeightTask(TrapezoidTask):
         solver.add_midline_from_bases_result(result, is_intermediate=False)
 
     def add_perimeter_result(self, solver: "TrapezoidSolver", result: dict) -> None:
-        c2_val = solver.compute_right_slanted_side()
-        p_val = solver.a + solver.b + solver.h + c2_val
+        p_val = solver.a + solver.b + 2 * solver.c
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = a + b + h + c_похила",
-            f"P = {solver.a} + {solver.b} + {solver.h} + {c2_val:.2f}",
+            r"P = a + b + 2c",
+            fr"P = {solver.a} + {solver.b} + 2 \cdot {solver.c}",
             p_val
         )
         solver.step_num += 1
@@ -288,8 +287,8 @@ class RightBasesAndHeightTask(TrapezoidTask):
         d1 = math.sqrt(solver.a ** 2 + solver.h ** 2)
         result["diagonal_1"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо першу діагональ d1",
-            "d1 = √(a² + h²)",
-            f"d1 = √({solver.a}² + {solver.h}²)",
+            r"d_1 = \sqrt{a^2 + h^2}",
+            fr"d_1 = \sqrt{{ {solver.a}^2 + {solver.h}^2 }}",
             d1,
             rule="За теоремою Піфагора для прямокутного трикутника з катетами a (основа) та h (висота)."
         )
@@ -298,30 +297,30 @@ class RightBasesAndHeightTask(TrapezoidTask):
         d2 = math.sqrt(solver.b ** 2 + solver.h ** 2)
         result["diagonal_2"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо другу діагональ d2",
-            "d2 = √(b² + h²)",
-            f"d2 = √({solver.b}² + {solver.h}²)",
+            r"d_2 = \sqrt{b^2 + h^2}",
+            fr"d_2 = \sqrt{{ {solver.b}^2 + {solver.h}^2 }}",
             d2,
             rule="За теоремою Піфагора для прямокутного трикутника з катетами b (друга основа) та h."
         )
         solver.step_num += 1
 
     def add_angles_result(self, solver: "TrapezoidSolver", result: dict) -> None:
-        diff = abs(solver.a - solver.b)
-        alpha = math.degrees(math.atan(solver.h / diff))
+        diff = solver.compute_half_base_difference()
+        alpha = math.degrees(math.acos(diff / solver.c))
         beta = 180.0 - alpha
-        solver.add_info("Два кути прямокутної трапеції дорівнюють 90°.")
         result["angle_alpha"] = solver.add_step(
-            f"Крок {solver.step_num}. Знаходимо гострий кут α",
-            "α = arctg(h / |a-b|)",
-            f"α = arctg({solver.h} / {diff})",
+            f"Крок {solver.step_num}. Знаходимо гострий кут при основі α",
+            r"\alpha = \arccos\left(\frac{x}{c}\right)",
+            fr"\alpha = \arccos\left(\frac{{ {diff:.2f} }}{{ {solver.c} }}\right)",
             alpha
         )
         solver.step_num += 1
         result["angle_beta"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо тупий кут β",
-            "β = 180° - α",
-            f"β = 180° - {alpha:.1f}°",
-            beta
+            r"\beta = 180^\circ - \alpha",
+            fr"\beta = 180^\circ - {alpha:.1f}^\circ",
+            beta,
+            rule="Сума кутів, прилеглих до бічної сторони, дорівнює 180°."
         )
         solver.step_num += 1
 
@@ -333,8 +332,8 @@ class RightBasesAndHeightTask(TrapezoidTask):
             solver.add_info("Вписане коло існує (a + b = h + c_похила).")
             result["incircle"] = solver.add_step(
                 "Знаходимо радіус вписаного кола r",
-                "r = h / 2",
-                f"r = {solver.h:.2f} / 2",
+                r"r = \frac{h}{2}",
+                fr"r = \frac{{ {solver.h:.2f} }}{{ 2 }}",
                 solver.h / 2,
                 rule="Діаметр вписаного в трапецію кола завжди дорівнює її висоті."
             )
@@ -410,8 +409,8 @@ class AreaTarget(TrapezoidTarget):
         area_val = solver.plot_m * solver.plot_h
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу",
-            "S = m · h",
-            f"S = {solver.plot_m:.2f} · {solver.plot_h:.2f}",
+            r"S = m \cdot h",
+            fr"S = {solver.plot_m:.2f} \cdot {solver.plot_h:.2f}",
             area_val,
             rule="Площа трапеції дорівнює добутку середньої лінії на висоту."
         )
@@ -539,8 +538,8 @@ class TrapezoidSolver(GeometricSolver):
         key = "intermediate_midline" if is_intermediate else "midline"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо середню лінію m",
-            "m = (a + b) / 2",
-            f"m = ({self.a} + {self.b}) / 2",
+            r"m = \frac{a + b}{2}",
+            fr"m = \frac{{ {self.a} + {self.b} }}{{ 2 }}",
             self.plot_m,
             rule="Середня лінія трапеції дорівнює півсумі її основ.",
             is_intermediate=is_intermediate
@@ -556,8 +555,8 @@ class TrapezoidSolver(GeometricSolver):
         diff = self.compute_half_base_difference()
         self.add_step(
             f"Крок {self.step_num}. (Проміжний крок) Проекція бічної сторони",
-            "x = |a - b| / 2",
-            f"x = |{self.a} - {self.b}| / 2 = {diff:.2f}",
+            r"x = \frac{|a - b|}{2}",
+            fr"x = \frac{{ |{self.a} - {self.b}| }}{{ 2 }}",
             diff,
             rule="У рівнобічній трапеції проекція бічної сторони дорівнює піврізниці основ.",
             is_intermediate=True
@@ -574,8 +573,8 @@ class TrapezoidSolver(GeometricSolver):
         key = "intermediate_height" if is_intermediate else "height"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо висоту h",
-            "h = √(c² - x²)",
-            f"h = √({self.c}² - {diff:.2f}²)",
+            r"h = \sqrt{c^2 - x^2}",
+            fr"h = \sqrt{{ {self.c}^2 - {diff:.2f}^2 }}",
             self.plot_h,
             rule="Знаходимо висоту за теоремою Піфагора з прямокутного трикутника.",
             is_intermediate=is_intermediate
@@ -591,9 +590,9 @@ class TrapezoidSolver(GeometricSolver):
         diff = abs(self.a - self.b)
         c2_val = self.compute_right_slanted_side()
         self.add_step(
-            f"Крок {self.step_num}. (Проміжний крок) Знаходимо похилу бічну сторону c_похила",
-            "c_похила = √(h² + |a-b|²)",
-            f"c_похила = √({self.h}² + {diff}²)",
+            f"Крок {self.step_num}. (Проміжний крок) Знаходимо похилу бічну сторону",
+            r"c_{\text{похила}} = \sqrt{h^2 + |a-b|^2}",  # Тут r-рядок, дужки звичайні
+            fr"c_{{\text{{похила}}}} = \sqrt{{ {self.h}^2 + {diff}^2 }}",  # Тут f-рядок, дужки подвійні
             c2_val,
             rule="У прямокутній трапеції похила сторона утворює прямокутний трикутник з висотою та різницею основ.",
             is_intermediate=True

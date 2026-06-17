@@ -65,8 +65,8 @@ class SidesAndAngleTask(ParallelogramTask):
         pref = "(Проміжний крок) " if is_intermediate else ""
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо площу",
-            "S = a * b * sin(alpha)",
-            f"S = {solver.a} * {solver.b} * sin({solver.angle})",
+            r"S = a \cdot b \cdot \sin(\alpha)",
+            fr"S = {solver.a} \cdot {solver.b} \cdot \sin({solver.angle}^\circ)",
             area,
             rule="Площа паралелограма дорівнює добутку двох сторін на синус кута між ними.",
             is_intermediate=is_intermediate,
@@ -78,8 +78,8 @@ class SidesAndAngleTask(ParallelogramTask):
     def add_angles_result(self, solver: "ParallelogramSolver", result: dict) -> None:
         result["adj_angle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо сусідній кут",
-            "beta = 180 - alpha",
-            f"beta = 180 - {solver.angle}",
+            r"\beta = 180^\circ - \alpha",
+            fr"\beta = 180^\circ - {solver.angle}^\circ",
             solver.adj_angle_plot,
             rule="У паралелограмі суміжні кути в сумі дають 180 градусів.",
         )
@@ -90,19 +90,19 @@ class SidesAndAngleTask(ParallelogramTask):
         solver.height_val = solver.compute_height_a()
         result["height_a"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту ha",
-            "ha = b * sin(alpha)",
-            f"ha = {solver.b} * sin({solver.angle})",
+            r"h_a = b \cdot \sin(\alpha)",
+            fr"h_a = {solver.b} \cdot \sin({solver.angle}^\circ)",
             solver.height_val,
-            rule="Висота паралелограма до сторони a: ha = b * sin(alpha).",
+            rule=r"Висота паралелограма до сторони \(a\): \(h_a = b \cdot \sin(\alpha)\).",
         )
         solver.step_num += 1
 
         result["height_b"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту hb",
-            "hb = a * sin(alpha)",
-            f"hb = {solver.a} * sin({solver.angle})",
+            r"h_b = a \cdot \sin(\alpha)",
+            fr"h_b = {solver.a} \cdot \sin({solver.angle}^\circ)",
             solver.compute_height_b(),
-            rule="Висота паралелограма до сторони b: hb = a * sin(alpha).",
+            rule=r"Висота паралелограма до сторони \(b\): \(h_b = a \cdot \sin(\alpha)\).",
         )
         solver.step_num += 1
 
@@ -145,8 +145,8 @@ class DiagonalsAndAngleTask(ParallelogramTask):
         pref = "(Проміжний крок) " if is_intermediate else ""
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо площу",
-            "S = 1/2 * d1 * d2 * sin(gamma)",
-            f"S = 1/2 * {solver.d1} * {solver.d2} * sin({solver.angle})",
+            r"S = \frac{1}{2} d_1 d_2 \sin(\gamma)",
+            fr"S = \frac{1}{2} \cdot {solver.d1} \cdot {solver.d2} \cdot \sin({solver.angle}^\circ)",
             area,
             rule="Площа через діагоналі: половина їх добутку на синус кута між ними.",
             is_intermediate=is_intermediate,
@@ -158,8 +158,8 @@ class DiagonalsAndAngleTask(ParallelogramTask):
     def add_angles_result(self, solver: "ParallelogramSolver", result: dict) -> None:
         result["angle_alpha"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо кут alpha між сторонами",
-            "alpha = arccos((a^2 + b^2 - d1^2) / (2ab))",
-            f"alpha = arccos(({solver.a:.2f}^2 + {solver.b:.2f}^2 - {solver.d1}^2) / (2*{solver.a:.2f}*{solver.b:.2f}))",
+            r"\alpha = \arccos\left(\frac{a^2 + b^2 - d_1^2}{2ab}\right)",
+            fr"\alpha = \arccos\left(\frac{{ {solver.a:.2f}^2 + {solver.b:.2f}^2 - {solver.d1}^2 }}{{ 2 \cdot {solver.a:.2f} \cdot {solver.b:.2f} }}\right)",
             solver.angle_plot,
             rule="Знаходимо за теоремою косинусів.",
         )
@@ -167,8 +167,8 @@ class DiagonalsAndAngleTask(ParallelogramTask):
 
         result["angle_beta"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо суміжний кут beta",
-            "beta = 180 - alpha",
-            f"beta = 180 - {solver.angle_plot:.1f}",
+            r"\beta = 180^\circ - \alpha",
+            fr"\beta = 180^\circ - {solver.angle_plot:.1f}^\circ",
             solver.adj_angle_plot,
             rule="Сума суміжних кутів паралелограма дорівнює 180 градусів.",
         )
@@ -181,8 +181,8 @@ class DiagonalsAndAngleTask(ParallelogramTask):
 
         result["height_a"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту ha",
-            "ha = S / a",
-            f"ha = {area:.2f} / {solver.a:.2f}",
+            r"h_a = \frac{S}{a}",
+            fr"h_a = \frac{{ {area:.2f} }}{{ {solver.a:.2f} }}",
             solver.height_val,
             rule="Висота дорівнює відношенню площі до сторони, на яку вона проведена.",
         )
@@ -190,8 +190,8 @@ class DiagonalsAndAngleTask(ParallelogramTask):
 
         result["height_b"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту hb",
-            "hb = S / b",
-            f"hb = {area:.2f} / {solver.b:.2f}",
+            r"h_b = \frac{S}{b}",
+            fr"h_b = \frac{{ {area:.2f} }}{{ {solver.b:.2f} }}",
             area / solver.b,
             rule="Висота дорівнює відношенню площі до сторони, на яку вона проведена.",
         )
@@ -227,10 +227,10 @@ class PerimeterTarget(ParallelogramTarget):
     def calculate(self, solver: "ParallelogramSolver", result: dict) -> None:
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = 2 * (a + b)",
-            f"P = 2 * ({solver.a:.2f} + {solver.b:.2f})",
+            r"P = 2(a + b)",
+            fr"P = 2({solver.a:.2f} + {solver.b:.2f})",
             2 * (solver.a + solver.b),
-            rule="Периметр паралелограма: P = 2*(a + b).",
+            rule=r"Периметр паралелограма: \(P = 2(a + b)\).",
         )
         solver.step_num += 1
 
@@ -251,8 +251,8 @@ class DiagonalsTarget(ParallelogramTarget):
 
         result["diagonal_1"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо діагональ d1",
-            "d1 = sqrt(a^2 + b^2 - 2*a*b*cos(alpha))",
-            f"d1 = sqrt({solver.a}^2 + {solver.b}^2 - 2*{solver.a}*{solver.b}*cos({solver.angle}))",
+            r"d_1 = \sqrt{a^2 + b^2 - 2ab \cos(\alpha)}",
+            fr"d_1 = \sqrt{{ {solver.a}^2 + {solver.b}^2 - 2 \cdot {solver.a} \cdot {solver.b} \cdot \cos({solver.angle}^\circ) }}",
             solver.d1_plot,
             rule="Теорема косинусів для трикутника, утвореного діагоналлю.",
         )
@@ -260,8 +260,8 @@ class DiagonalsTarget(ParallelogramTarget):
 
         result["diagonal_2"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо діагональ d2",
-            "d2 = sqrt(a^2 + b^2 + 2*a*b*cos(alpha))",
-            f"d2 = sqrt({solver.a}^2 + {solver.b}^2 + 2*{solver.a}*{solver.b}*cos({solver.angle}))",
+            r"d_2 = \sqrt{a^2 + b^2 + 2ab \cos(\alpha)}",
+            fr"d_2 = \sqrt{{ {solver.a}^2 + {solver.b}^2 + 2 \cdot {solver.a} \cdot {solver.b} \cdot \cos({solver.angle}^\circ) }}",
             solver.d2_plot,
         )
         solver.step_num += 1
@@ -411,8 +411,8 @@ class ParallelogramSolver(GeometricSolver):
 
         result[key_a] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо сторону a",
-            "a = sqrt((d1/2)^2 + (d2/2)^2 - 2*(d1/2)*(d2/2)*cos(gamma))",
-            f"a = sqrt({self.d1 / 2:.2f}^2 + {self.d2 / 2:.2f}^2 - 2*{self.d1 / 2:.2f}*{self.d2 / 2:.2f}*cos({self.angle}))",
+            r"a = \sqrt{\left(\frac{d_1}{2}\right)^2 + \left(\frac{d_2}{2}\right)^2 - 2\left(\frac{d_1}{2}\right)\left(\frac{d_2}{2}\right)\cos(\gamma)}",
+            fr"a = \sqrt{{ {self.d1 / 2:.2f}^2 + {self.d2 / 2:.2f}^2 - 2 \cdot {self.d1 / 2:.2f} \cdot {self.d2 / 2:.2f} \cdot \cos({self.angle}^\circ) }}",
             self.a,
             rule="Теорема косинусів для трикутника з половинами діагоналей.",
             is_intermediate=is_intermediate,
@@ -421,8 +421,8 @@ class ParallelogramSolver(GeometricSolver):
 
         result[key_b] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо сторону b",
-            "b = sqrt((d1/2)^2 + (d2/2)^2 + 2*(d1/2)*(d2/2)*cos(gamma))",
-            f"b = sqrt({self.d1 / 2:.2f}^2 + {self.d2 / 2:.2f}^2 + 2*{self.d1 / 2:.2f}*{self.d2 / 2:.2f}*cos({self.angle}))",
+            r"b = \sqrt{\left(\frac{d_1}{2}\right)^2 + \left(\frac{d_2}{2}\right)^2 + 2\left(\frac{d_1}{2}\right)\left(\frac{d_2}{2}\right)\cos(\gamma)}",
+            fr"b = \sqrt{{ {self.d1 / 2:.2f}^2 + {self.d2 / 2:.2f}^2 + 2 \cdot {self.d1 / 2:.2f} \cdot {self.d2 / 2:.2f} \cdot \cos({self.angle}^\circ) }}",
             self.b,
             is_intermediate=is_intermediate,
         )

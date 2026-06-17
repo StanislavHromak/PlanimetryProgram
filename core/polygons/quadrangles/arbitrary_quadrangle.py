@@ -5,9 +5,6 @@ from typing import ClassVar
 from core.base import GeometricSolver
 from core.polygons.quadrangles.plotters.arbitary_quadrangle_plotter import ArbitraryQuadranglePlotter
 
-
-# ─── АБСТРАКЦІЇ ──────────────────────────────────────────────────────────
-
 class ArbitraryQuadrangleTask(ABC):
     task_type: str
 
@@ -26,9 +23,6 @@ class ArbitraryQuadrangleTarget(ABC):
     @abstractmethod
     def calculate(self, solver: "ArbitraryQuadrangleSolver", result: dict) -> None:
         pass
-
-
-# ─── ЗАДАЧІ (TASKS) ──────────────────────────────────────────────────────
 
 class SidesAndAngleTask(ArbitraryQuadrangleTask):
     task_type = "ARB_SIDES_ANGLES"
@@ -55,9 +49,6 @@ class SidesAndAngleTask(ArbitraryQuadrangleTask):
             f"c={solver.c}, d={solver.d}, α={solver.angle}°"
         )
 
-
-# ─── ЦІЛІ (TARGETS) ──────────────────────────────────────────────────────
-
 class PerimeterTarget(ArbitraryQuadrangleTarget):
     target_name = "perimeter"
 
@@ -65,8 +56,8 @@ class PerimeterTarget(ArbitraryQuadrangleTarget):
         perimeter = solver.a + solver.b + solver.c + solver.d
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = a + b + c + d",
-            f"P = {solver.a} + {solver.b} + {solver.c} + {solver.d}",
+            r"P = a + b + c + d",
+            fr"P = {solver.a} + {solver.b} + {solver.c} + {solver.d}",
             perimeter,
             rule="Периметр многокутника — сума довжин усіх його сторін."
         )
@@ -77,7 +68,6 @@ class AreaTarget(ArbitraryQuadrangleTarget):
     target_name = "area"
 
     def calculate(self, solver: "ArbitraryQuadrangleSolver", result: dict) -> None:
-        # Звертаємося до публічного методу, інкапсуляція збережена
         step = solver.get_area_step()
         if step:
             result["area"] = step
@@ -93,7 +83,7 @@ class CirclesCheckTarget(ArbitraryQuadrangleTarget):
 
         r_in = solver.get_incircle_radius()
         if r_in is not None:
-            solver.add_info("✅ Вписане коло ІСНУЄ (виконується умова: a + c = b + d).")
+            solver.add_info("Вписане коло ІСНУЄ (виконується умова: a + c = b + d).")
             solver.add_rule(
                 "Теорема Пітота: у чотирикутник можна вписати коло тоді і тільки тоді, коли суми протилежних сторін рівні."
             )
@@ -101,13 +91,13 @@ class CirclesCheckTarget(ArbitraryQuadrangleTarget):
             p = (solver.a + solver.b + solver.c + solver.d) / 2
             result["r_inscribed"] = solver.add_step(
                 "Знаходимо радіус вписаного кола",
-                "r = S / p,  p = (a+b+c+d)/2",
-                f"r = {area:.2f} / {p:.2f}",
+                r"r = \frac{S}{p}, \quad p = \frac{a+b+c+d}{2}",
+                fr"r = \frac{{ {area:.2f} }}{{ {p:.2f} }}",
                 r_in
             )
             solver.step_num += 1
         else:
-            solver.add_info("❌ Вписане коло НЕ ІСНУЄ (a + c ≠ b + d).")
+            solver.add_info("Вписане коло НЕ ІСНУЄ (a + c ≠ b + d).")
             solver.add_rule("Теорема Пітота.")
             result["can_inscribe"] = "Ні"
 
@@ -117,25 +107,23 @@ class CirclesCheckTarget(ArbitraryQuadrangleTarget):
 
         r_circ = solver.get_circumcircle_radius()
         if r_circ is not None:
-            solver.add_info("✅ Описане коло ІСНУЄ (сума протилежних кутів = 180°).")
+            solver.add_info("Описане коло ІСНУЄ (сума протилежних кутів = 180°).")
             solver.add_rule(
                 "Теорема про вписаний чотирикутник: навколо чотирикутника можна описати коло тоді і тільки тоді, коли суми його протилежних кутів рівні 180°."
             )
             D = solver.get_diagonal()
             result["r_circumscribed"] = solver.add_step(
                 "Знаходимо радіус описаного кола",
-                "R = D / (2·sin(α))",
-                f"R = {D:.2f} / (2·sin({solver.angle}°))",
+                r"R = \frac{D}{2\sin(\alpha)}",
+                fr"R = \frac{{ {D:.2f} }}{{ 2 \cdot \sin({solver.angle}^\circ) }}",
                 r_circ
             )
             solver.step_num += 1
         else:
-            solver.add_info("❌ Описане коло НЕ ІСНУЄ (сума протилежних кутів ≠ 180°).")
+            solver.add_info("Описане коло НЕ ІСНУЄ (сума протилежних кутів ≠ 180°).")
             solver.add_rule("Теорема про вписаний чотирикутник.")
             result["can_circumscribe"] = "Ні"
 
-
-# ─── ГОЛОВНИЙ СОЛВЕР ─────────────────────────────────────────────────────
 
 class ArbitraryQuadrangleSolver(GeometricSolver):
     """Розв'язувач задач з довільним чотирикутником."""
@@ -186,8 +174,8 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
         D = self.D_val
         self.add_step(
             f"Крок {self.step_num}. (Проміжний крок) Знаходимо діагональ D",
-            "D = √(a² + d² - 2·a·d·cos(α))",
-            f"D = √({self.a}² + {self.d}² - 2·{self.a}·{self.d}·cos({self.angle}°))",
+            r"D = \sqrt{a^2 + d^2 - 2ad\cos(\alpha)}",
+            fr"D = \sqrt{{ {self.a}^2 + {self.d}^2 - 2 \cdot {self.a} \cdot {self.d} \cdot \cos({self.angle}^\circ) }}",
             D,
             rule="Теорема косинусів застосовується до трикутника, утвореного сторонами a, d і діагоналлю D.",
             is_intermediate=True
@@ -203,10 +191,10 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
         s1 = 0.5 * self.a * self.d * math.sin(math.radians(self.angle))
         self.add_step(
             f"Крок {self.step_num}. (Проміжний крок) Площа трикутника S1 (сторони a, d)",
-            "S1 = (1/2) · a · d · sin(α)",
-            f"S1 = 0.5 · {self.a} · {self.d} · sin({self.angle}°)",
+            r"S_1 = \frac{1}{2} a d \sin(\alpha)",
+            fr"S_1 = \frac{1}{2} \cdot {self.a} \cdot {self.d} \cdot \sin({self.angle}^\circ)",
             s1,
-            rule="Площа трикутника через дві сторони і кут між ними: S = (1/2)·a·b·sin(γ).",
+            rule=r"Площа трикутника через дві сторони і кут між ними: \(S = \frac{1}{2}ab\sin(\gamma)\).",
             is_intermediate=True
         )
         self.step_num += 1
@@ -220,12 +208,14 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
         D = self.get_diagonal()
         p = (self.b + self.c + D) / 2
         s2 = math.sqrt(p * (p - self.b) * (p - self.c) * (p - D))
+
+        # Виводимо формулу Герона, а у розв'язку підставляємо знайдені значення, включаючи p
         self.add_step(
             f"Крок {self.step_num}. (Проміжний крок) Площа трикутника S2 (за формулою Герона)",
-            "S2 = √(p·(p-b)·(p-c)·(p-D))",
-            f"p = ({self.b} + {self.c} + {D:.2f}) / 2 = {p:.2f}",
+            r"S_2 = \sqrt{p(p-b)(p-c)(p-D)}, \quad p = \frac{b+c+D}{2}",
+            fr"S_2 = \sqrt{{ {p:.2f} \cdot ({p:.2f}-{self.b}) \cdot ({p:.2f}-{self.c}) \cdot ({p:.2f}-{D:.2f}) }}",
             s2,
-            rule="Формула Герона: S = √(p·(p-a)·(p-b)·(p-c)).",
+            rule=r"Формула Герона: \(S = \sqrt{p(p-a)(p-b)(p-c)}\).",
             is_intermediate=True
         )
         self.step_num += 1
@@ -245,8 +235,8 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
 
         step_res = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо загальну площу",
-            "S = S1 + S2",
-            f"S = {s1:.2f} + {s2:.2f}",
+            r"S = S_1 + S_2",
+            fr"S = {s1:.2f} + {s2:.2f}",
             area_val,
             rule="Площа довільного чотирикутника дорівнює сумі площ двох трикутників.",
             is_intermediate=not is_target
@@ -300,4 +290,3 @@ class ArbitraryQuadrangleSolver(GeometricSolver):
             r_inscribed=r_in,
             r_circumscribed=r_circ
         ).plot()
-

@@ -41,8 +41,8 @@ class DiameterTask(CircleTask):
         solver.r = solver.val / 2
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо радіус r",
-            "r = d / 2",
-            f"r = {solver.val} / 2",
+            r"r = \frac{d}{2}",
+            fr"r = \frac{{ {solver.val} }}{{ 2 }}",
             solver.r,
             is_intermediate=is_int,
         )
@@ -59,13 +59,12 @@ class CircumferenceTask(CircleTask):
         solver.r = solver.val / (2 * math.pi)
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо радіус r",
-            "r = C / (2*pi)",
-            f"r = {solver.val} / (2 * pi)",
+            r"r = \frac{C}{2\pi}",
+            fr"r = \frac{{ {solver.val} }}{{ 2\pi }}",
             solver.r,
             is_intermediate=is_int,
         )
         solver.step_num += 1
-
 
 class AreaTask(CircleTask):
     task_type = "CIRCLE_AREA"
@@ -77,8 +76,8 @@ class AreaTask(CircleTask):
         solver.r = math.sqrt(solver.val / math.pi)
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо радіус r",
-            "r = sqrt(S / pi)",
-            f"r = sqrt({solver.val} / pi)",
+            r"r = \sqrt{\frac{S}{\pi}}",
+            fr"r = \sqrt{{ \frac{{ {solver.val} }}{{ \pi }} }}",
             solver.r,
             is_intermediate=is_int,
         )
@@ -108,8 +107,8 @@ class DiameterTarget(CircleTarget):
             return
         result["diameter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо діаметр d",
-            "d = 2 * r",
-            f"d = 2 * {solver.r:.2f}",
+            r"d = 2r",
+            fr"d = 2 \cdot {solver.r:.2f}",
             solver.r * 2,
         )
         solver.step_num += 1
@@ -123,8 +122,8 @@ class CircumferenceTarget(CircleTarget):
             return
         result["circumference"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо довжину кола C",
-            "C = 2 * pi * r",
-            f"C = 2 * pi * {solver.r:.2f}",
+            r"C = 2\pi r",
+            fr"C = 2\pi \cdot {solver.r:.2f}",
             2 * math.pi * solver.r,
         )
         solver.step_num += 1
@@ -138,8 +137,8 @@ class CircleAreaTarget(CircleTarget):
             return
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу круга S",
-            "S = pi * r^2",
-            f"S = pi * ({solver.r:.2f})^2",
+            r"S = \pi r^2",
+            fr"S = \pi \cdot {solver.r:.2f}^2",
             math.pi * (solver.r ** 2),
         )
         solver.step_num += 1

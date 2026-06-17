@@ -53,8 +53,8 @@ class CircumradiusTask(RegularPolygonTask):
         solver.side = 2 * solver.val * math.sin(solver.angle_rad())
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо сторону a",
-            "a = 2 * R * sin(180/n)",
-            f"a = 2 * {solver.val} * sin(180/{solver.n})",
+            r"a = 2R \sin\left(\frac{180^\circ}{n}\right)",
+            fr"a = 2 \cdot {solver.val} \cdot \sin\left(\frac{{180^\circ}}{{ {solver.n} }}\right)",
             solver.side,
             is_intermediate=is_int,
         )
@@ -74,8 +74,8 @@ class InradiusTask(RegularPolygonTask):
         solver.side = 2 * solver.val * math.tan(solver.angle_rad())
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо сторону a",
-            "a = 2 * r * tg(180/n)",
-            f"a = 2 * {solver.val} * tg(180/{solver.n})",
+            r"a = 2r \tan\left(\frac{180^\circ}{n}\right)",
+            fr"a = 2 \cdot {solver.val} \cdot \tan\left(\frac{{180^\circ}}{{ {solver.n} }}\right)",
             solver.side,
             is_intermediate=is_int,
         )
@@ -95,8 +95,8 @@ class AreaTask(RegularPolygonTask):
         solver.side = math.sqrt((4 * solver.val * math.tan(solver.angle_rad())) / solver.n)
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо сторону a",
-            "a = sqrt((4 * S * tg(180/n)) / n)",
-            f"a = sqrt((4 * {solver.val} * tg(180/{solver.n})) / {solver.n})",
+            r"a = \sqrt{\frac{4S \tan(180^\circ/n)}{n}}",
+            fr"a = \sqrt{{ \frac{{ 4 \cdot {solver.val} \cdot \tan(180^\circ/{solver.n}) }}{{ {solver.n} }} }}",
             solver.side,
             is_intermediate=is_int,
         )
@@ -116,8 +116,8 @@ class PerimeterTask(RegularPolygonTask):
         solver.side = solver.val / solver.n
         result[key] = solver.add_step(
             f"Крок {solver.step_num}. {pref}Знаходимо сторону a",
-            "a = P / n",
-            f"a = {solver.val} / {solver.n}",
+            r"a = \frac{P}{n}",
+            fr"a = \frac{{ {solver.val} }}{{ {solver.n} }}",
             solver.side,
             is_intermediate=is_int,
         )
@@ -157,12 +157,12 @@ class AngleAndSideTask(RegularPolygonTask):
         )
         result["n_sides"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо кількість сторін n",
-            "n = 360 / (180 - alpha)",
-            f"n = 360 / (180 - {solver.alpha}) = {solver.n}",
+            r"n = \frac{360^\circ}{180^\circ - \alpha}",
+            fr"n = \frac{{ 360^\circ }}{{ 180^\circ - {solver.alpha}^\circ }} = {solver.n}",
             solver.n,
             rule=(
                 "Сума суміжних зовнішніх кутів дорівнює 360 градусів, "
-                "а зовнішній кут дорівнює 180 - alpha."
+                "а зовнішній кут дорівнює 180° - α."
             ),
         )
         solver.step_num += 1
@@ -187,8 +187,8 @@ class AreaTarget(RegularPolygonTarget):
         area = (solver.n * solver.side ** 2) / (4 * math.tan(solver.angle_rad()))
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу",
-            "S = (n * a^2) / (4 * tg(180/n))",
-            f"S = ({solver.n} * {solver.side:.2f}^2) / (4 * tg(180/{solver.n}))",
+            r"S = \frac{n \cdot a^2}{4 \tan\left(\frac{180^\circ}{n}\right)}",
+            fr"S = \frac{{ {solver.n} \cdot {solver.side:.2f}^2 }}{{ 4 \tan\left(\frac{{180^\circ}}{{ {solver.n} }}\right) }}",
             area,
         )
         solver.step_num += 1
@@ -204,8 +204,8 @@ class PerimeterTarget(RegularPolygonTarget):
         perimeter = solver.n * solver.side
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = n * a",
-            f"P = {solver.n} * {solver.side:.2f}",
+            r"P = n \cdot a",
+            fr"P = {solver.n} \cdot {solver.side:.2f}",
             perimeter,
         )
         solver.step_num += 1
@@ -220,8 +220,8 @@ class AnglesTarget(RegularPolygonTarget):
 
         solver.add_step(
             f"Крок {solver.step_num}. (Проміжний крок) Знаходимо суму внутрішніх кутів",
-            "sum = (n - 2) * 180",
-            f"sum = ({solver.n} - 2) * 180",
+            r"\Sigma = (n - 2) \cdot 180^\circ",
+            fr"\Sigma = ({solver.n} - 2) \cdot 180^\circ",
             sum_angles,
             is_intermediate=True,
         )
@@ -230,8 +230,8 @@ class AnglesTarget(RegularPolygonTarget):
         if solver.task_type != "REGULAR_ANGLE_SIDE":
             result["interior_angle"] = solver.add_step(
                 f"Крок {solver.step_num}. Знаходимо внутрішній кут",
-                "alpha = sum / n",
-                f"alpha = {sum_angles} / {solver.n}",
+                r"\alpha = \frac{\Sigma}{n}",
+                fr"\alpha = \frac{{ {sum_angles} }}{{ {solver.n} }}",
                 one_angle,
             )
             solver.step_num += 1
@@ -248,8 +248,8 @@ class DiagonalTarget(RegularPolygonTarget):
         solver.diag_val = 2 * solver.plot_big_r() * math.sin(2 * math.pi / solver.n)
         result["diagonal"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо найменшу діагональ d",
-            "d = 2 * R * sin(360 / n)",
-            f"d = 2 * {solver.plot_big_r():.2f} * sin(360 / {solver.n})",
+            r"d = 2R \sin\left(\frac{360^\circ}{n}\right)",
+            fr"d = 2 \cdot {solver.plot_big_r():.2f} \cdot \sin\left(\frac{{360^\circ}}{{ {solver.n} }}\right)",
             solver.diag_val,
             rule=(
                 "Найменша діагональ правильного багатокутника з'єднує вершину "
@@ -269,8 +269,8 @@ class CircumcircleTarget(RegularPolygonTarget):
         solver.R = solver.plot_big_r()
         result["circumcircle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус описаного кола R",
-            "R = a / (2 * sin(180/n))",
-            f"R = {solver.side:.2f} / (2 * sin(180/{solver.n}))",
+            r"R = \frac{a}{2 \sin\left(\frac{180^\circ}{n}\right)}",
+            fr"R = \frac{{ {solver.side:.2f} }}{{ 2 \sin\left(\frac{{180^\circ}}{{ {solver.n} }}\right) }}",
             solver.R,
         )
         solver.step_num += 1
@@ -286,8 +286,8 @@ class IncircleTarget(RegularPolygonTarget):
         solver.r = solver.plot_r()
         result["incircle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус вписаного кола r",
-            "r = a / (2 * tg(180/n))",
-            f"r = {solver.side:.2f} / (2 * tg(180/{solver.n}))",
+            r"r = \frac{a}{2 \tan\left(\frac{180^\circ}{n}\right)}",
+            fr"r = \frac{{ {solver.side:.2f} }}{{ 2 \tan\left(\frac{{180^\circ}}{{ {solver.n} }}\right) }}",
             solver.r,
         )
         solver.step_num += 1

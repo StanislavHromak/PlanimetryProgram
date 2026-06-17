@@ -50,8 +50,8 @@ class ArcLengthTarget(SectorTarget):
     def calculate(self, solver: "SectorSolver", result: dict) -> None:
         result["arc_length"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо довжину дуги L",
-            "L = (pi * r * alpha) / 180",
-            f"L = (pi * {solver.r} * {solver.angle}) / 180",
+            r"L = \frac{\pi r \alpha}{180^\circ}",
+            fr"L = \frac{{ \pi \cdot {solver.r} \cdot {solver.angle}^\circ }}{{ 180^\circ }}",
             solver.arc_length(),
         )
         solver.step_num += 1
@@ -71,8 +71,8 @@ class SectorPerimeterTarget(SectorTarget):
         p_sect = solver.arc_length() + 2 * solver.r
         result["perimeter_sector"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр сектора",
-            "P = L + 2*r",
-            f"P = {solver.arc_length():.2f} + 2 * {solver.r}",
+            r"P = L + 2r",
+            fr"P = {solver.arc_length():.2f} + 2 \cdot {solver.r}",
             p_sect,
         )
         solver.step_num += 1
@@ -84,8 +84,8 @@ class ChordLengthTarget(SectorTarget):
     def calculate(self, solver: "SectorSolver", result: dict) -> None:
         result["chord_length"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо довжину хорди c",
-            "c = 2 * r * sin(alpha / 2)",
-            f"c = 2 * {solver.r} * sin({solver.angle} / 2)",
+            r"c = 2r \sin\left(\frac{\alpha}{2}\right)",
+            fr"c = 2 \cdot {solver.r} \cdot \sin\left(\frac{{ {solver.angle}^\circ }}{{ 2 }}\right)",
             solver.chord_length(),
         )
         solver.step_num += 1
@@ -102,8 +102,8 @@ class SegmentAreaTarget(SectorTarget):
         seg_area = (solver.r ** 2 / 2) * (solver.rad_angle() - math.sin(solver.rad_angle()))
         result["segment_area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу сегмента",
-            "S_segment = S_sector - (1/2 * r^2 * sin(alpha))",
-            f"S_segment = {sector_area:.2f} - 0.5 * {solver.r}^2 * sin({solver.angle})",
+            r"S_{\text{сегмента}} = S_{\text{сектора}} - \frac{1}{2} r^2 \sin(\alpha)",
+            fr"S_{{\text{{сегмента}}}} = {sector_area:.2f} - \frac{{1}}{{2}} \cdot {solver.r}^2 \cdot \sin({solver.angle}^\circ)",
             seg_area,
             rule=(
                 "Площа кругового сегмента дорівнює площі сектора мінус площа "
@@ -120,8 +120,8 @@ class SegmentHeightTarget(SectorTarget):
         h = solver.r * (1 - math.cos(solver.rad_angle() / 2))
         result["segment_height"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту сегмента",
-            "h = r * (1 - cos(alpha / 2))",
-            f"h = {solver.r} * (1 - cos({solver.angle / 2}))",
+            r"h = r \left(1 - \cos\left(\frac{\alpha}{2}\right)\right)",
+            fr"h = {solver.r} \left(1 - \cos\left(\frac{{ {solver.angle}^\circ }}{{ 2 }}\right)\right)",
             h,
         )
         solver.step_num += 1
@@ -193,8 +193,8 @@ class SectorSolver(GeometricSolver):
         key = "intermediate_sector_area" if is_intermediate else "sector_area"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {pref}Знаходимо площу сектора",
-            "S_sector = (pi * r^2 * alpha) / 360",
-            f"S_sector = (pi * {self.r}^2 * {self.angle}) / 360",
+            r"S_{\text{сектора}} = \frac{\pi r^2 \alpha}{360^\circ}",
+            fr"S_{{\text{{сектора}}}} = \frac{{ \pi \cdot {self.r}^2 \cdot {self.angle}^\circ }}{{ 360^\circ }}",
             sector_area,
             is_intermediate=is_intermediate,
         )
@@ -206,4 +206,10 @@ class SectorSolver(GeometricSolver):
         self.task.prepare(self, self._result)
 
     def _generate_image(self) -> str:
-        return SectorPlotter(self.r, self.angle).plot()
+        draw_h = self.is_target("segment_height")
+
+        return SectorPlotter(
+            r=self.r,
+            angle_deg=self.angle,
+            draw_segment_height=draw_h
+        ).plot()

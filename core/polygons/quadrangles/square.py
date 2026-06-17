@@ -64,8 +64,8 @@ class PerimeterTask(SquareTask):
         solver.a = solver.P / 4
         solver.add_side_result(
             result,
-            formula="a = P / 4",
-            solution=f"a = {solver.P} / 4",
+            formula=r"a = \frac{P}{4}",
+            solution=fr"a = \frac{{ {solver.P} }}{{ 4 }}",
             rule="Оскільки всі сторони квадрата рівні, сторона дорівнює чверті периметра.",
         )
 
@@ -86,8 +86,8 @@ class DiagonalTask(SquareTask):
         solver.a = solver.d / math.sqrt(2)
         solver.add_side_result(
             result,
-            formula="a = d / sqrt(2)",
-            solution=f"a = {solver.d} / sqrt(2)",
+            formula=r"a = \frac{d}{\sqrt{2}}",
+            solution=fr"a = \frac{{ {solver.d} }}{{\sqrt{2}}}",
             rule="Сторона квадрата виражається через діагональ за теоремою Піфагора.",
         )
 
@@ -109,8 +109,8 @@ class AreaTarget(SquareTarget):
 
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу",
-            "S = a^2",
-            f"S = {solver.a:.2f}^2",
+            r"S = a^2",
+            fr"S = {solver.a:.2f}^2",
             solver.a ** 2,
             rule="Площа квадрата дорівнює квадрату його сторони.",
         )
@@ -126,8 +126,8 @@ class PerimeterTarget(SquareTarget):
 
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = 4 * a",
-            f"P = 4 * {solver.a:.2f}",
+            r"P = 4a",
+            fr"P = 4 \cdot {solver.a:.2f}",
             4 * solver.a,
             rule="Периметр квадрата дорівнює сумі чотирьох його сторін.",
         )
@@ -147,8 +147,8 @@ class IncircleTarget(SquareTarget):
     def calculate(self, solver: "SquareSolver", result: dict) -> None:
         result["incircle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус вписаного кола r",
-            "r = a / 2",
-            f"r = {solver.a:.2f} / 2",
+            r"r = \frac{a}{2}",
+            fr"r = \frac{{ {solver.a:.2f} }}{{ 2 }}",
             solver.a / 2,
             rule="Радіус вписаного в квадрат кола дорівнює половині його сторони.",
         )
@@ -164,8 +164,8 @@ class CircumcircleTarget(SquareTarget):
         solver.show_diagonal = True
         result["circumcircle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус описаного кола R",
-            "R = d / 2",
-            f"R = {solver.d:.2f} / 2",
+            r"R = \frac{d}{2}",
+            fr"R = \frac{{ {solver.d:.2f} }}{{ 2 }}",
             solver.d / 2,
             rule="Радіус описаного кола дорівнює половині діагоналі.",
         )
@@ -224,11 +224,11 @@ class SquareSolver(GeometricSolver):
         return self.task.validate(self)
 
     def add_side_result(
-        self,
-        result: dict,
-        formula: str = "a = sqrt(S)",
-        solution: str | None = None,
-        rule: str | None = None,
+            self,
+            result: dict,
+            formula: str = r"a = \sqrt{S}",
+            solution: str | None = None,
+            rule: str | None = None,
     ) -> float:
         if self._side_step_added:
             return self.a
@@ -239,7 +239,7 @@ class SquareSolver(GeometricSolver):
         result[key] = self.add_step(
             f"Крок {self.step_num}. {pref}Знаходимо сторону a",
             formula,
-            solution or f"a = sqrt({self.S})",
+            solution or fr"a = \sqrt{{ {self.S} }}",
             self.a,
             rule=rule,
             is_intermediate=is_intermediate,
@@ -259,8 +259,8 @@ class SquareSolver(GeometricSolver):
         key = "intermediate_diagonal" if is_intermediate else "diagonal"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {pref}Знаходимо діагональ d",
-            "d = a * sqrt(2)",
-            f"d = {self.a:.2f} * sqrt(2)",
+            r"d = a\sqrt{2}",
+            fr"d = {self.a:.2f}\sqrt{2}",
             self.d,
             rule=(
                 "Діагональ квадрата знаходиться за теоремою Піфагора."

@@ -47,8 +47,8 @@ class AreaAndSideTask(RectangleTask):
         solver.b = solver.S / solver.a
         solver.add_side_b_result(
             result,
-            "b = S / a",
-            f"b = {solver.S} / {solver.a}",
+            r"b = \frac{S}{a}",
+            fr"b = \frac{{ {solver.S} }}{{ {solver.a} }}",
             "Друга сторона прямокутника дорівнює площі, поділеній на відому сторону.",
         )
 
@@ -71,8 +71,8 @@ class PerimeterAndSideTask(RectangleTask):
         solver.b = (solver.P / 2) - solver.a
         solver.add_side_b_result(
             result,
-            "b = P / 2 - a",
-            f"b = {solver.P} / 2 - {solver.a}",
+            r"b = \frac{P}{2} - a",
+            fr"b = \frac{{ {solver.P} }}{{ 2 }} - {solver.a}",
             "Півпериметр дорівнює сумі суміжних сторін.",
         )
 
@@ -97,8 +97,8 @@ class DiagonalAndSideTask(RectangleTask):
         solver.b = math.sqrt(solver.d ** 2 - solver.a ** 2)
         solver.add_side_b_result(
             result,
-            "b = sqrt(d^2 - a^2)",
-            f"b = sqrt({solver.d}^2 - {solver.a}^2)",
+            r"b = \sqrt{d^2 - a^2}",
+            fr"b = \sqrt{{ {solver.d}^2 - {solver.a}^2 }}",
             "За теоремою Піфагора для трикутника, утвореного діагоналлю та сторонами.",
         )
 
@@ -120,8 +120,8 @@ class AreaTarget(RectangleTarget):
 
         result["area"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо площу прямокутника",
-            "S = a * b",
-            f"S = {solver.a:.2f} * {solver.b:.2f}",
+            r"S = a \cdot b",
+            fr"S = {solver.a:.2f} \cdot {solver.b:.2f}",
             solver.a * solver.b,
             rule="Площа прямокутника дорівнює добутку його суміжних сторін.",
         )
@@ -137,8 +137,8 @@ class PerimeterTarget(RectangleTarget):
 
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = 2 * (a + b)",
-            f"P = 2 * ({solver.a:.2f} + {solver.b:.2f})",
+            r"P = 2(a + b)",
+            fr"P = 2({solver.a:.2f} + {solver.b:.2f})",
             2 * (solver.a + solver.b),
             rule="Периметр дорівнює подвоєній сумі суміжних сторін.",
         )
@@ -161,8 +161,8 @@ class CircumcircleTarget(RectangleTarget):
         solver.show_diagonal = True
         result["r_circumscribed"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус описаного кола R",
-            "R = d / 2",
-            f"R = {solver.diag_val:.2f} / 2",
+            r"R = \frac{d}{2}",
+            fr"R = \frac{{ {solver.diag_val:.2f} }}{{ 2 }}",
             solver.diag_val / 2,
             rule=(
                 "Центр описаного кола лежить на перетині діагоналей, "
@@ -249,8 +249,8 @@ class RectangleSolver(GeometricSolver):
         key = "intermediate_diagonal" if is_intermediate else "diagonal"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо діагональ d",
-            "d = sqrt(a^2 + b^2)",
-            f"d = sqrt({self.a:.2f}^2 + {self.b:.2f}^2)",
+            r"d = \sqrt{a^2 + b^2}",
+            fr"d = \sqrt{{ {self.a:.2f}^2 + {self.b:.2f}^2 }}",
             self.diag_val,
             rule=(
                 "Діагональ прямокутника знаходиться за теоремою Піфагора."

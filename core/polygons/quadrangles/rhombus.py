@@ -63,8 +63,8 @@ class SideAndAngleTask(RhombusTask):
         beta = 180.0 - solver.angle
         result["angle_beta"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо сусідній кут β",
-            "β = 180° - α",
-            f"β = 180° - {solver.angle}°",
+            r"\beta = 180^\circ - \alpha",
+            fr"\beta = 180^\circ - {solver.angle}^\circ",
             beta,
             rule="Сума суміжних кутів ромба дорівнює 180°."
         )
@@ -92,18 +92,18 @@ class AreaAndSideTask(RhombusTask):
     def add_angles_result(self, solver: "RhombusSolver", result: dict) -> None:
         result["angle_alpha"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо гострий кут α",
-            "α = arcsin(S / a²)",
-            f"α = arcsin({solver.S} / {solver.a}²)",
+            r"\alpha = \arcsin\left(\frac{S}{a^2}\right)",
+            fr"\alpha = \arcsin\left(\frac{{ {solver.S} }}{{ {solver.a}^2 }}\right)",
             solver.angle,
-            rule="З формули площі ромба через кут: S = a² · sin(α)."
+            rule=r"З формули площі ромба через кут: \(S = a^2 \cdot \sin(\alpha)\)."
         )
         solver.step_num += 1
 
         beta = 180.0 - solver.angle
         result["angle_beta"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо тупий кут β",
-            "β = 180° - α",
-            f"β = 180° - {solver.angle:.1f}°",
+            r"\beta = 180^\circ - \alpha",
+            fr"\beta = 180^\circ - {solver.angle:.1f}^\circ",
             beta
         )
         solver.step_num += 1
@@ -180,8 +180,8 @@ class PerimeterTarget(RhombusTarget):
     def calculate(self, solver: "RhombusSolver", result: dict) -> None:
         result["perimeter"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо периметр",
-            "P = 4 · a",
-            f"P = 4 · {solver.a:.2f}",
+            r"P = 4a",
+            fr"P = 4 \cdot {solver.a:.2f}",
             4 * solver.a,
             rule="Усі сторони ромба рівні."
         )
@@ -195,8 +195,8 @@ class HeightTarget(RhombusTarget):
         height_val = solver.compute_height()
         result["height"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо висоту h",
-            "h = S / a",
-            f"h = {solver.compute_area():.2f} / {solver.a:.2f}",
+            r"h = \frac{S}{a}",
+            fr"h = \frac{{ {solver.compute_area():.2f} }}{{ {solver.a:.2f} }}",
             height_val,
             rule="Висота дорівнює відношенню площі до сторони."
         )
@@ -212,8 +212,8 @@ class IncircleTarget(RhombusTarget):
         r_val = height_val / 2
         result["incircle"] = solver.add_step(
             f"Крок {solver.step_num}. Знаходимо радіус вписаного кола r",
-            "r = h / 2",
-            f"r = {height_val:.2f} / 2",
+            r"r = \frac{h}{2}",
+            fr"r = \frac{{ {height_val:.2f} }}{{ 2 }}",
             r_val,
             rule="Центр вписаного кола лежить на перетині діагоналей, а радіус дорівнює половині висоти."
         )
@@ -332,8 +332,8 @@ class RhombusSolver(GeometricSolver):
         key = "intermediate_side_a" if is_intermediate else "side_a"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо сторону a",
-            "a = √((d1/2)² + (d2/2)²)",
-            f"a = √({self.d1 / 2:.2f}² + {self.d2 / 2:.2f}²)",
+            r"a = \sqrt{\left(\frac{d_1}{2}\right)^2 + \left(\frac{d_2}{2}\right)^2}",
+            fr"a = \sqrt{{ {self.d1 / 2:.2f}^2 + {self.d2 / 2:.2f}^2 }}",
             self.a,
             rule="Діагоналі ромба перетинаються під прямим кутом. Знаходимо за теоремою Піфагора.",
             is_intermediate=is_intermediate
@@ -352,8 +352,8 @@ class RhombusSolver(GeometricSolver):
 
         result[key1] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо діагональ d1",
-            "d1 = a · √(2 - 2·cos(α))",
-            f"d1 = {self.a} · √(2 - 2·cos({self.angle}°))",
+            r"d_1 = a \sqrt{2 - 2\cos(\alpha)}",
+            fr"d_1 = {self.a} \sqrt{{2 - 2\cos({self.angle}^\circ)}}",
             self.d1,
             rule="За теоремою косинусів.",
             is_intermediate=is_intermediate
@@ -361,8 +361,8 @@ class RhombusSolver(GeometricSolver):
         self.step_num += 1
         result[key2] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо діагональ d2",
-            "d2 = a · √(2 + 2·cos(α))",
-            f"d2 = {self.a} · √(2 + 2·cos({self.angle}°))",
+            r"d_2 = a \sqrt{2 + 2\cos(\alpha)}",
+            fr"d_2 = {self.a} \sqrt{{2 + 2\cos({self.angle}^\circ)}}",
             self.d2,
             is_intermediate=is_intermediate
         )
@@ -378,8 +378,8 @@ class RhombusSolver(GeometricSolver):
         key = "intermediate_d2" if is_intermediate else "diagonal_2"
         result[key] = self.add_step(
             f"Крок {self.step_num}. {prefix}Знаходимо іншу діагональ",
-            "d_other = 2 · √(a² - (d/2)²)",
-            f"d_other = 2 · √({self.a}² - ({self.d1}/2)²)",
+            r"d_2 = 2 \sqrt{a^2 - \left(\frac{d_1}{2}\right)^2}",
+            fr"d_2 = 2 \sqrt{{ {self.a}^2 - \left(\frac{{ {self.d1} }}{{ 2 }}\right)^2 }}",
             self.d2,
             rule="З прямокутного трикутника, утвореного половинами діагоналей і стороною.",
             is_intermediate=is_intermediate
@@ -394,8 +394,8 @@ class RhombusSolver(GeometricSolver):
 
         result["angle_alpha"] = self.add_step(
             f"Крок {self.step_num}. Знаходимо гострий кут α",
-            "α = 2 · arctg(d_min / d_max)",
-            f"α = 2 · arctg({min(self.d1, self.d2)} / {max(self.d1, self.d2)})",
+            r"\alpha = 2 \arctan\left(\frac{d_{min}}{d_{max}}\right)",
+            fr"\alpha = 2 \arctan\left(\frac{{ {min(self.d1, self.d2)} }}{{ {max(self.d1, self.d2)} }}\right)",
             self.angle,
             rule="Половина діагоналей утворює зі стороною прямокутний трикутник."
         )
@@ -404,8 +404,8 @@ class RhombusSolver(GeometricSolver):
         beta = 180.0 - self.angle
         result["angle_beta"] = self.add_step(
             f"Крок {self.step_num}. Знаходимо тупий кут β",
-            "β = 180° - α",
-            f"β = 180° - {self.angle:.1f}°",
+            r"\beta = 180^\circ - \alpha",
+            fr"\beta = 180^\circ - {self.angle:.1f}^\circ",
             beta,
             rule="Сума суміжних кутів ромба дорівнює 180°."
         )
@@ -419,8 +419,8 @@ class RhombusSolver(GeometricSolver):
         area_val = self.compute_area()
         result["area"] = self.add_step(
             f"Крок {self.step_num}. Знаходимо площу",
-            "S = 1/2 · d1 · d2",
-            f"S = 1/2 · {self.d1:.2f} · {self.d2:.2f}",
+            r"S = \frac{1}{2} d_1 d_2",
+            fr"S = \frac{1}{2} \cdot {self.d1:.2f} \cdot {self.d2:.2f}",
             area_val,
             rule="Площа ромба дорівнює половині добутку його діагоналей."
         )
