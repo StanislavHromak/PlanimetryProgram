@@ -19,9 +19,9 @@ from svglib.svglib import svg2rlg
 
 logger = logging.getLogger(__name__)
 
-# ── Реєстрація шрифтів з підтримкою кирилиці ────────────────────────────────
+# Реєстрація шрифтів з підтримкою кирилиці
 def _register_fonts() -> None:
-    """Реєструє DejaVuSans з папки fonts/ поруч з цим файлом."""
+    """Реєструє DejaVuSans з папки fonts поруч з цим файлом."""
     import os
     fonts_dir = os.path.join(os.path.dirname(__file__), "fonts")
     variants = [
@@ -39,15 +39,15 @@ def _register_fonts() -> None:
 
 _register_fonts()
 
-# Псевдоніми щоб код стилів не знав про конкретний шрифт
+# Псевдоніми, щоб код стилів не знав про конкретний шрифт
 FONT_REGULAR  = "DejaVuSans"
 FONT_BOLD     = "DejaVuSans-Bold"
 FONT_ITALIC   = "DejaVuSans-Oblique"
-FONT_MONO     = "DejaVuSans"          # моноширинний — теж DejaVu (достатньо для цифр)
+FONT_MONO     = "DejaVuSans"
 
 
 
-# ── Кольори ──────────────────────────────────────────────────────────────────
+# Кольори
 PRIMARY     = colors.HexColor("#4f46e5")
 PRIMARY_LT  = colors.HexColor("#ede9fe")
 STEP_BG     = colors.HexColor("#f8fafc")
@@ -63,7 +63,7 @@ MUTED       = colors.HexColor("#6b7280")
 DARK        = colors.HexColor("#1f2937")
 
 
-# ── Назви фігур та задач ─────────────────────────────────────────────────────
+# Назви фігур та задач
 FIGURE_NAMES = {
     "triangle":       "Трикутник",
     "circle":         "Коло",
@@ -332,7 +332,6 @@ def generate_pdf(solution: dict) -> bytes:
     styles = _make_styles()
     story  = []
 
-    # ── Шапка ────────────────────────────────────────────────────────────────
     figure_name = FIGURE_NAMES.get(solution.get("figure", ""), solution.get("figure", ""))
     task_name   = TASK_NAMES.get(solution.get("task_type", ""), solution.get("task_type", ""))
     created_at  = solution.get("created_at",

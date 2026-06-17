@@ -482,6 +482,8 @@ export const TARGET_NAMES = {
     "eccentricity": "Ексцентриситет (e)",
     "midline": "Середня лінія (m)",
     "circles_check": "Вписане/Описане коло",
+    "can_inscribe": "Чи можна вписати коло?",
+    "can_circumscribe": "Чи можна описати коло?",
 
     // Проміжні результати
     "intermediate_side_a": "Сторона a (проміжний рез.)",

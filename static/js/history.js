@@ -44,29 +44,89 @@ const TASK_NAMES = {
     ARB_SIDES_ANGLES:              "4 сторони та кут",
 };
 
+let historyData = [];
+let currentPage = 1;
+const itemsPerPage = 10;
+
 // Завантаження та відображення історії
 export async function loadHistory() {
     const container = document.getElementById('history-list');
-    container.innerHTML = '<div class="history-loading">⏳ Завантаження...</div>';
+    const pagination = document.getElementById('pagination-container');
 
-    let data;
+    container.innerHTML = '<div class="history-loading">⏳ Завантаження...</div>';
+    pagination.style.display = 'none';
+
     try {
         const res = await fetch('/api/history');
         const json = await res.json();
-        data = json.success ? json.data : [];
+        historyData = json.success ? json.data : [];
     } catch (e) {
         console.error('Помилка завантаження історії:', e);
-        container.innerHTML = '<div class="history-empty">❌ Помилка завантаження історії</div>';
+        container.innerHTML = '<div class="history-empty">Помилка завантаження історії</div>';
         return;
     }
 
-    if (data.length === 0) {
-        container.innerHTML = '<div class="history-empty">📭 Історія порожня. Розв\'яжіть першу задачу!</div>';
+    if (historyData.length === 0) {
+        container.innerHTML = '<div class="history-empty">Історія порожня. Розв\'яжіть першу задачу!</div>';
         return;
     }
 
-    container.innerHTML = data.map(item => renderHistoryCard(item)).join('');
+    currentPage = 1;
+    renderPage();
 }
+
+// Відображення конкретної сторінки
+function renderPage() {
+    const container = document.getElementById('history-list');
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageData = historyData.slice(startIndex, endIndex);
+
+    container.innerHTML = pageData.map(item => renderHistoryCard(item)).join('');
+
+    renderPaginationControls();
+}
+
+// Відображення кнопок пагінації
+function renderPaginationControls() {
+    const pagination = document.getElementById('pagination-container');
+    const totalPages = Math.ceil(historyData.length / itemsPerPage);
+
+    if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+    }
+
+    let html = '';
+
+    html += `<button class="btn-page" ${currentPage === 1 ? 'disabled' : ''} 
+                onclick="window.changeHistoryPage(${currentPage - 1})">&laquo; Попередня</button>`;
+
+    for (let i = 1; i <= totalPages; i++) {
+        const activeClass = i === currentPage ? 'btn-page--active' : '';
+        html += `<button class="btn-page ${activeClass}" 
+                    onclick="window.changeHistoryPage(${i})">${i}</button>`;
+    }
+
+    html += `<button class="btn-page" ${currentPage === totalPages ? 'disabled' : ''} 
+                onclick="window.changeHistoryPage(${currentPage + 1})">Наступна &raquo;</button>`;
+
+    pagination.innerHTML = html;
+    pagination.style.display = 'flex';
+}
+
+// Зміна сторінки
+export function changeHistoryPage(page) {
+    const totalPages = Math.ceil(historyData.length / itemsPerPage);
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderPage();
+        // Плавно прокручуємо вгору до початку історії
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+window.changeHistoryPage = changeHistoryPage;
 
 function renderHistoryCard(item) {
     const figureName = FIGURE_NAMES[item.figure]   ?? item.figure;
@@ -102,15 +162,15 @@ function renderHistoryCard(item) {
             <div class="history-card__actions">
                 <button class="btn-history btn-history--view"
                         onclick="window.repeatSolution(${item.id})">
-                    🔄 Повторити
+                    Повторити
                 </button>
                 <button class="btn-history btn-history--export"
                         onclick="window.exportPDF(${item.id})">
-                    📄 Експорт PDF
+                    Експорт PDF
                 </button>
                 <button class="btn-history btn-history--delete"
                         onclick="window.deleteSolution(${item.id}, this)">
-                    🗑 Видалити
+                    Видалити
                 </button>
             </div>
         </div>
@@ -167,7 +227,7 @@ export async function exportPDF(id) {
     const btn  = card ? card.querySelector('.btn-history--export') : null;
 
     if (btn) {
-        btn.textContent = '⏳ Генерація...';
+        btn.textContent = 'Генерація...';
         btn.disabled = true;
     }
 
@@ -194,7 +254,7 @@ export async function exportPDF(id) {
         alert('Не вдалося згенерувати PDF. Спробуйте ще раз.');
     } finally {
         if (btn) {
-            btn.textContent = '📄 Експорт PDF';
+            btn.textContent = 'Експорт PDF';
             btn.disabled = false;
         }
     }
@@ -212,15 +272,27 @@ export async function deleteSolution(id, btnEl) {
             return;
         }
 
+        historyData = historyData.filter(item => item.id !== id);
+
+        // Анімація зникнення
         const card = btnEl.closest('.history-card');
         card.style.transition = 'opacity 0.3s, transform 0.3s';
         card.style.opacity    = '0';
         card.style.transform  = 'translateX(20px)';
+
         setTimeout(() => {
-            card.remove();
-            const container = document.getElementById('history-list');
-            if (!container.querySelector('.history-card')) {
-                container.innerHTML = '<div class="history-empty">📭 Історія порожня.</div>';
+            // Якщо після видалення на цій сторінці не лишилося карток — переходимо на попередню
+            const totalPages = Math.ceil(historyData.length / itemsPerPage);
+            if (currentPage > totalPages && currentPage > 1) {
+                currentPage--;
+            }
+
+            if (historyData.length === 0) {
+                const container = document.getElementById('history-list');
+                container.innerHTML = '<div class="history-empty">Історія порожня.</div>';
+                document.getElementById('pagination-container').style.display = 'none';
+            } else {
+                renderPage(); // Перемальовуємо сторінку
             }
         }, 300);
 

@@ -21,7 +21,6 @@
             <p>Швидке розв'язання задач з детальним поясненням</p>
         </header>
 
-        <!-- Вкладки -->
         <div class="tabs-bar">
             <button class="tab-btn tab-btn--active" data-tab="solver"
                     onclick="window.switchTab('solver')">
@@ -35,7 +34,6 @@
 
         <main class="main-content">
 
-            <!-- Вкладка: Розв'язувач -->
             <div id="tab-solver" class="tab-content">
 
                 <section class="card config-card">
@@ -96,7 +94,6 @@
 
             </div>
 
-            <!-- Вкладка: Історія -->
             <div id="tab-history" class="tab-content" style="display: none;">
                 <section class="card">
                     <div class="history-header">
@@ -108,13 +105,15 @@
                     <div id="history-list">
                         <div class="history-loading">Завантаження...</div>
                     </div>
+
+                    <div id="pagination-container" class="pagination-container" style="display: none;"></div>
+
                 </section>
             </div>
 
         </main>
     </div>
 
-    <!-- Модальне вікно для зображень -->
     <div id="image-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-btn" id="close-modal-btn">&times;</span>

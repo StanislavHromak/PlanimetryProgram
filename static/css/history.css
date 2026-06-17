@@ -1,4 +1,4 @@
-/* ── Вкладки ─────────────────────────────────────────────────────────────── */
+/* Вкладки  */
 .tabs-bar {
     display: flex;
     gap: 0.5rem;
@@ -28,7 +28,7 @@
     border-bottom-color: var(--primary-color);
 }
 
-/* ── Кнопка експорту ─────────────────────────────────────────────────────── */
+/* Кнопка експорту */
 .btn-export {
     display: inline-flex;
     align-items: center;
@@ -49,7 +49,7 @@
 .btn-export:hover  { background: #059669; }
 .btn-export:active { transform: scale(0.98); }
 
-/* ── Історія ─────────────────────────────────────────────────────────────── */
+/* Історія */
 .history-header {
     display: flex;
     align-items: center;
@@ -180,3 +180,51 @@
 .btn-history--view   { background: #e0e7ff; color: #3730a3; }
 .btn-history--export { background: #d1fae5; color: #065f46; }
 .btn-history--delete { background: #fee2e2; color: #991b1b; }
+
+/* Перегортування сторінок */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-page {
+    padding: 8px 14px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-page:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.btn-page--active {
+    background: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+}
+
+.btn-page--active:hover:not(:disabled) {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-page:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
