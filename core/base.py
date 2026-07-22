@@ -34,8 +34,9 @@ class GeometricSolver(ABC):
         self._add_error(text)
 
     def add_step(self, title: str, formula: str, solution_str: str,
-                 value: float, rule: str = None, is_intermediate: bool = False) -> float:
-        return self._add_step(title, formula, solution_str, value, rule, is_intermediate)
+                 value: float | str, rule: str = None, is_intermediate: bool = False,
+                 show_result_suffix: bool = True) -> float | str:
+        return self._add_step(title, formula, solution_str, value, rule, is_intermediate, show_result_suffix)
 
     def _is_target(self, param: str) -> bool:
         return param in self.targets
@@ -53,14 +54,16 @@ class GeometricSolver(ABC):
         self._steps.append({"type": "error", "text": text})
 
     def _add_step(self, title: str, formula: str, solution_str: str,
-                  value: float, rule: str = None, is_intermediate: bool = False) -> float:
+                  value: float | str, rule: str = None, is_intermediate: bool = False,
+                  show_result_suffix: bool = True) -> float | str:
         step = {
             "type": "intermediate" if is_intermediate else "step",
             "title": title,
             "formula": formula,
             "solution": solution_str,
             "value": f"{value:.2f}" if isinstance(value, (int, float)) else value,
-            "rule": rule
+            "rule": rule,
+            "show_result_suffix": show_result_suffix,
         }
         self._steps.append(step)
 

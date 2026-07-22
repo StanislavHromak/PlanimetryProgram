@@ -23,10 +23,19 @@ class BasePlotter(ABC):
         self.ax.plot(x_closed, y_closed, color=edge_color, linestyle='-', lw=lw)
         self.ax.fill(x_coords, y_coords, color=fill_color, alpha=alpha)
 
-    def _get_base64_image(self) -> str:
-        """Фіналізує графік і повертає його у форматі base64 (SVG)."""
-        self.ax.axis('equal')
-        self.ax.axis('off')
+    def _get_base64_image(self, keep_axis: bool = False) -> str:
+        """
+        Фіналізує графік і повертає його у форматі base64 (SVG).
+        За замовчуванням приховує осі (абстрактні креслення планіметрії).
+        keep_axis=True — залишає сітку, підписи осей і поділки
+        (використовується аналітичною геометрією, де координати важливі).
+        """
+        if keep_axis:
+            self.ax.set_aspect('equal', adjustable='box')
+        else:
+            self.ax.axis('equal')
+            self.ax.axis('off')
+
         plt.tight_layout()
 
         buf = io.BytesIO()
