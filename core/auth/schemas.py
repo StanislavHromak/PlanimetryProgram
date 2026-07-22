@@ -1,5 +1,6 @@
-import re
 from pydantic import BaseModel, field_validator
+from core.auth.validators import validate_username_format, validate_password_strength
+from core.auth.roles import UserRole
 
 
 class UserCreate(BaseModel):
@@ -9,22 +10,12 @@ class UserCreate(BaseModel):
     @field_validator("username")
     @classmethod
     def username_must_be_valid(cls, v: str) -> str:
-        if len(v) < 3:
-            raise ValueError("Ім'я користувача має містити щонайменше 3 символи.")
-        if not re.match(r'^[a-zA-Z0-9_]+$', v):
-            raise ValueError("Ім'я користувача може містити лише латинські літери, цифри та підкреслення.")
-        return v
+        return validate_username_format(v)
 
     @field_validator("password")
     @classmethod
     def password_must_be_strong_enough(cls, v: str) -> str:
-        if len(v) < 6:
-            raise ValueError("Пароль має містити щонайменше 6 символів.")
-        if not re.search(r'[A-Za-zА-Яа-яЇїІіЄєҐґ]', v):
-            raise ValueError("Пароль має містити щонайменше одну літеру.")
-        if not re.search(r'\d', v):
-            raise ValueError("Пароль має містити щонайменше одну цифру.")
-        return v
+        return validate_password_strength(v)
 
 
 class UserLogin(BaseModel):
@@ -33,8 +24,42 @@ class UserLogin(BaseModel):
 
 
 class UserOut(BaseModel):
+    model_config = {"from_attributes": True}
+
     id: int
     username: str
+    role: str
+    is_active: bool
+
+
+class UsernameUpdate(BaseModel):
+    username: str
+
+    @field_validator("username")
+    @classmethod
+    def username_must_be_valid(cls, v: str) -> str:
+        return validate_username_format(v)
+
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def new_password_must_be_strong(cls, v: str) -> str:
+        return validate_password_strength(v)
+
+
+class AdminRoleUpdate(BaseModel):
+    role: str
+
+    @field_validator("role")
+    @classmethod
+    def role_must_be_valid(cls, v: str) -> str:
+        if v not in (UserRole.USER.value, UserRole.ADMIN.value):
+            raise ValueError("Роль має бути 'user' або 'admin'.")
+        return v
 
 
 class Token(BaseModel):
