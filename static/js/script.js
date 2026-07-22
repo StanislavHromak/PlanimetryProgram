@@ -17,6 +17,11 @@ window.deleteSolution               = deleteSolution;
 window.exportCurrentResult          = exportCurrentResult;
 window.solveAnalytic                = solveAnalytic;
 window.exportCurrentAnalyticResult  = exportCurrentAnalyticResult;
+window.findAnalyticSubFigureByTask = (taskType) => {
+    return Object.keys(analyticConfig).find(
+        subKey => taskType in analyticConfig[subKey].tasks
+    );
+};
 
 // ID останнього збереженого розв'язку (для кнопки експорту)
 let lastSolutionId = null;

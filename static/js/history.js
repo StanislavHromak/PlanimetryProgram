@@ -1,10 +1,11 @@
 const FIGURE_NAMES = {
-    triangle:       "Трикутник",
-    circle:         "Коло",
-    sector:         "Сектор / Сегмент",
-    ellipse:        "Еліпс",
-    regular_polygon:"Правильний багатокутник",
-    quadrangle:     "Чотирикутник",
+    triangle:            "Трикутник",
+    circle:               "Коло",
+    sector:               "Сектор / Сегмент",
+    ellipse:               "Еліпс",
+    regular_polygon:      "Правильний багатокутник",
+    quadrangle:           "Чотирикутник",
+    analytic_geometry:    "Аналітична геометрія",
 };
 
 const TASK_NAMES = {
@@ -42,6 +43,10 @@ const TASK_NAMES = {
     TRAPEZOID_MIDLINE_HEIGHT:      "Середня лінія і висота",
     ISOSCELES_TRAPEZOID_BASES_LEG: "Рівнобічна: основи і бічна",
     ARB_SIDES_ANGLES:              "4 сторони та кут",
+    TWO_POINTS:                    "Дві точки",
+    POINT_LINE_DISTANCE:           "Точка і пряма",
+    TWO_LINES:                     "Дві прямі",
+    VECTORS:                       "Вектори",
 };
 
 let historyData = [];
@@ -190,13 +195,17 @@ export async function repeatSolution(id) {
         return;
     }
 
-    // Перемикаємось на вкладку "Розв'язувач"
-    switchTab('solver');
+    if (item.figure === 'analytic_geometry') {
+        await repeatAnalyticSolution(item);
+    } else {
+        await repeatPlanimetrySolution(item);
+    }
+}
 
-    // Чекаємо поки DOM оновиться
+async function repeatPlanimetrySolution(item) {
+    switchTab('solver');
     await new Promise(resolve => setTimeout(resolve, 50));
 
-    // Заповнюємо форму
     const figureSelect = document.getElementById('figure-select');
     figureSelect.value = item.figure;
     figureSelect.dispatchEvent(new Event('change'));
@@ -215,6 +224,45 @@ export async function repeatSolution(id) {
     });
 
     document.querySelectorAll('#target-checkboxes input[type="checkbox"]').forEach(cb => {
+        cb.checked = item.targets.includes(cb.value);
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function repeatAnalyticSolution(item) {
+    switchTab('analytic');
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Знаходимо, якому підвиду (two_points / point_line / two_lines / vectors)
+    // належить task_type, оскільки на цій вкладці немає figure-рівня — одразу підвиди.
+    const subFigureKey = window.findAnalyticSubFigureByTask
+        ? window.findAnalyticSubFigureByTask(item.task_type)
+        : null;
+
+    if (!subFigureKey) {
+        console.warn('Не вдалося визначити підвид аналітичної геометрії для задачі', item.task_type);
+        return;
+    }
+
+    const subSelect = document.getElementById('analytic-subfigure-select');
+    subSelect.value = subFigureKey;
+    subSelect.dispatchEvent(new Event('change'));
+
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    const taskSelect = document.getElementById('analytic-task-select');
+    taskSelect.value = item.task_type;
+    taskSelect.dispatchEvent(new Event('change'));
+
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    Object.entries(item.params).forEach(([key, val]) => {
+        const input = document.getElementById(`analytic-${key}`);
+        if (input) input.value = val;
+    });
+
+    document.querySelectorAll('#analytic-target-checkboxes input[type="checkbox"]').forEach(cb => {
         cb.checked = item.targets.includes(cb.value);
     });
 
