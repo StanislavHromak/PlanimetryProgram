@@ -12,11 +12,22 @@
     <link rel="stylesheet" href="/static/css/results.css">
     <link rel="stylesheet" href="/static/css/modal.css">
     <link rel="stylesheet" href="/static/css/history.css">
+    <link rel="stylesheet" href="/static/css/auth.css">
 </head>
 
 <body>
     <div class="app-container">
         <header class="app-header">
+            <div class="profile-corner">
+                <button id="profile-btn" class="profile-btn" title="Профіль">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                <div id="profile-panel" class="profile-panel"></div>
+            </div>
+
             <h1>PlanimetrySolver <span class="badge">Розв'язувач задач з планіметрії</span></h1>
             <p>Швидке розв'язання задач з детальним поясненням</p>
         </header>
@@ -24,7 +35,11 @@
         <div class="tabs-bar">
             <button class="tab-btn tab-btn--active" data-tab="solver"
                     onclick="window.switchTab('solver')">
-                Розв'язувач
+                Планіметрія
+            </button>
+            <button class="tab-btn" data-tab="analytic"
+                    onclick="window.switchTab('analytic')">
+                Аналітична геометрія
             </button>
             <button class="tab-btn" data-tab="history"
                     onclick="window.switchTab('history')">
@@ -91,7 +106,76 @@
                         <div id="steps-list" class="steps-container"></div>
                     </div>
                 </section>
+            </div>
 
+            <div id="tab-analytic" class="tab-content" style="display: none;">
+
+                <div id="analytic-locked" class="locked-panel" style="display:none;">
+                    <div class="locked-icon">🔒</div>
+                    <h2>Цей розділ доступний лише зареєстрованим користувачам</h2>
+                    <p>
+                        Аналітична геометрія — розширений розділ програми.
+                        Щоб розв'язувати задачі про точки, прямі та вектори,
+                        будь ласка, зареєструйтесь або увійдіть у свій акаунт.
+                    </p>
+                    <button class="btn-primary locked-cta" id="analytic-locked-cta">
+                        Зареєструватися / Увійти
+                    </button>
+                </div>
+
+                <div id="analytic-content">
+
+                    <section class="card config-card">
+                        <div class="settings-grid">
+                            <div class="setting-group">
+                                <label for="analytic-subfigure-select">Оберіть тип задачі</label>
+                                <select id="analytic-subfigure-select" class="modern-select"></select>
+                            </div>
+
+                            <div class="setting-group">
+                                <label for="analytic-task-select">Що відомо?</label>
+                                <select id="analytic-task-select" class="modern-select"></select>
+                            </div>
+
+                            <div class="setting-group targets-group">
+                                <label>Що знайти?</label>
+                                <div id="analytic-target-checkboxes" class="chips-group"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card input-card">
+                        <h2>Введіть дані</h2>
+                        <div id="analytic-dynamic-inputs" class="input-grid"></div>
+                        <button class="btn-primary" onclick="solveAnalytic()">
+                            <span class="btn-icon"></span> Розрахувати
+                        </button>
+                        <div id="analytic-error-msg" class="error-msg"></div>
+                    </section>
+
+                    <section id="analytic-results" class="card results-card" style="display: none;">
+                        <div class="results-layout">
+                            <div class="data-section">
+                                <h2>Результати</h2>
+                                <ul id="analytic-params-list" class="modern-list"></ul>
+                                <button id="analytic-export-btn" class="btn-export" style="display:none"
+                                        onclick="window.exportCurrentAnalyticResult()">
+                                    Експортувати PDF
+                                </button>
+                            </div>
+
+                            <div class="plot-section" id="analytic-plot-section" style="display: none;">
+                                <h2>Креслення</h2>
+                                <div id="analytic-plot-container" class="image-wrapper"></div>
+                            </div>
+                        </div>
+
+                        <div class="steps-section">
+                            <h2>Хід розв'язання</h2>
+                            <div id="analytic-steps-list" class="steps-container"></div>
+                        </div>
+                    </section>
+                </div>
             </div>
 
             <div id="tab-history" class="tab-content" style="display: none;">
@@ -107,10 +191,8 @@
                     </div>
 
                     <div id="pagination-container" class="pagination-container" style="display: none;"></div>
-
                 </section>
             </div>
-
         </main>
     </div>
 
@@ -123,6 +205,13 @@
             <div class="zoom-hint">
                 Використовуйте коліщатко миші для масштабування. Затисніть ЛКМ для переміщення.
             </div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content auth-modal-content">
+            <span class="close-btn" id="auth-modal-close">&times;</span>
+            <div id="auth-modal-body" class="auth-modal-body"></div>
         </div>
     </div>
 

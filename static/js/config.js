@@ -1,3 +1,4 @@
+export const GUEST_ALLOWED_FIGURES = ['triangle'];
 export const uiConfig = {
     regular_polygon: {
         name: "Правильний n-кутник",
@@ -441,6 +442,96 @@ export const uiConfig = {
     }
 };
 
+export const analyticConfig = {
+    two_points: {
+        name: "Дві точки",
+        targets: [
+            { id: "distance",      label: "Відстань (d)",           checked: true },
+            { id: "midpoint",      label: "Середину відрізка",      checked: false },
+            { id: "line_equation", label: "Рівняння прямої",        checked: false },
+            { id: "slope",         label: "Кутовий коефіцієнт (k)", checked: false }
+        ],
+        tasks: {
+            "TWO_POINTS": {
+                name: "Координати двох точок",
+                inputs: [
+                    { id: "x1", label: "x1 (точка A)" },
+                    { id: "y1", label: "y1 (точка A)" },
+                    { id: "x2", label: "x2 (точка B)" },
+                    { id: "y2", label: "y2 (точка B)" }
+                ],
+                validTargets: ["distance", "midpoint", "line_equation", "slope"]
+            }
+        }
+    },
+    point_line: {
+        name: "Точка і пряма",
+        targets: [
+            { id: "distance",              label: "Відстань до прямої (d)", checked: true },
+            { id: "foot_of_perpendicular", label: "Основу перпендикуляра",  checked: false }
+        ],
+        tasks: {
+            "POINT_LINE_DISTANCE": {
+                name: "Точка і пряма через дві точки",
+                inputs: [
+                    { id: "px", label: "x точки M" },
+                    { id: "py", label: "y точки M" },
+                    { id: "x1", label: "x1 (пряма)" },
+                    { id: "y1", label: "y1 (пряма)" },
+                    { id: "x2", label: "x2 (пряма)" },
+                    { id: "y2", label: "y2 (пряма)" }
+                ],
+                validTargets: ["distance", "foot_of_perpendicular"]
+            }
+        }
+    },
+    two_lines: {
+        name: "Дві прямі",
+        targets: [
+            { id: "relation",     label: "Взаємне розташування", checked: true },
+            { id: "intersection", label: "Точку перетину",       checked: true },
+            { id: "angle",        label: "Кут між прямими",      checked: false }
+        ],
+        tasks: {
+            "TWO_LINES": {
+                name: "Дві прямі через пари точок",
+                inputs: [
+                    { id: "x1", label: "x1 (пряма 1)" },
+                    { id: "y1", label: "y1 (пряма 1)" },
+                    { id: "x2", label: "x2 (пряма 1)" },
+                    { id: "y2", label: "y2 (пряма 1)" },
+                    { id: "x3", label: "x1 (пряма 2)" },
+                    { id: "y3", label: "y1 (пряма 2)" },
+                    { id: "x4", label: "x2 (пряма 2)" },
+                    { id: "y4", label: "y2 (пряма 2)" }
+                ],
+                validTargets: ["relation", "intersection", "angle"]
+            }
+        }
+    },
+    vectors: {
+        name: "Вектори",
+        targets: [
+            { id: "magnitude",        label: "Довжини векторів",   checked: true },
+            { id: "dot_product",      label: "Скалярний добуток",  checked: true },
+            { id: "angle",            label: "Кут між векторами",  checked: false },
+            { id: "is_perpendicular", label: "Перпендикулярність?", checked: false }
+        ],
+        tasks: {
+            "VECTORS": {
+                name: "Координати двох векторів",
+                inputs: [
+                    { id: "x1", label: "x (вектор a)" },
+                    { id: "y1", label: "y (вектор a)" },
+                    { id: "x2", label: "x (вектор b)" },
+                    { id: "y2", label: "y (вектор b)" }
+                ],
+                validTargets: ["magnitude", "dot_product", "angle", "is_perpendicular"]
+            }
+        }
+    }
+};
+
 // Словник для красивого відображення результатів з бекенду
 export const TARGET_NAMES = {
     "area": "Площа (S)",
@@ -490,5 +581,21 @@ export const TARGET_NAMES = {
     "intermediate_side_b": "Сторона b (проміжний рез.)",
     "intermediate_side_c": "Сторона c (проміжний рез.)",
     "intermediate_diagonal": "Діагональ (проміжний рез.)",
-    "intermediate_height": "Висота (проміжний рез.)"
+    "intermediate_height": "Висота (проміжний рез.)",
+
+    // Аналітична геометрія
+    "midpoint_x": "Середина, x",
+    "midpoint_y": "Середина, y",
+    "line_equation": "Рівняння прямої",
+    "slope": "Кутовий коефіцієнт (k)",
+    "foot_x": "Основа перпендикуляра, x",
+    "foot_y": "Основа перпендикуляра, y",
+    "relation": "Взаємне розташування",
+    "intersection_x": "Точка перетину, x",
+    "intersection_y": "Точка перетину, y",
+    "intersection": "Точка перетину",
+    "magnitude_1": "Довжина вектора a",
+    "magnitude_2": "Довжина вектора b",
+    "dot_product": "Скалярний добуток",
+    "is_perpendicular": "Перпендикулярність",
 };

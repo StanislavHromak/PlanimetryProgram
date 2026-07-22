@@ -1,0 +1,224 @@
+/* Кнопка профілю у шапці */
+.profile-corner {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+}
+
+.profile-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.1s;
+    padding: 0;
+}
+
+.profile-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.profile-btn:active {
+    transform: scale(0.95);
+}
+
+.profile-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--text-muted);
+}
+
+.profile-btn--active svg {
+    stroke: var(--primary-color);
+}
+
+.profile-btn--logged-in {
+    border-color: var(--primary-color);
+    background: #eef2ff;
+}
+
+/* Випадна панель */
+.profile-panel {
+    display: none;
+    position: absolute;
+    top: 52px;
+    right: 0;
+    width: 260px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    padding: 1.2rem;
+    z-index: 100;
+}
+
+.profile-panel--open {
+    display: block;
+}
+
+.profile-panel h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.profile-field {
+    margin-bottom: 0.8rem;
+}
+
+.profile-field label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+
+.profile-field input {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.profile-btn-submit {
+    width: 100%;
+    padding: 0.6rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 0.3rem;
+}
+
+.profile-btn-submit:hover {
+    background: var(--primary-hover);
+}
+
+.profile-switch-mode {
+    text-align: center;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+}
+
+.profile-switch-mode a {
+    color: var(--primary-color);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.profile-switch-mode a:hover {
+    text-decoration: underline;
+}
+
+.profile-error {
+    color: var(--error-color);
+    font-size: 0.82rem;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.profile-user-info {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.profile-username {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text-main);
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.profile-role-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.15rem 0.55rem;
+    border-radius: 10px;
+}
+
+.profile-btn-logout {
+    width: 100%;
+    padding: 0.6rem;
+    background: #fee2e2;
+    color: #991b1b;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.profile-btn-logout:hover {
+    background: #fecaca;
+}
+
+.profile-guest-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 0.8rem;
+}
+
+.locked-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1.5rem;
+}
+
+.locked-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.locked-panel h2 {
+    margin: 0 0 0.8rem 0;
+    font-size: 1.3rem;
+    color: var(--text-main);
+}
+
+.locked-panel p {
+    max-width: 420px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.locked-cta {
+    width: auto;
+    padding: 0.75rem 2rem;
+}
+
+/* Модальне вікно авторизації (по центру, як image-modal) */
+.auth-modal-content {
+    width: 380px;
+    height: auto;
+    max-width: 90%;
+    padding: 2rem;
+}
+
+.auth-modal-body h3 {
+    margin: 0 0 1.2rem 0;
+    font-size: 1.2rem;
+    text-align: center;
+    color: var(--text-main);
+}
