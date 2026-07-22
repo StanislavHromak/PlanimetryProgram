@@ -19,6 +19,10 @@ from core.polygons.quadrangles.rhombus import RhombusSolver
 from core.polygons.quadrangles.square import SquareSolver
 from core.polygons.quadrangles.trapezoid import TrapezoidSolver
 
+from core.analytic.analytic_geometry import (
+    TwoPointsSolver, PointLineSolver, TwoLinesSolver, VectorsSolver,
+)
+
 
 class GeometryFactory:
     """Фабрика реєстрації солверів."""
@@ -82,5 +86,13 @@ def _register_solvers() -> None:
     GeometryFactory.register_solver("curves", SectorSolver)
     GeometryFactory.register_solver("curves", EllipseSolver)
 
+    GeometryFactory.register_solver("analytic_geometry", TwoPointsSolver)
+    GeometryFactory.register_solver("analytic_geometry", PointLineSolver)
+    GeometryFactory.register_solver("analytic_geometry", TwoLinesSolver)
+    GeometryFactory.register_solver("analytic_geometry", VectorsSolver)
+
 
 _register_solvers()
+
+# Фігури, доступні гостям без реєстрації.
+GUEST_ALLOWED_FIGURES: set[str] = {"triangle"}
