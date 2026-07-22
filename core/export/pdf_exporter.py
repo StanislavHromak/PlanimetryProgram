@@ -16,6 +16,7 @@ from reportlab.lib.enums import TA_CENTER
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from svglib.svglib import svg2rlg
+from core.export.latex_to_text import latex_to_plain
 
 logger = logging.getLogger(__name__)
 
@@ -264,7 +265,6 @@ def _render_step(step: dict, styles: dict, page_w: float) -> list:
         bg     = INTER_BG    if is_inter else STEP_BG
         border = INTER_BORDER if is_inter else STEP_BORDER
 
-        # rows: list[list] — комірки таблиці (можуть містити Paragraph або Table)
         title_row: list = [Paragraph(f"{prefix}{step.get('title', '')}", title_style)]
         rows: list[list] = [title_row]
 
@@ -276,16 +276,19 @@ def _render_step(step: dict, styles: dict, page_w: float) -> list:
 
         if step.get("formula"):
             rows.append([_card(
-                [[Paragraph(step["formula"], styles["formula"])]],
+                [[Paragraph(latex_to_plain(step["formula"]), styles["formula"])]],
                 bg=colors.HexColor("#eef2ff"), border=PRIMARY, padding=6,
             )])
 
         value_str = step.get("value", "")
-        sol_str   = step.get("solution", "")
-        rows.append([Paragraph(
-            f'{sol_str} = <font color="#4f46e5"><b>{value_str}</b></font>',
-            styles["solution"],
-        )])
+        sol_str = latex_to_plain(step.get("solution", ""))
+        show_suffix = step.get("show_result_suffix", True)
+
+        description = (
+            f'{sol_str} = <font color="#4f46e5"><b>{value_str}</b></font>'
+            if show_suffix else sol_str
+        )
+        rows.append([Paragraph(description, styles["solution"])])
 
         card = _card(rows, bg=bg, border=border)
         if is_inter:

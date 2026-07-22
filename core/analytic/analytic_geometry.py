@@ -5,6 +5,9 @@ from typing import ClassVar
 from core.base import GeometricSolver
 from core.analytic.entities import Point2D, Vector2D, Line2D
 from core.analytic.plotters.analytic_plotter import AnalyticPlotter
+from core.analytic.line_formatting import (
+    fmt_num, format_linear_expr, format_line_lhs, simplify_line_coefficients,
+)
 
 
 # ============================================================
@@ -78,15 +81,41 @@ class LineEquationTarget(TwoPointsTarget):
     target_name = "line_equation"
 
     def calculate(self, solver: "TwoPointsSolver", result: dict) -> None:
-        line = solver.line()
-        equation = f"{line.a:.2f}x + {line.b:.2f}y + {line.c:.2f} = 0"
-        result["line_equation"] = equation
+        x1, y1 = solver.p1.x, solver.p1.y
+        x2, y2 = solver.p2.x, solver.p2.y
+        dx, dy = x2 - x1, y2 - y1
+
+        # Розкриваємо (y - y1)(x2 - x1) = (x - x1)(y2 - y1) у стандартну форму Ax + By + C = 0
+        a_coef, b_coef, c_coef = -dy, dx, dy * x1 - dx * y1
+
+        raw_lhs = format_line_lhs(a_coef, b_coef, c_coef)
+        a_s, b_s, c_s = simplify_line_coefficients(a_coef, b_coef, c_coef)
+        simplified_lhs = format_line_lhs(a_s, b_s, c_s)
+        simplified_equation = f"{simplified_lhs} = 0"
+
+        x1s, y1s, x2s, y2s = fmt_num(x1), fmt_num(y1), fmt_num(x2), fmt_num(y2)
+        dx_s, dy_s = fmt_num(dx), fmt_num(dy)
+
+        derivation_lines = [
+            fr"(y - {y1s})({x2s} - {x1s}) = (x - {x1s})({y2s} - {y1s})",
+            fr"(y - {y1s}) \cdot {dx_s} = (x - {x1s}) \cdot {dy_s}",
+            fr"{format_linear_expr(dx, 'y', -dx * y1)} = {format_linear_expr(dy, 'x', -dy * x1)}",
+        ]
+        if raw_lhs != simplified_lhs:
+            derivation_lines.append(fr"{raw_lhs} = 0")
+
+        derivation_lines.append(fr"\boxed{{{simplified_lhs} = 0}}")
+
+        solution_block = r"\begin{gathered}" + r" \\ ".join(derivation_lines) + r"\end{gathered}"
+
+        result["line_equation"] = simplified_equation
         solver.add_step(
             f"Крок {solver.step_num}. Складаємо рівняння прямої через точки A і B",
             r"(y - y_1)(x_2 - x_1) = (x - x_1)(y_2 - y_1)",
-            equation,
-            equation,
+            solution_block,
+            simplified_equation,
             rule="Загальне рівняння прямої, що проходить через дві задані точки.",
+            show_result_suffix=False,
         )
         solver.step_num += 1
 
@@ -146,14 +175,18 @@ class TwoPointsSolver(GeometricSolver):
 
     def _generate_image(self) -> str:
         show_line = self.is_target("line_equation") or self.is_target("slope")
+        points = [(self.p1.x, self.p1.y, "A"), (self.p2.x, self.p2.y, "B")]
+
+        if self.is_target("midpoint"):
+            m = self.p1.midpoint_with(self.p2)
+            points.append((m.x, m.y, "M"))
+
         lines = []
         if show_line:
             line = self.line()
             lines.append((line.a, line.b, line.c, "AB", "steelblue"))
-        return AnalyticPlotter(
-            points=[(self.p1.x, self.p1.y, "A"), (self.p2.x, self.p2.y, "B")],
-            lines=lines,
-        ).plot()
+
+        return AnalyticPlotter(points=points, lines=lines).plot()
 
 
 # ============================================================
