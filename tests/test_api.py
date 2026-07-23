@@ -87,7 +87,7 @@ async def test_solve_geometry_success_authorized(client):
     # 2. ЛОГІН
     login_response = await client.post(
         "/api/auth/login",
-        json={"username": unique_username, "password": "testpassword1"}
+        data={"username": unique_username, "password": "testpassword1"}
     )
     assert login_response.status_code == 200, f"Помилка логіну: {login_response.text}"
 
