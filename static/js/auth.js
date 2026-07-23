@@ -69,14 +69,19 @@ function renderLoggedInPanel() {
     el('profile-panel').innerHTML = `
         <div class="profile-user-info">
             <span class="profile-username">${currentUser.username}</span>
-            <span class="profile-role-badge">Користувач</span>
+            <span class="profile-role-badge">${currentUser.role === 'admin' ? 'Адміністратор' : 'Користувач'}</span>
         </div>
+        <button class="profile-btn-submit" id="profile-edit-open-btn">Редагувати профіль</button>
         <button class="profile-btn-logout" id="profile-logout-btn">Вийти</button>
     `;
-
+    el('profile-edit-open-btn').addEventListener('click', () => {
+        closeProfilePanel();
+        window.openProfileEditModal();
+    });
     el('profile-logout-btn').addEventListener('click', () => {
         clearToken();
         currentUser = null;
+        el('profile-panel').innerHTML = '';
         closeProfilePanel();
         updateAuthUI();
         window.dispatchEvent(new CustomEvent('auth-changed'));
@@ -153,6 +158,7 @@ async function handleAuthSubmit() {
         currentUser = await fetchMe();
         closeAuthModal();
         updateAuthUI();
+        renderLoggedInPanel();   // ДОДАНО: одразу перерендерити меню з новим користувачем
         window.dispatchEvent(new CustomEvent('auth-changed'));
     } catch (e) {
         errorEl.innerText = e.message;
@@ -213,4 +219,18 @@ export async function initAuth() {
     if (currentUser) {
         renderLoggedInPanel();
     }
+}
+
+export function getCurrentUser() {
+    return currentUser;
+}
+
+export async function refreshCurrentUser() {
+    currentUser = await fetchMe();
+    updateAuthUI();
+    if (currentUser) renderLoggedInPanel();
+}
+
+export function isAdmin() {
+    return !!currentUser && currentUser.role === 'admin';
 }

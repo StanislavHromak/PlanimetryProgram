@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy import String, DateTime, Text, Integer, ForeignKey, Boolean, select
+from sqlalchemy import delete as sa_delete
 
 try:
     KYIV_TZ: timezone | ZoneInfo = ZoneInfo("Europe/Kyiv")
@@ -29,6 +30,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
+    display_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     role: Mapped[str] = mapped_column(String(20), default="user")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -42,8 +45,11 @@ class User(Base):
         return {
             "id": self.id,
             "username": self.username,
+            "display_name": self.display_name,
+            "email": self.email,
             "role": self.role,
             "is_active": self.is_active,
+            "created_at": self.created_at.strftime("%d.%m.%Y %H:%M") if self.created_at else None,
         }
 
 
@@ -135,8 +141,9 @@ async def username_taken_by_other(db: AsyncSession, username: str, exclude_user_
     return result.scalar_one_or_none() is not None
 
 
-async def update_username(db: AsyncSession, user: User, new_username: str) -> User:
-    user.username = new_username
+async def update_profile(db: AsyncSession, user: User, **fields) -> User:
+    for key, value in fields.items():
+        setattr(user, key, value)
     await db.commit()
     await db.refresh(user)
     return user
@@ -162,11 +169,8 @@ async def set_user_role(db: AsyncSession, user: User, role: str) -> User:
 
 
 async def delete_user(db: AsyncSession, user: User) -> None:
-    """Видаляє акаунт, знеособлюючи його попередні розв'язки (user_id -> NULL)."""
-    stmt = select(SolutionRecord).where(SolutionRecord.user_id == user.id)
-    result = await db.execute(stmt)
-    for record in result.scalars().all():
-        record.user_id = None
+    """Видаляє акаунт користувача разом з усією його історією розв'язків (каскадно)."""
+    await db.execute(sa_delete(SolutionRecord).where(SolutionRecord.user_id == user.id))
     await db.delete(user)
     await db.commit()
 
@@ -223,21 +227,27 @@ async def save_solution(db: AsyncSession, figure: str, task_type: str,
     return record
 
 
-async def get_history(db: AsyncSession, user_id: int | None = None, limit: int = 50) -> list[SolutionRecord]:
+async def get_history(
+    db: AsyncSession,
+    user_id: int | None = None,
+    limit: int = 50,
+    include_all: bool = False,
+) -> list[SolutionRecord]:
     """
-    Повертає історію користувача. Якщо user_id не вказано (гість або
-    неавторизований запит) — повертає порожній список: історія
-    прив'язана до конкретного акаунта, а не є спільним журналом усіх задач.
+    Повертає історію. Звичайний користувач бачить лише свої записи.
+    Адміністратор (include_all=True) бачить історію всіх користувачів.
+    Гість (user_id is None і include_all=False) отримує порожній список.
     """
+    stmt = select(SolutionRecord).order_by(SolutionRecord.created_at.desc()).limit(limit)
+
+    if include_all:
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
     if user_id is None:
         return []
 
-    stmt = (
-        select(SolutionRecord)
-        .where(SolutionRecord.user_id == user_id)
-        .order_by(SolutionRecord.created_at.desc())
-        .limit(limit)
-    )
+    stmt = stmt.where(SolutionRecord.user_id == user_id)
     result = await db.execute(stmt)
     return list(result.scalars().all())
 

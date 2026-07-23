@@ -1,3 +1,6 @@
+import { isLoggedIn, authHeaders } from '/static/js/auth.js';
+import { loadAdminUsers } from '/static/js/admin.js';
+
 const FIGURE_NAMES = {
     triangle:            "Трикутник",
     circle:               "Коло",
@@ -62,7 +65,7 @@ export async function loadHistory() {
     pagination.style.display = 'none';
 
     try {
-        const res = await fetch('/api/history');
+        const res = await fetch('/api/history', { headers: authHeaders() });
         const json = await res.json();
         historyData = json.success ? json.data : [];
     } catch (e) {
@@ -186,7 +189,7 @@ function renderHistoryCard(item) {
 export async function repeatSolution(id) {
     let item;
     try {
-        const res  = await fetch(`/api/history/${id}`);
+        const res  = await fetch(`/api/history/${id}`, { headers: authHeaders() });
         const json = await res.json();
         if (!json.success) return;
         item = json.data;
@@ -280,7 +283,7 @@ export async function exportPDF(id) {
     }
 
     try {
-        const res = await fetch(`/api/export/pdf/${id}`);
+        const res = await fetch(`/api/export/pdf/${id}`, { headers: authHeaders() });
         if (!res.ok) {
             console.error('Сервер повернув помилку:', res.status);
             alert('Не вдалося згенерувати PDF. Спробуйте ще раз.');
@@ -313,7 +316,10 @@ export async function deleteSolution(id, btnEl) {
     if (!confirm('Видалити цей розв\'язок з історії?')) return;
 
     try {
-        const res = await fetch(`/api/history/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/history/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders(),
+        });
         if (!res.ok) {
             console.error('Помилка видалення:', res.status);
             alert('Помилка видалення');
@@ -360,6 +366,13 @@ export function switchTab(tabName) {
     });
 
     if (tabName === 'history') {
-        loadHistory().catch(e => console.error('loadHistory failed:', e));
+        const locked = !isLoggedIn();
+        document.getElementById('history-locked').style.display = locked ? 'flex' : 'none';
+        document.getElementById('history-content').style.display = locked ? 'none' : 'block';
+        if (!locked) loadHistory().catch(e => console.error('loadHistory failed:', e));
+    }
+
+    if (tabName === 'admin') {
+        loadAdminUsers().catch(e => console.error('loadAdminUsers failed:', e));
     }
 }

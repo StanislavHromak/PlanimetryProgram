@@ -30,15 +30,29 @@ class UserOut(BaseModel):
     username: str
     role: str
     is_active: bool
+    display_name: str | None = None
+    email: str | None = None
 
 
-class UsernameUpdate(BaseModel):
-    username: str
+class ProfileUpdate(BaseModel):
+    username: str | None = None
+    display_name: str | None = None
+    email: str | None = None
 
     @field_validator("username")
     @classmethod
-    def username_must_be_valid(cls, v: str) -> str:
-        return validate_username_format(v)
+    def validate_username(cls, v):
+        return validate_username_format(v) if v is not None else v
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if not v:
+            return None
+        import re
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v):
+            raise ValueError("Некоректний формат електронної пошти.")
+        return v
 
 
 class PasswordUpdate(BaseModel):

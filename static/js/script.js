@@ -1,5 +1,7 @@
 import { uiConfig, analyticConfig, GUEST_ALLOWED_FIGURES, TARGET_NAMES } from '/static/js/config.js';
-import { initAuth, isLoggedIn, authHeaders, openAuthModal } from '/static/js/auth.js';
+import { initAuth, isLoggedIn, authHeaders, openAuthModal, isAdmin } from '/static/js/auth.js';
+import { initProfileEditModal, openProfileEditModal } from '/static/js/profile.js';
+import { adminToggleBlock, adminToggleRole, adminDeleteUser, adminShowDetails } from '/static/js/admin.js';
 import { openImageModal, initModalListeners } from '/static/js/modal.js';
 import { renderStep } from '/static/js/renderer.js';
 import {
@@ -17,11 +19,16 @@ window.deleteSolution               = deleteSolution;
 window.exportCurrentResult          = exportCurrentResult;
 window.solveAnalytic                = solveAnalytic;
 window.exportCurrentAnalyticResult  = exportCurrentAnalyticResult;
-window.findAnalyticSubFigureByTask = (taskType) => {
+window.findAnalyticSubFigureByTask  = (taskType) => {
     return Object.keys(analyticConfig).find(
         subKey => taskType in analyticConfig[subKey].tasks
     );
 };
+window.openProfileEditModal         = openProfileEditModal;
+window.adminToggleBlock             = adminToggleBlock;
+window.adminToggleRole              = adminToggleRole;
+window.adminDeleteUser              = adminDeleteUser;
+window.adminShowDetails             = adminShowDetails;
 
 // ID останнього збереженого розв'язку (для кнопки експорту)
 let lastSolutionId = null;
@@ -29,6 +36,7 @@ let lastAnalyticSolutionId = null;
 
 window.onload = async function () {
     initModalListeners();
+    initProfileEditModal();          // НОВЕ: ініціалізація модалки редагування профілю
     await initAuth();
 
     renderFigureOptions();
@@ -46,6 +54,14 @@ window.onload = async function () {
     }
     applyGuestRestrictions();
 
+    // НОВЕ: блокування вкладки "Історія" для гостя (кнопка входу на заблокованій панелі)
+    const historyLockedCta = document.getElementById('history-locked-cta');
+    if (historyLockedCta) {
+        historyLockedCta.addEventListener('click', () => openAuthModal('register'));
+    }
+
+    applyAdminUI();   // НОВЕ: показати/сховати вкладку "Адміністрування"
+
     const analyticSubSelect = document.getElementById('analytic-subfigure-select');
     if (analyticSubSelect) {
         analyticSubSelect.innerHTML = Object.keys(analyticConfig).map(key =>
@@ -62,8 +78,14 @@ window.onload = async function () {
         renderFigureOptions();
         updateUI();
         applyGuestRestrictions();
+        applyAdminUI();   // НОВЕ: перерахувати видимість вкладки адміна після логіну/логауту
     });
 };
+
+function applyAdminUI() {
+    const adminBtn = document.getElementById('admin-tab-btn');
+    if (adminBtn) adminBtn.style.display = isAdmin() ? 'inline-block' : 'none';
+}
 
 function renderFigureOptions() {
     const figureSelect = document.getElementById('figure-select');
