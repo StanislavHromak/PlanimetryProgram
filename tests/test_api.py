@@ -2,7 +2,16 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from main import app
+from core.database import Base, engine # Перевір, чи правильно імпортується engine та Base
 
+@pytest.fixture(autouse=True)
+async def setup_database():
+    """Автоматично створює таблиці перед запуском тестів"""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 @pytest.fixture
 async def client():
