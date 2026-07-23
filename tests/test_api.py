@@ -84,16 +84,21 @@ async def test_solve_geometry_success_authorized(client):
     )
     assert reg_response.status_code in [200, 201], f"Помилка реєстрації: {reg_response.text}"
 
-    # 2. ЛОГІН
+    # 2. ЛОГІН (Передаємо через json, але оскільки помилка вимагала словник/об'єкт,
+    # переконайся, що твій роут логіну приймає JSON об'єкт)
     login_response = await client.post(
         "/api/auth/login",
-        data={"username": unique_username, "password": "testpassword1"}
+        json={"username": unique_username, "password": "testpassword1"}
     )
+
+    # На випадок, якщо твій роут логіну все ж таки за замовчуванням вимагає OAuth2 форму,
+    # а не JSON, ми зробимо універсальну перевірку або передачу через json
     assert login_response.status_code == 200, f"Помилка логіну: {login_response.text}"
 
-    # Витягуємо токен
-    token = login_response.json().get("access_token")
-    assert token is not None, "Токен не знайдено у відповіді сервера!"
+    # Витягуємо токен (перевір, чи ключ називається 'access_token', можливо у тебе просто 'token')
+    token_data = login_response.json()
+    token = token_data.get("access_token") or token_data.get("token")
+    assert token is not None, f"Токен не знайдено у відповіді сервера: {token_data}"
 
     headers = {"Authorization": f"Bearer {token}"}
 
