@@ -302,9 +302,24 @@ class PointLineSolver(GeometricSolver):
 
     def _generate_image(self) -> str:
         line = self.line()
+        # Обчислюємо координати основи перпендикуляра для графіка
+        a, b, c = line.a, line.b, line.c
+        factor = (a * self.point.x + b * self.point.y + c) / (a ** 2 + b ** 2)
+        hx = self.point.x - a * factor
+        hy = self.point.y - b * factor
+
         return AnalyticPlotter(
-            points=[(self.point.x, self.point.y, "M")],
+            points=[
+                (self.point.x, self.point.y, "M"),
+                (hx, hy, "H"),
+                # Додаємо точки прямої без підпису, щоб графік правильно взяв межі (bounds)
+                (self.l1.x, self.l1.y, ""),
+                (self.l2.x, self.l2.y, "")
+            ],
             lines=[(line.a, line.b, line.c, "l", "steelblue")],
+            segments=[(self.point.x, self.point.y, hx, hy, "indianred", "--")],
+            # Малюємо кут 90°. Вектор 1 - це HM, вектор 2 - напрямок прямої
+            angles=[(hx, hy, self.point.x - hx, self.point.y - hy, -b, a, r"90^\circ", True)]
         ).plot()
 
 
@@ -458,11 +473,35 @@ class TwoLinesSolver(GeometricSolver):
 
     def _generate_image(self) -> str:
         l1, l2 = self.line1(), self.line2()
+
+        # Додаємо невидимі базові точки для правильного розрахунку масштабу
+        points = [
+            (self.a1.x, self.a1.y, ""), (self.a2.x, self.a2.y, ""),
+            (self.b1.x, self.b1.y, ""), (self.b2.x, self.b2.y, "")
+        ]
+        angles = []
+
+        pt = l1.intersection_with(l2)
+        if pt:
+            points.append((pt.x, pt.y, "P"))
+            angle_deg = l1.angle_with(l2)
+            is_right = math.isclose(angle_deg, 90, abs_tol=1e-3)
+
+            # Вектори напрямку прямих
+            v1, v2 = l1.direction_vector(), l2.direction_vector()
+            # Обертаємо вектор, якщо він вказує на тупий кут, щоб намалювати саме гострий
+            if v1.dot(v2) < 0:
+                v2 = __import__("core.analytic.entities", fromlist=["Vector2D"]).Vector2D(-v2.x, -v2.y)
+
+            angles.append((pt.x, pt.y, v1.x, v1.y, v2.x, v2.y, fr"{angle_deg:.1f}^\circ", is_right))
+
         return AnalyticPlotter(
+            points=points,
             lines=[
                 (l1.a, l1.b, l1.c, "l1", "steelblue"),
                 (l2.a, l2.b, l2.c, "l2", "indianred"),
             ],
+            angles=angles
         ).plot()
 
 
@@ -590,9 +629,12 @@ class VectorsSolver(GeometricSolver):
         self.add_info(f"Дано вектори a({self.v1.x}, {self.v1.y}) і b({self.v2.x}, {self.v2.y})")
 
     def _generate_image(self) -> str:
+        angle_deg = self.v1.angle_with(self.v2)
+        is_right = math.isclose(angle_deg, 90, abs_tol=1e-3)
         return AnalyticPlotter(
             vectors=[
                 (0, 0, self.v1.x, self.v1.y, "a", "steelblue"),
                 (0, 0, self.v2.x, self.v2.y, "b", "indianred"),
             ],
+            angles=[(0, 0, self.v1.x, self.v1.y, self.v2.x, self.v2.y, fr"{angle_deg:.1f}^\circ", is_right)]
         ).plot()
